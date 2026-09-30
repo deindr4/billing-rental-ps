@@ -195,4 +195,39 @@ class SinkronTest extends TestCase
             ->assertSet('tokenBaru', fn ($t) => str_starts_with((string) $t, 'sk_'));
         $this->assertSame(1, ServerSinkron::count());
     }
+
+    public function test_token_acak_dibuat_di_lokal_lalu_didaftarkan_di_cloud(): void
+    {
+        $this->actingAs(User::where('email', 'owner@billing.test')->firstOrFail());
+
+        // Server lokal: tombol "Buat token acak" mengisi kolom token (terlihat, belum disimpan)
+        $lokal = Livewire::test(Sinkronisasi::class)->call('buatTokenAcak')->assertSet('tokenTerlihat', true);
+        $token = $lokal->get('token');
+        $this->assertMatchesRegularExpression(ServerSinkron::POLA_TOKEN, $token);
+        $lokal->assertSee('Token baru belum berlaku');
+        $this->assertNull(app(SinkronService::class)->pengaturan()['token']);
+
+        $lokal->set('url', 'https://cloud.contoh.id')->set('aktif', true)->call('simpan')->assertSet('tokenTerlihat', false);
+        $this->assertSame($token, app(SinkronService::class)->pengaturan()['token']);
+
+        // Server cloud: super admin menempel token tersebut
+        config(['app.mode' => 'cloud']);
+        $this->actingAs(User::where('email', 'admin@billing.test')->firstOrFail());
+
+        Livewire::test(Sinkronisasi::class)->set('namaServer', 'Rental lokal')->set('tokenServer', 'sk_pendek')->call('buatServer')
+            ->assertHasErrors('tokenServer');
+
+        Livewire::test(Sinkronisasi::class)->set('namaServer', 'Rental lokal')->set('tokenServer', ' '.$token.' ')->call('buatServer')
+            ->assertHasNoErrors()->assertSet('tokenBaru', null);
+
+        $this->assertSame('Rental lokal', ServerSinkron::dariToken($token)?->nama);
+
+        // Token yang sama tidak bisa didaftarkan dua kali
+        Livewire::test(Sinkronisasi::class)->set('namaServer', 'Dobel')->set('tokenServer', $token)->call('buatServer')
+            ->assertHasErrors('tokenServer');
+        $this->assertSame(1, ServerSinkron::count());
+
+        // Token dari lokal langsung diterima endpoint sync
+        $this->withToken($token)->getJson('/api/sync/info')->assertOk();
+    }
 }

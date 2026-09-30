@@ -47,6 +47,12 @@ class Sinkronisasi extends Page
 
     public ?string $tokenBaru = null;
 
+    /** Token yang dibuat di server lokal lalu ditempel di cloud (opsional) */
+    public ?string $tokenServer = '';
+
+    /** Token acak yang baru dibuat di server lokal: tampil terbuka supaya bisa disalin */
+    public bool $tokenTerlihat = false;
+
     public static function canAccess(): bool
     {
         $user = auth()->user();
@@ -103,9 +109,18 @@ class Sinkronisasi extends Page
 
         $sinkron->simpanPengaturan($this->url, $this->token, $this->aktif);
         $this->token = null;
+        $this->tokenTerlihat = false;
         app(StatusSistemService::class)->lupakan();
 
         Notification::make()->title('Pengaturan sinkron disimpan')->success()->send();
+    }
+
+    /** Isi kolom token dengan token acak baru (belum disimpan; daftarkan juga di cloud) */
+    public function buatTokenAcak(): void
+    {
+        abort_if($this->diCloud(), 403);
+        $this->token = ServerSinkron::tokenAcak();
+        $this->tokenTerlihat = true;
     }
 
     public function tes(SinkronService $sinkron): void
@@ -157,13 +172,29 @@ class Sinkronisasi extends Page
     public function buatServer(): void
     {
         abort_unless($this->diCloud() && auth()->user()->isSuperAdmin(), 403);
-        $this->validate(['namaServer' => 'required|string|min:3|max:100', 'tenantServer' => 'nullable|uuid']);
+        $this->tokenServer = trim((string) $this->tokenServer);
+        $this->validate([
+            'namaServer' => 'required|string|min:3|max:100',
+            'tenantServer' => 'nullable|uuid',
+            'tokenServer' => ['nullable', 'regex:'.ServerSinkron::POLA_TOKEN],
+        ], ['tokenServer.regex' => 'Token tidak valid. Salin utuh dari server lokal (diawali sk_, 51 karakter).']);
 
-        [$server, $token] = ServerSinkron::buat(trim($this->namaServer), $this->tenantServer ?: null);
-        $this->tokenBaru = $token;
-        Audit::catat('token_sinkron', 'Buat token sinkron: '.$server->nama, $server);
+        if ($this->tokenServer !== '' && ServerSinkron::where('token_hash', hash('sha256', $this->tokenServer))->exists()) {
+            $this->addError('tokenServer', 'Token ini sudah terdaftar.');
+
+            return;
+        }
+
+        [$server, $token] = ServerSinkron::buat(trim($this->namaServer), $this->tenantServer ?: null, $this->tokenServer ?: null);
+        // Token dari server lokal tidak perlu ditampilkan lagi (sudah ada di sana)
+        $this->tokenBaru = $this->tokenServer === '' ? $token : null;
+        Audit::catat('token_sinkron', ($this->tokenServer === '' ? 'Buat' : 'Daftarkan').' token sinkron: '.$server->nama, $server);
+        Notification::make()->title('Server '.$server->nama.' terdaftar')
+            ->body($this->tokenServer === '' ? 'Salin token di bawah ke server lokal.' : 'Token dari server lokal sudah berlaku. Klik Tes koneksi di server lokal.')
+            ->success()->send();
         $this->namaServer = '';
         $this->tenantServer = null;
+        $this->tokenServer = '';
     }
 
     public function aktifkanServer(string $id, bool $aktif): void

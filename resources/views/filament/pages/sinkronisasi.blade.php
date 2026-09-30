@@ -45,10 +45,34 @@
                     <x-filament::input.wrapper><x-filament::input type="url" wire:model="url" placeholder="https://rental.domainku.id" /></x-filament::input.wrapper>
                     @error('url') <span style="color:#ef4444; font-size:12px">{{ $message }}</span> @enderror
                 </label>
-                <label>
+                <div>
                     <span style="display:block; font-size:14px; margin-bottom:4px;">Token sinkron {{ $s['punya_token'] ? '(tersimpan — kosongkan jika tidak diganti)' : '' }}</span>
-                    <x-filament::input.wrapper><x-filament::input type="password" wire:model="token" placeholder="sk_..." autocomplete="off" /></x-filament::input.wrapper>
-                </label>
+                    <div style="display:flex; gap:8px; align-items:center;" x-data="{ disalin: false }">
+                        <x-filament::input.wrapper style="flex:1">
+                            <x-filament::input :type="$tokenTerlihat ? 'text' : 'password'" wire:model="token" placeholder="sk_..." autocomplete="off" x-ref="token" />
+                        </x-filament::input.wrapper>
+                        @if ($tokenTerlihat)
+                            <x-filament::button color="gray" type="button" icon="heroicon-o-clipboard"
+                                                x-on:click="navigator.clipboard.writeText($refs.token.value); disalin = true; setTimeout(() => disalin = false, 2000)">
+                                <span x-text="disalin ? 'Disalin' : 'Salin'">Salin</span>
+                            </x-filament::button>
+                        @endif
+                        @if ($s['punya_token'])
+                            <x-filament::button color="gray" type="button" icon="heroicon-o-sparkles" wire:click="buatTokenAcak"
+                                                wire:confirm="Buat token baru? Token lama tetap dipakai sampai Anda menekan Simpan.">Buat token acak</x-filament::button>
+                        @else
+                            <x-filament::button color="gray" type="button" icon="heroicon-o-sparkles" wire:click="buatTokenAcak">Buat token acak</x-filament::button>
+                        @endif
+                    </div>
+                    @if ($tokenTerlihat)
+                        <div style="font-size:12px; margin-top:6px; padding:8px; border:1px solid #f59e0b; border-radius:6px;">
+                            Token baru belum berlaku. Langkah berikutnya:
+                            <b>1.</b> Salin token ·
+                            <b>2.</b> Di server cloud (super admin → Pengaturan → Sinkronisasi) isi nama server, tempel token di kolom <i>Token dari server lokal</i>, klik <b>Daftarkan</b> ·
+                            <b>3.</b> Kembali ke sini, klik <b>Simpan</b> lalu <b>Tes koneksi</b>.
+                        </div>
+                    @endif
+                </div>
                 <label style="display:flex; align-items:center; gap:8px; font-size:14px;">
                     <x-filament::input.checkbox wire:model="aktif" /> Aktifkan sinkron otomatis
                 </label>
@@ -62,7 +86,7 @@
         {{-- ======================== SERVER CLOUD ======================== --}}
         <x-filament::section>
             <x-slot name="heading">Server lokal rental</x-slot>
-            <x-slot name="description">Setiap rental memasang token di server lokalnya. Token hanya tampil sekali saat dibuat.</x-slot>
+            <x-slot name="description">Dua cara: tempel token yang dibuat di server lokal (tombol "Buat token acak" di sana), atau kosongkan agar cloud membuatkan token lalu salin ke server lokal. Token hanya tampil sekali.</x-slot>
 
             @if ($tokenBaru)
                 <div style="border:1px solid #22c55e; border-radius:8px; padding:12px; margin-bottom:12px;">
@@ -85,8 +109,14 @@
                         </x-filament::input.select>
                     </x-filament::input.wrapper>
                 </label>
-                <x-filament::button type="submit" icon="heroicon-o-key">Buat token</x-filament::button>
+                <label style="flex:1; min-width:260px;">
+                    <span style="display:block; font-size:14px; margin-bottom:4px;">Token dari server lokal <span style="{{ $redup }}">(opsional)</span></span>
+                    <x-filament::input.wrapper><x-filament::input wire:model="tokenServer" placeholder="Kosongkan = cloud membuatkan token" autocomplete="off" /></x-filament::input.wrapper>
+                </label>
+                <x-filament::button type="submit" icon="heroicon-o-key">Daftarkan</x-filament::button>
             </form>
+            @error('namaServer') <p style="color:#ef4444; font-size:12px; margin-top:-8px;">{{ $message }}</p> @enderror
+            @error('tokenServer') <p style="color:#ef4444; font-size:12px; margin-top:-8px;">{{ $message }}</p> @enderror
 
             @forelse ($this->server as $sv)
                 <div wire:key="sv-{{ $sv->id }}" style="{{ $baris }} align-items:center;">

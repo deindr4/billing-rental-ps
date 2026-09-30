@@ -32,9 +32,21 @@ class ServerSinkron extends Model
     }
 
     /** Buat server baru. Return [server, token polos] */
-    public static function buat(string $nama, ?string $tenantId = null): array
+    /** Format token: sk_ + 48 huruf/angka acak */
+    public const POLA_TOKEN = '/^sk_[A-Za-z0-9]{48}$/';
+
+    public static function tokenAcak(): string
     {
-        $token = 'sk_'.Str::random(48);
+        return 'sk_'.Str::random(48);
+    }
+
+    /**
+     * Daftarkan server lokal. $token diisi jika token dibuat di server lokal (tombol "Buat token acak")
+     * lalu ditempel di cloud; kosong = cloud membuatkan token baru.
+     */
+    public static function buat(string $nama, ?string $tenantId = null, ?string $token = null): array
+    {
+        $token = $token ?: static::tokenAcak();
 
         $server = static::create([
             'nama' => $nama,

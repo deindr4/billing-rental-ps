@@ -36,6 +36,10 @@ mengambil alih tenant lain yang sudah ada.
 
 Lewat terminal: `php artisan sync token "Nama rental"`.
 
+**Cara lain (token dibuat di server lokal):** di server lokal klik **Buat token acak** → **Salin**. Di cloud isi nama
+server + tempel token di kolom *Token dari server lokal* → **Daftarkan**. Kembali ke lokal → **Simpan** → **Tes koneksi**.
+Token baru di server lokal belum dipakai sampai tombol Simpan ditekan.
+
 **Di server lokal** — sekali:
 
 1. Admin → **Pengaturan → Sinkronisasi** → isi alamat cloud (`https://...`) + token → centang aktif → **Simpan** → **Tes koneksi**.
