@@ -14,7 +14,15 @@ class Pembayaran extends Model
 {
     use BelongsToCabang, BelongsToTenant, HasSyncMeta, HasUuids, TidakBisaDihapus;
 
-    public const METODE = ['tunai', 'qris', 'transfer', 'saldo'];
+    public const METODE = ['tunai', 'qris', 'transfer', 'saldo', 'qris_gateway'];
+
+    public const LABEL = [
+        'tunai' => 'Tunai',
+        'qris' => 'QRIS',
+        'transfer' => 'Transfer',
+        'saldo' => 'Saldo member',
+        'qris_gateway' => 'QRIS online',
+    ];
 
     protected $table = 'pembayaran';
 

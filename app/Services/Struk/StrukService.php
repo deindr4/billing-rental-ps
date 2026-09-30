@@ -4,6 +4,7 @@ namespace App\Services\Struk;
 
 use App\Models\Cabang;
 use App\Models\MemberMutasi;
+use App\Models\Pembayaran;
 use App\Models\Pengaturan;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
@@ -20,7 +21,7 @@ final class StrukService
 {
     public const LEBAR = [58 => 32, 80 => 48]; // mm => kolom karakter
 
-    public const METODE = ['tunai' => 'Tunai', 'qris' => 'QRIS', 'transfer' => 'Transfer', 'saldo' => 'Saldo'];
+    public const METODE = Pembayaran::LABEL;
 
     public const FOOTER_DEFAULT = 'Terima kasih, selamat bermain!';
 

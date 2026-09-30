@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Iklan;
+use App\Services\Gateway\BayarMandiriService;
 use App\Services\Publik\BookingService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -18,6 +19,13 @@ Schedule::call(fn () => app(BookingService::class)->tandaiKedaluwarsa())->everyF
 
 // Iklan billboard yang masa tayangnya habis terhapus otomatis (ikut tersinkron ke cloud)
 Schedule::call(fn () => Iklan::hapusKedaluwarsa())->hourly()->name('iklan-kedaluwarsa');
+
+// Bayar mandiri TV: cek status QRIS yang menunggu (cadangan callback) & selesaikan sesi lunas yang habis
+Schedule::call(function () {
+    $layanan = app(BayarMandiriService::class);
+    $layanan->periksaSemua();
+    $layanan->selesaikanYangHabis();
+})->everyMinute()->name('bayar-mandiri')->withoutOverlapping(5);
 
 // Sinkron lokal -> cloud tiap menit (diam jika belum diatur); cloud membersihkan antrean lama
 Schedule::command('sync jalankan --diam')->everyMinute()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');

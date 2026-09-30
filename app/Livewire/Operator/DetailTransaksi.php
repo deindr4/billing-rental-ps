@@ -5,6 +5,7 @@ namespace App\Livewire\Operator;
 use App\Exceptions\BillingException;
 use App\Jobs\KirimNotifikasi;
 use App\Livewire\Concerns\WithAlert;
+use App\Models\Pembayaran;
 use App\Models\Transaksi;
 use App\Models\User;
 use App\Services\Billing\BillingService;
@@ -32,12 +33,7 @@ class DetailTransaksi extends Component
         'batal' => 'Dibatalkan',
     ];
 
-    public const METODE = [
-        'tunai' => 'Tunai',
-        'qris' => 'QRIS',
-        'transfer' => 'Transfer',
-        'saldo' => 'Saldo Member',
-    ];
+    public const METODE = Pembayaran::LABEL;
 
     public bool $buka = false;
 

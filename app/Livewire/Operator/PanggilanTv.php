@@ -4,6 +4,7 @@ namespace App\Livewire\Operator;
 
 use App\Models\Booking;
 use App\Models\LogTv;
+use App\Models\PembayaranOnline;
 use App\Models\Unit;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
@@ -41,15 +42,29 @@ class PanggilanTv extends Component
                 text: "{$b->nama} · ".$b->mulai_pada->translatedFormat('D d M H:i')." ({$b->kode}). Buka menu Jadwal & Booking.");
         }
 
-        if ($panggilan->isEmpty()) {
-            if ($booking->isNotEmpty()) {
-                $this->sejak = $booking->last()->created_at->getTimestampMs();
-            }
+        // Bayar mandiri QRIS di TV: berhasil (info) atau perlu tindakan kasir (peringatan)
+        $online = PembayaranOnline::query()->with('unit:id,nama')->whereIn('status', ['selesai', 'perlu_tindakan'])
+            ->where('updated_at', '>', $batas)->orderBy('updated_at')->get();
 
-            return;
+        foreach ($online as $p) {
+            $rp = 'Rp '.number_format($p->nominal, 0, ',', '.');
+
+            $p->status === 'perlu_tindakan'
+                ? $this->dispatch('ui:alert', icon: 'warning', title: 'Bayar mandiri perlu tindakan',
+                    text: "{$p->unit?->nama} · {$rp}: {$p->catatan} Buka menu Pembayaran online.")
+                : $this->dispatch('ui:toast', icon: 'success', title: "{$p->unit?->nama}: bayar mandiri {$rp}");
         }
 
-        $this->sejak = max($panggilan->last()->created_at->getTimestampMs(), $booking->last()?->created_at->getTimestampMs() ?? 0);
+        $this->sejak = max(
+            $this->sejak,
+            $panggilan->last()?->created_at->getTimestampMs() ?? 0,
+            $booking->last()?->created_at->getTimestampMs() ?? 0,
+            $online->last()?->updated_at->getTimestampMs() ?? 0,
+        );
+
+        if ($panggilan->isEmpty()) {
+            return;
+        }
         $nama = Unit::whereIn('id', $panggilan->pluck('unit_id')->filter())->pluck('nama')->unique()->implode(', ');
 
         $this->dispatch('ui:panggil-kasir', unit: $nama ?: 'TV');

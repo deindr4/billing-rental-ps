@@ -1,6 +1,6 @@
 @php
     $rp = fn ($n) => ((int) $n < 0 ? '-Rp ' : 'Rp ').number_format(abs((int) $n), 0, ',', '.');
-    $metodeLabel = ['tunai' => 'Tunai', 'qris' => 'QRIS', 'transfer' => 'Transfer', 'saldo' => 'Saldo'];
+    $metodeLabel = \App\Models\Pembayaran::LABEL;
 @endphp
 <!DOCTYPE html>
 <html lang="id">

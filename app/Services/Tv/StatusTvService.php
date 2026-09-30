@@ -3,6 +3,7 @@
 namespace App\Services\Tv;
 
 use App\Models\Cabang;
+use App\Models\PembayaranOnline;
 use App\Models\Pengaturan;
 use App\Models\PerangkatTv;
 use App\Models\Sesi;
@@ -12,6 +13,8 @@ use App\Models\TransaksiItem;
 use App\Models\Unit;
 use App\Services\Billing\BillingService;
 use App\Services\Billing\KalkulatorOpenBilling;
+use App\Services\Gateway\BayarMandiriService;
+use App\Services\Gateway\PengaturanGateway;
 use App\Services\Publik\QrisService;
 use App\Support\Tema;
 use Illuminate\Support\Facades\Storage;
@@ -35,6 +38,16 @@ final class StatusTvService
             ? Unit::withoutGlobalScopes()->with(['tipeKonsol:id,kode,nama', 'kategori:id,nama'])->find($perangkat->unit_id)
             : null;
         $cabang = Cabang::with('tenant')->find($perangkat->cabang_id);
+
+        // QRIS bayar mandiri yang sedang menunggu: cek ke gateway dulu, supaya TV langsung terbuka begitu lunas
+        $tagihan = $unit ? PembayaranOnline::withoutGlobalScopes()->where('unit_id', $unit->id)
+            ->whereIn('status', ['menunggu', 'dibayar'])->latest()->first() : null;
+
+        if ($tagihan) {
+            $tagihan = app(BayarMandiriService::class)->periksa($tagihan);
+            $unit->refresh();
+        }
+
         $sesi = $unit ? $this->sesiUnit($unit) : null;
         $sekarang = now();
         $zona = $cabang?->zona_waktu ?: config('app.timezone');
@@ -79,9 +92,42 @@ final class StatusTvService
                 'cloud' => self::urlServer(Pengaturan::ambil('server.url_cloud', null, $perangkat->cabang_id)),
                 'asal' => config('app.mode') === 'cloud' ? 'cloud' : 'lokal', // server yang menjawab request ini
             ],
+            // Bayar mandiri: QR "scan untuk main / isi ulang" + QRIS nominal yang sedang menunggu dibayar
+            'bayar_mandiri' => $unit ? $this->bayarMandiri($unit, $tagihan) : null,
             // Perintah remote yang belum kedaluwarsa (cadangan jika websocket putus)
             'perintah' => TvRemoteService::antrean($perangkat->id),
             'realtime' => $this->realtime($perangkat),
+        ];
+    }
+
+    /** Blok bayar mandiri untuk layar kunci / layar habis (null = fitur tidak tersedia saat ini) */
+    private function bayarMandiri(Unit $unit, ?PembayaranOnline $tagihan): ?array
+    {
+        $layanan = app(BayarMandiriService::class);
+        $k = $layanan->konteks($unit);
+
+        if (! $k['bisa']) {
+            return null;
+        }
+
+        $aktif = $tagihan && $tagihan->masihBisaDibayar() ? $tagihan : null;
+
+        return [
+            'jenis' => $k['jenis'],                           // mulai | isi_ulang
+            // Halaman HP untuk mengetik nominal (alamat server yang dipakai TV, bisa dibuka HP di Wi-Fi rental)
+            'url' => request()->getSchemeAndHttpHost().'/main/'.$layanan->token($unit),
+            'tarif_per_jam' => $layanan->tarif($unit),
+            'minimal_menit' => app(PengaturanGateway::class)->minimalMenit($unit->cabang_id),
+            'tagihan' => $aktif ? [
+                'id' => $aktif->id,
+                'qris' => $aktif->qr_string,
+                // qris = string QRIS (scan pakai app bank/e-wallet) | tautan = halaman bayar gateway (scan pakai kamera HP)
+                'tipe' => $aktif->urlBayar() ? 'tautan' : 'qris',
+                'nominal' => $aktif->nominal,
+                'menit' => $aktif->menit,
+                'label' => $layanan->labelMenit($aktif->menit),
+                'kedaluwarsa_ms' => $aktif->kedaluwarsa_pada->getTimestampMs(),
+            ] : null,
         ];
     }
 

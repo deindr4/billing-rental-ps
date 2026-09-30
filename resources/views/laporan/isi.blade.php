@@ -14,7 +14,7 @@
     $naik = $persen($r['omzet_bersih'], $lalu['omzet_bersih']);
     $maksJam = max(1, max($jamSibuk));
     $jamPuncak = array_search(max($jamSibuk), $jamSibuk, true);
-    $metodeLabel = ['tunai' => 'Tunai', 'qris' => 'QRIS', 'transfer' => 'Transfer', 'saldo' => 'Saldo member'];
+    $metodeLabel = \App\Models\Pembayaran::LABEL;
     $totalMetode = max(1, (int) $perMetode->sum('total'));
 @endphp
 

@@ -87,7 +87,8 @@ final class BillingService
                 }
 
                 $tarifPerJam = $this->tarifPerJam($unit);
-                $hargaDurasi = intdiv($tarifPerJam * $durasiMenit + 59, 60);
+                // Bayar mandiri: harga = nominal yang dibayar pelanggan (durasi sudah dihitung dari nominal)
+                $hargaDurasi = isset($data['harga']) ? max(0, (int) $data['harga']) : intdiv($tarifPerJam * $durasiMenit + 59, 60);
                 $berakhirPada = $now->copy()->addMinutes($durasiMenit);
                 $mode = Sesi::MODE_PAKET; // hitung mundur seperti paket
             } elseif ($mode === Sesi::MODE_OPEN) {
@@ -107,7 +108,9 @@ final class BillingService
                 }
             }
 
-            $transaksi = Transaksi::create([
+            // ID boleh ditentukan pemanggil (bayar mandiri: diturunkan dari referensi gateway, supaya
+            // server lokal & cloud yang sama-sama memproses pembayaran menghasilkan sesi yang sama)
+            $transaksi = new Transaksi([
                 'tenant_id' => $unit->tenant_id,
                 'cabang_id' => $unit->cabang_id,
                 'shift_id' => $shift->id,
@@ -120,7 +123,13 @@ final class BillingService
                 'pelanggan_nama' => ($data['pelanggan_nama'] ?? null) ?: $member?->nama,
             ]);
 
-            $sesi = Sesi::create([
+            if (! empty($data['id_transaksi'])) {
+                $transaksi->id = $data['id_transaksi'];
+            }
+
+            $transaksi->save();
+
+            $sesi = new Sesi([
                 'tenant_id' => $unit->tenant_id,
                 'cabang_id' => $unit->cabang_id,
                 'unit_id' => $unit->id,
@@ -136,6 +145,12 @@ final class BillingService
                 'status' => Sesi::STATUS_BERJALAN,
                 'bayar_di_awal' => (bool) ($data['bayar_di_awal'] ?? false),
             ]);
+
+            if (! empty($data['id_sesi'])) {
+                $sesi->id = $data['id_sesi'];
+            }
+
+            $sesi->save();
 
             if ($paket) {
                 $this->tambahItem($transaksi, TransaksiItem::JENIS_SEWA, "Sewa {$unit->nama} - {$paket->nama}", (int) $paket->harga, $paket);
@@ -187,7 +202,11 @@ final class BillingService
 
     /* ================= TAMBAH WAKTU (paket) ================= */
 
-    public function tambahWaktu(Sesi $sesi, User $user, int $menit, bool $gratis = false, ?string $alasan = null): Sesi
+    /**
+     * @param  int|null  $harga  harga khusus (bayar mandiri: sesuai nominal yang dibayar); null = dari tarif per jam
+     * @param  bool  $dariSekarang  waktu habis & TV terkunci: tambahan dihitung dari sekarang, bukan dari jam habis
+     */
+    public function tambahWaktu(Sesi $sesi, User $user, int $menit, bool $gratis = false, ?string $alasan = null, ?int $harga = null, bool $dariSekarang = false): Sesi
     {
         if ($menit <= 0) {
             throw new BillingException('Durasi tambahan harus lebih dari 0 menit.');
@@ -197,7 +216,7 @@ final class BillingService
             throw new BillingException('Tambah waktu gratis wajib disertai alasan.');
         }
 
-        return DB::transaction(function () use ($sesi, $user, $menit, $gratis, $alasan) {
+        return DB::transaction(function () use ($sesi, $user, $menit, $gratis, $alasan, $harga, $dariSekarang) {
             $sesi = $this->kunciSesi($sesi->id);
             $this->pastikanAktif($sesi);
 
@@ -208,9 +227,10 @@ final class BillingService
             $this->shift->wajibAktif($user, $sesi->cabang_id);
 
             $unit = Unit::withoutGlobalScopes()->findOrFail($sesi->unit_id);
-            $harga = $gratis ? 0 : intdiv($this->tarifPerJam($unit) * $menit + 59, 60);
+            $harga = $gratis ? 0 : ($harga ?? intdiv($this->tarifPerJam($unit) * $menit + 59, 60));
 
-            $sesi->berakhir_pada = $sesi->berakhir_pada->copy()->addMinutes($menit);
+            $dasar = $dariSekarang && $sesi->berakhir_pada->isPast() ? now() : $sesi->berakhir_pada->copy();
+            $sesi->berakhir_pada = $dasar->addMinutes($menit);
             $sesi->durasi_menit = (int) $sesi->durasi_menit + $menit;
             $sesi->versi_tagihan = $sesi->versi_tagihan + 1;
             $sesi->save();
@@ -530,6 +550,61 @@ final class BillingService
                 $sesi->save();
 
                 $this->log($sesi, 'bayar', ['total' => $totalBayar, 'kembalian' => $kembalian], $user);
+            }
+
+            return $transaksi;
+        });
+    }
+
+    /**
+     * Pembayaran lewat payment gateway (QRIS di TV). Boleh sebagian: yang belum tertutup
+     * tetap jadi sisa tagihan di kasir (misal F&B atau waktu tambahan manual dibayar tunai).
+     */
+    public function bayarOnline(Transaksi $transaksi, User $user, int $jumlah, string $referensi): Transaksi
+    {
+        return DB::transaction(function () use ($transaksi, $user, $jumlah, $referensi) {
+            $transaksi = Transaksi::withoutGlobalScopes()->whereKey($transaksi->id)->lockForUpdate()->firstOrFail();
+
+            if ($transaksi->isDibatalkan()) {
+                throw new BillingException('Transaksi sudah dibatalkan.');
+            }
+
+            $jumlah = min($jumlah, $transaksi->sisaTagihan());
+
+            if ($jumlah <= 0) {
+                return $transaksi;
+            }
+
+            $shift = $this->shift->wajibAktif($user, $transaksi->cabang_id);
+
+            Pembayaran::create([
+                'tenant_id' => $transaksi->tenant_id,
+                'cabang_id' => $transaksi->cabang_id,
+                'transaksi_id' => $transaksi->id,
+                'shift_id' => $shift->id,
+                'user_id' => $user->id,
+                'metode' => 'qris_gateway',
+                'jumlah' => $jumlah,
+                'referensi' => mb_substr($referensi, 0, 100),
+                'status' => 'sukses',
+                'dibayar_pada' => now(),
+            ]);
+
+            $transaksi->total_bayar = $transaksi->totalDibayar();
+
+            if ($transaksi->sisaTagihan() <= 0) {
+                $this->lunasi($transaksi);
+                $this->member->sinkronManfaat($transaksi, $user);
+            } else {
+                $transaksi->save();
+            }
+
+            $sesi = Sesi::withoutGlobalScopes()->where('transaksi_id', $transaksi->id)->first();
+
+            if ($sesi) {
+                $sesi->versi_tagihan = $sesi->versi_tagihan + 1;
+                $sesi->save();
+                $this->log($sesi, 'bayar', ['total' => $jumlah, 'metode' => 'qris_gateway', 'referensi' => $referensi], $user);
             }
 
             return $transaksi;

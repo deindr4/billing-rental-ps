@@ -20,6 +20,7 @@ final class MenuOperator
                 ['route' => 'jadwal', 'label' => 'Jadwal & Booking', 'ikon' => 'jadwal', 'izin' => 'rental.kelola'],
                 ['route' => 'lounge', 'label' => 'Billboard', 'ikon' => 'lounge', 'izin' => 'rental.kelola'],
                 ['route' => 'turnamen', 'label' => 'Turnamen', 'ikon' => 'turnamen', 'izin' => 'turnamen.kelola'],
+                ['route' => 'pembayaran-online', 'label' => 'Pembayaran online', 'ikon' => 'bayar', 'izin' => 'pembayaran.terima'],
                 ['route' => 'transaksi', 'label' => 'Transaksi', 'ikon' => 'transaksi', 'izin' => 'transaksi.lihat'],
                 ['route' => 'member', 'label' => 'Member', 'ikon' => 'member', 'izin' => 'member.kelola'],
             ],

@@ -38,6 +38,7 @@ class AuditLog extends Model
         'prive' => 'Prive owner',
         'backup' => 'Backup',
         'pulihkan_backup' => 'Pulihkan backup',
+        'bayar_mandiri' => 'Bayar mandiri (QRIS TV)',
     ];
 
     protected $table = 'audit_log';

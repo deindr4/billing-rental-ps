@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\GatewayCallbackController;
 use App\Http\Controllers\Api\SinkronController;
 use App\Http\Controllers\Api\Tv\PairingController;
 use App\Http\Controllers\Api\Tv\TvController;
@@ -13,6 +14,10 @@ Route::get('/ping', fn () => response()->json([
     'mode' => config('app.mode') === 'cloud' ? 'cloud' : 'lokal',
     'waktu' => now()->toIso8601String(),
 ]))->middleware('throttle:60,1');
+
+// Notifikasi pembayaran dari payment gateway (Tripay, Midtrans, Duitku, iPaymu, DOKU, Winpay)
+Route::post('/gateway/{provider}/callback', GatewayCallbackController::class)
+    ->whereIn('provider', ['tripay', 'midtrans', 'duitku', 'ipaymu', 'doku', 'winpay'])->middleware('throttle:120,1')->name('gateway.callback');
 
 // Sinkron server lokal -> cloud (hanya dipakai di server cloud). Bearer token Server Sinkron.
 Route::prefix('sync')->middleware([AutentikasiServerSinkron::class, 'throttle:120,1'])->group(function () {

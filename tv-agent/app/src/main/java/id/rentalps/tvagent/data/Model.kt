@@ -46,6 +46,32 @@ data class StatusTv(
     /** Perintah remote yang belum kedaluwarsa (cadangan jika websocket putus) */
     val perintah: List<PerintahRemote> = emptyList(),
     val realtime: InfoRealtime? = null,
+    /** Bayar mandiri QRIS di TV (null = tidak tersedia: kas tutup, fitur mati, unit dipakai) */
+    @SerialName("bayar_mandiri") val bayarMandiri: BayarMandiri? = null,
+)
+
+@Serializable
+data class BayarMandiri(
+    /** mulai | isi_ulang */
+    val jenis: String,
+    /** Halaman HP untuk mengetik nominal (isi QR "scan untuk main") */
+    val url: String,
+    @SerialName("tarif_per_jam") val tarifPerJam: Long? = null,
+    @SerialName("minimal_menit") val minimalMenit: Int = 30,
+    /** QRIS nominal yang sedang menunggu dibayar */
+    val tagihan: TagihanQris? = null,
+)
+
+@Serializable
+data class TagihanQris(
+    val id: String,
+    val qris: String,
+    /** qris = string QRIS | tautan = halaman bayar gateway (DOKU), dipindai dengan kamera HP */
+    val tipe: String = "qris",
+    val nominal: Long,
+    val menit: Int,
+    val label: String,
+    @SerialName("kedaluwarsa_ms") val kedaluwarsaMs: Long,
 )
 
 @Serializable

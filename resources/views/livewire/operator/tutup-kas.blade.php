@@ -56,6 +56,9 @@
         <dl class="px-4 py-3 text-sm space-y-1.5">
             <div class="flex justify-between"><dt class="text-muted">QRIS</dt><dd><x-rupiah :nilai="$r['qris']" /></dd></div>
             <div class="flex justify-between"><dt class="text-muted">Transfer</dt><dd><x-rupiah :nilai="$r['transfer']" /></dd></div>
+            @if ($r['qris_gateway'] > 0)
+                <div class="flex justify-between"><dt class="text-muted">QRIS online (bayar mandiri TV)</dt><dd><x-rupiah :nilai="$r['qris_gateway']" /></dd></div>
+            @endif
             @if ($r['saldo'] > 0)
                 <div class="flex justify-between"><dt class="text-muted">Saldo member</dt><dd><x-rupiah :nilai="$r['saldo']" /></dd></div>
             @endif

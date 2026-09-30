@@ -210,7 +210,8 @@ class Agent(private val ctx: Context) {
             val (status, mentah) = api.status()
             terapkanStatus(status, mentah)
             gagalBeruntun = 0
-            status.pollDetik.coerceIn(5, 120) * 1000L
+            // QRIS sedang ditampilkan: cek lebih sering supaya TV terbuka beberapa detik setelah pelanggan bayar
+            if (status.bayarMandiri?.tagihan != null) 4_000L else status.pollDetik.coerceIn(5, 120) * 1000L
         } catch (e: PerluPairing) {
             // Hanya server tempat TV dipasangkan yang boleh mencabut TV. Server lain (mis. cloud yang
             // belum tersinkron) menolak token -> anggap tidak terjangkau, pakai server lain.

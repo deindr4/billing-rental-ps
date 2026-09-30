@@ -13,6 +13,7 @@ use App\Livewire\Operator\JadwalBooking;
 use App\Livewire\Operator\Laporan;
 use App\Livewire\Operator\Lounge;
 use App\Livewire\Operator\Member;
+use App\Livewire\Operator\PembayaranOnlineKasir;
 use App\Livewire\Operator\Pengeluaran;
 use App\Livewire\Operator\Pos;
 use App\Livewire\Operator\Rental;
@@ -20,6 +21,7 @@ use App\Livewire\Operator\Stok;
 use App\Livewire\Operator\TutupKas;
 use App\Livewire\Publik\Billboard;
 use App\Livewire\Publik\BookingPortal;
+use App\Livewire\Publik\MainMandiri;
 use App\Livewire\Publik\TurnamenPublik;
 use App\Models\Iklan;
 use App\Models\RilisApk;
@@ -53,6 +55,7 @@ Route::get('/iklan/{iklan}/gambar.webp', function (string $iklan) {
         'Cache-Control' => 'public, max-age=86400',
     ]);
 })->whereUuid('iklan')->middleware('throttle:240,1')->name('iklan.gambar');
+Route::get('/main/{token}', MainMandiri::class)->middleware('throttle:60,1')->name('main');
 Route::get('/turnamen/{slug}', TurnamenPublik::class)->middleware('throttle:60,1')->name('turnamen.publik');
 
 // "Rental" di menu admin hanya judul kelompok; alamat ini diarahkan ke daftar unit
@@ -84,6 +87,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', Laporan::class)->middleware('can:laporan.lihat')->name('laporan');
         Route::get('/pengeluaran', Pengeluaran::class)->middleware('can:pengeluaran.catat')->name('pengeluaran');
         Route::get('/member', Member::class)->middleware('can:member.kelola')->name('member');
+        Route::get('/pembayaran-online', PembayaranOnlineKasir::class)->middleware('can:pembayaran.terima')->name('pembayaran-online');
         Route::get('/jadwal', JadwalBooking::class)->middleware('can:rental.kelola')->name('jadwal');
         Route::get('/lounge', Lounge::class)->middleware('can:rental.kelola')->name('lounge');
         Route::get('/turnamen', DaftarTurnamen::class)->middleware('can:turnamen.kelola')->name('turnamen');

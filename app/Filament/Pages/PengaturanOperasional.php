@@ -94,6 +94,10 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['qris_payload'] = $cabangId ? (string) Pengaturan::ambil('qris.payload', '', $cabangId) : '';
 
         $jam = $cabangId ? BookingService::jamOperasionalCabang($cabangId) : ['buka' => '10:00', 'tutup' => '23:00', 'keterangan' => 'Setiap hari'];
+        $isi['bm_aktif'] = $cabangId ? (bool) Pengaturan::ambil('bayar_mandiri.aktif', false, $cabangId) : false;
+        $isi['bm_minimal_menit'] = $cabangId ? (int) Pengaturan::ambil('bayar_mandiri.minimal_menit', 30, $cabangId) : 30;
+        $isi['bm_masa_qris_menit'] = $cabangId ? (int) Pengaturan::ambil('bayar_mandiri.masa_qris_menit', 10, $cabangId) : 10;
+        $isi['bm_selesai_otomatis_menit'] = $cabangId ? (int) Pengaturan::ambil('bayar_mandiri.selesai_otomatis_menit', 10, $cabangId) : 10;
         $isi['jam_buka'] = $jam['buka'];
         $isi['jam_tutup'] = $jam['tutup'];
         $isi['jam_keterangan'] = $jam['keterangan'];
@@ -267,6 +271,17 @@ class PengaturanOperasional extends Page implements HasSchemas
                             }),
                     ]),
 
+                Section::make('Bayar mandiri di TV (QRIS)')
+                    ->description('Pelanggan scan QR di TV, bayar nominal bebas → TV terbuka otomatis (durasi = nominal ÷ tarif per jam). Hanya saat kas dibuka. Gateway diatur di Pengaturan → Pembayaran online.')
+                    ->columns(3)
+                    ->schema([
+                        Toggle::make('bm_aktif')->label('Aktifkan bayar mandiri di TV cabang ini')->columnSpanFull(),
+                        TextInput::make('bm_minimal_menit')->label('Minimal beli (menit)')->numeric()->minValue(15)->maxValue(240)->required(),
+                        TextInput::make('bm_masa_qris_menit')->label('QRIS berlaku (menit)')->numeric()->minValue(3)->maxValue(60)->required(),
+                        TextInput::make('bm_selesai_otomatis_menit')->label('Selesai otomatis setelah habis (menit)')->numeric()->minValue(1)->maxValue(120)->required()
+                            ->helperText('Sesi bayar mandiri yang lunas & tidak diisi ulang diselesaikan, unit kosong lagi.'),
+                    ]),
+
                 Section::make('Jam operasional')
                     ->description('Tampil di billboard & dipakai sebagai jam booking online. Status BUKA/TUTUP di billboard mengikuti kas: buka saat ada kasir yang membuka kas.')
                     ->columns(3)
@@ -340,6 +355,13 @@ class PengaturanOperasional extends Page implements HasSchemas
         // QRIS
         Pengaturan::simpan('qris.payload', trim((string) ($data['qris_payload'] ?? '')), $cabangId);
         Pengaturan::simpan('qris.aktif', (bool) ($data['qris_aktif'] ?? false) && trim((string) ($data['qris_payload'] ?? '')) !== '', $cabangId);
+
+        // Bayar mandiri di TV
+        Pengaturan::simpan('bayar_mandiri.aktif', (bool) ($data['bm_aktif'] ?? false), $cabangId);
+
+        foreach (['minimal_menit', 'masa_qris_menit', 'selesai_otomatis_menit'] as $k) {
+            Pengaturan::simpan('bayar_mandiri.'.$k, (int) ($data['bm_'.$k] ?? 0), $cabangId);
+        }
 
         // Booking online
         Pengaturan::simpan('booking.aktif', (bool) ($data['booking_aktif'] ?? false), $cabangId);

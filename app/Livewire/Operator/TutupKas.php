@@ -72,6 +72,7 @@ class TutupKas extends Component
             'qris' => (int) ($perMetode['qris']->total ?? 0),
             'transfer' => (int) ($perMetode['transfer']->total ?? 0),
             'saldo' => (int) ($perMetode['saldo']->total ?? 0),
+            'qris_gateway' => (int) ($perMetode['qris_gateway']->total ?? 0),
             'jumlah_transaksi' => Pembayaran::query()
                 ->where('shift_id', $shift->id)
                 ->where('status', 'sukses')

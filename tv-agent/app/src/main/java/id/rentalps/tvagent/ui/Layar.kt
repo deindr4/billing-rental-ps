@@ -355,7 +355,13 @@ private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaH
                     BarKoneksi(k, fokusMenu, onBukaMenu)
                 }
                 Spacer(Modifier.weight(1f))
-                KartuAjakan(k)
+                val bm = s?.bayarMandiri
+                if (k.layar == "kunci" && bm != null) {
+                    // Bayar mandiri: scan QR -> ketik nominal di HP -> QRIS muncul di sini -> TV terbuka otomatis
+                    Panel(garis = aksen.copy(alpha = 0.5f)) { KontenBayarMandiri(bm, sekarang) }
+                } else {
+                    KartuAjakan(k)
+                }
             }
 
             Pengumuman(s)
@@ -545,19 +551,27 @@ private fun LayarTagihan(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit) {
                         Label("Pembayaran", warna = teksDiAtas(aksen), ukuran = 10.sp)
                     }
                     Spacer(Modifier.height(10.dp))
-                    Text("Selesaikan di kasir", color = Warna.teks, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        "TV & konsol terbuka lagi otomatis setelah kasir menambah waktu atau pembayaran tercatat.",
-                        color = Warna.redup, fontSize = 13.sp,
-                    )
-                    Spacer(Modifier.height(12.dp))
-                    Label("Metode pembayaran")
-                    Spacer(Modifier.height(6.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        Chip("Tunai", warna = Warna.teks)
-                        Chip("QRIS", warna = Warna.teks)
-                        Chip("Transfer", warna = Warna.teks)
+                    val bm = s.bayarMandiri
+                    if (habis && bm?.jenis == "isi_ulang") {
+                        // Isi ulang waktu mandiri lewat QRIS (tagihan lain, misal F&B, tetap di kasir)
+                        KontenBayarMandiri(bm, sekarang, besar = false)
+                        Spacer(Modifier.height(6.dp))
+                        Text("Atau tambah waktu & bayar di kasir.", color = Warna.redup, fontSize = 12.sp)
+                    } else {
+                        Text("Selesaikan di kasir", color = Warna.teks, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            "TV & konsol terbuka lagi otomatis setelah kasir menambah waktu atau pembayaran tercatat.",
+                            color = Warna.redup, fontSize = 13.sp,
+                        )
+                        Spacer(Modifier.height(12.dp))
+                        Label("Metode pembayaran")
+                        Spacer(Modifier.height(6.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Chip("Tunai", warna = Warna.teks)
+                            Chip("QRIS", warna = Warna.teks)
+                            Chip("Transfer", warna = Warna.teks)
+                        }
                     }
                     Spacer(Modifier.weight(1f))
                     if (tagihan != null) {
