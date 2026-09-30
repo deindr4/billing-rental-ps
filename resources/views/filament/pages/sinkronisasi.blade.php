@@ -33,7 +33,12 @@
 
         <x-filament::section>
             <x-slot name="heading">Koneksi ke cloud</x-slot>
-            <x-slot name="description">Token dibuat di server cloud: Admin → Pengaturan → Sinkronisasi (super admin).</x-slot>
+            <x-slot name="description">
+                Token dibuat di server cloud (login super admin → Pengaturan → Sinkronisasi → Buat token), lalu tempel di sini.
+                @if ($url)
+                    <a href="{{ rtrim($url, '/') }}/admin/sinkronisasi" target="_blank" rel="noopener" style="text-decoration:underline">Buka halaman token di cloud ↗</a>
+                @endif
+            </x-slot>
             <form wire:submit="simpan" style="display:grid; gap:12px; max-width:560px;">
                 <label>
                     <span style="display:block; font-size:14px; margin-bottom:4px;">Alamat server cloud</span>

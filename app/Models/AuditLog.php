@@ -39,6 +39,8 @@ class AuditLog extends Model
         'backup' => 'Backup',
         'pulihkan_backup' => 'Pulihkan backup',
         'bayar_mandiri' => 'Bayar mandiri (QRIS TV)',
+        'pemeliharaan' => 'Pemeliharaan sistem',
+        'token_sinkron' => 'Token sinkron',
     ];
 
     protected $table = 'audit_log';

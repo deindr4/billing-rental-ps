@@ -6,6 +6,7 @@ use App\Models\ServerSinkron;
 use App\Models\Tenant;
 use App\Services\Sinkron\SinkronService;
 use App\Services\StatusSistemService;
+use App\Support\Audit;
 use BackedEnum;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -158,8 +159,9 @@ class Sinkronisasi extends Page
         abort_unless($this->diCloud() && auth()->user()->isSuperAdmin(), 403);
         $this->validate(['namaServer' => 'required|string|min:3|max:100', 'tenantServer' => 'nullable|uuid']);
 
-        [, $token] = ServerSinkron::buat(trim($this->namaServer), $this->tenantServer ?: null);
+        [$server, $token] = ServerSinkron::buat(trim($this->namaServer), $this->tenantServer ?: null);
         $this->tokenBaru = $token;
+        Audit::catat('token_sinkron', 'Buat token sinkron: '.$server->nama, $server);
         $this->namaServer = '';
         $this->tenantServer = null;
     }
