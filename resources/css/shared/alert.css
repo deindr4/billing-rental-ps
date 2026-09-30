@@ -1,0 +1,57 @@
+/* Tema SweetAlert2 mengikuti design tokens (dark/light + aksen) */
+@layer components {
+    .swal2-container {
+        z-index: 9999;
+    }
+
+    .swal-popup {
+        background: var(--surface) !important;
+        color: var(--text) !important;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg) !important;
+        font-family: var(--font-sans);
+    }
+
+    .swal-title {
+        color: var(--text) !important;
+        font-size: 18px !important;
+        font-weight: 600 !important;
+    }
+
+    .swal-text,
+    .swal-desc {
+        color: var(--text-muted) !important;
+        font-size: 14px !important;
+    }
+
+    .swal-actions {
+        gap: 0.5rem;
+    }
+
+    .swal-textarea {
+        height: 5rem;
+        padding: 0.5rem 0.75rem;
+        margin-top: 0.75rem;
+        resize: none;
+    }
+
+    .swal-pin {
+        margin-top: 0.75rem;
+        text-align: center;
+        letter-spacing: 0.4em;
+        font-family: var(--font-mono);
+    }
+
+    .swal2-validation-message {
+        background: var(--surface-2) !important;
+        color: var(--danger) !important;
+    }
+
+    .swal-toast {
+        box-shadow: none !important;
+    }
+
+    .swal2-timer-progress-bar {
+        background: var(--accent) !important;
+    }
+}

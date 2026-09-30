@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Server billing ada di LAN (http://192.168.x.x), jadi HTTP biasa diizinkan -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>

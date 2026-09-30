@@ -1,0 +1,274 @@
+<div>
+    <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
+        <div>
+            <h1 class="text-xl font-semibold">Stok</h1>
+            <p class="text-sm text-muted">Saldo, belanja barang, hitung fisik, dan riwayat keluar-masuk.</p>
+        </div>
+        <a href="{{ route('pos') }}" wire:navigate class="btn h-9">Kembali ke POS</a>
+    </div>
+
+    {{-- Tab --}}
+    <div class="flex gap-2 overflow-x-auto pb-1 mb-4">
+        @foreach (\App\Livewire\Operator\Stok::TAB as $kode => $nama)
+            <button type="button" wire:click="gantiTab('{{ $kode }}')"
+                    @class(['btn h-8 px-3 text-sm shrink-0', 'btn-primary' => $tab === $kode])>{{ $nama }}</button>
+        @endforeach
+    </div>
+
+    {{-- ================= SALDO ================= --}}
+    @if ($tab === 'saldo')
+        @php
+            $nilaiStok = $this->daftarProduk->sum(fn ($p) => max(0, $p->sisaStok()) * (int) ($p->stok?->hpp_rata ?? 0));
+        @endphp
+
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+            <input type="search" wire:model.live.debounce.300ms="cari" class="input sm:w-72" placeholder="Cari produk">
+            <label class="flex items-center gap-2 text-sm">
+                <input type="checkbox" wire:model.live="hanyaMenipis"> Hanya stok menipis
+            </label>
+            @if ($this->bolehLihatLaba())
+                <span class="text-sm text-muted sm:ml-auto">
+                    Nilai stok <x-rupiah :nilai="$nilaiStok" class="text-fg font-semibold" />
+                </span>
+            @endif
+        </div>
+
+        <div class="surface overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="text-xs text-muted border-b border-line">
+                    <tr>
+                        <th class="px-3 py-2 font-medium text-left">Produk</th>
+                        <th class="px-3 py-2 font-medium text-right">Stok</th>
+                        @if ($this->bolehLihatLaba())
+                            <th class="px-3 py-2 font-medium text-right hidden sm:table-cell">HPP</th>
+                        @endif
+                        <th class="px-3 py-2 font-medium text-right hidden sm:table-cell">Harga jual</th>
+                        @if ($this->bolehLihatLaba())
+                            <th class="px-3 py-2 font-medium text-right">Margin</th>
+                            <th class="px-3 py-2 font-medium text-right hidden lg:table-cell">Nilai stok</th>
+                        @endif
+                        <th class="px-3 py-2 font-medium text-left">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @forelse ($this->daftarProduk as $p)
+                        @php
+                            $qty = $p->sisaStok();
+                            $hpp = (int) ($p->stok?->hpp_rata ?? 0);
+                            $margin = $p->harga_jual - $hpp;
+                            $persen = $p->harga_jual > 0 ? round($margin / $p->harga_jual * 100) : 0;
+                        @endphp
+                        <tr wire:key="saldo-{{ $p->id }}">
+                            <td class="px-3 py-2">
+                                <div class="font-medium">{{ $p->nama }}</div>
+                                <div class="text-xs text-muted">{{ $p->kode ?: '-' }} · {{ $p->satuan }}</div>
+                            </td>
+                            <td class="px-3 py-2 text-right num font-semibold">{{ $qty }}</td>
+                            @if ($this->bolehLihatLaba())
+                                <td class="px-3 py-2 text-right hidden sm:table-cell text-muted"><x-rupiah :nilai="$hpp" /></td>
+                            @endif
+                            <td class="px-3 py-2 text-right hidden sm:table-cell"><x-rupiah :nilai="$p->harga_jual" /></td>
+                            @if ($this->bolehLihatLaba())
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                                @if ($hpp > 0)
+                                    <div @class([
+                                        'num',
+                                        'text-danger' => $margin <= 0,
+                                        'text-st-hampir' => $margin > 0 && $persen < 20,
+                                        'text-accent' => $persen >= 20,
+                                    ])>
+                                        <x-rupiah :nilai="$margin" />
+                                    </div>
+                                    <div class="text-xs text-muted num">{{ $persen }}%</div>
+                                @else
+                                    <span class="text-xs text-muted">Belum ada HPP</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-2 text-right hidden lg:table-cell"><x-rupiah :nilai="max(0, $qty) * $hpp" /></td>
+                            @endif
+                            <td class="px-3 py-2">
+                                @if ($qty <= 0)
+                                    <span class="badge text-danger">Habis</span>
+                                @elseif ($p->stokMenipis())
+                                    <span class="badge text-st-hampir">Menipis</span>
+                                @else
+                                    <span class="badge text-muted">Aman</span>
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="7" class="px-3 py-8 text-center text-muted">Tidak ada produk.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <p class="text-xs text-muted mt-2">
+            HPP = harga pokok rata-rata dari stok masuk. Margin kuning di bawah 20%, merah jika rugi.
+        </p>
+
+    {{-- ================= STOK MASUK ================= --}}
+    @elseif ($tab === 'masuk')
+        @if (! $this->bolehMasuk())
+            <div class="surface p-6 text-center text-muted">Anda tidak punya izin mencatat stok masuk.</div>
+        @else
+            <form wire:submit="simpanMasuk" class="surface p-4 space-y-4 max-w-3xl">
+                <div class="space-y-3">
+                    @foreach ($masuk as $i => $b)
+                        <div wire:key="masuk-{{ $i }}-{{ count($masuk) }}" class="grid gap-2 sm:grid-cols-[1fr_110px_170px_auto] items-start">
+                            <div>
+                                <select wire:model="masuk.{{ $i }}.produk_id" class="input" aria-label="Produk">
+                                    <option value="">Pilih produk</option>
+                                    @foreach ($this->pilihanProduk as $p)
+                                        <option value="{{ $p->id }}">{{ $p->nama }}</option>
+                                    @endforeach
+                                </select>
+                                @error("masuk.$i.produk_id") <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <input type="number" inputmode="numeric" min="1" wire:model.live.debounce.300ms="masuk.{{ $i }}.qty"
+                                       class="input num" placeholder="Jumlah">
+                                @error("masuk.$i.qty") <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <div>
+                                <x-input-uang wire:model.live="masuk.{{ $i }}.harga" placeholder="Harga pokok / pcs" />
+                                @error("masuk.$i.harga") <p class="text-xs text-danger mt-1">{{ $message }}</p> @enderror
+                            </div>
+                            <button type="button" wire:click="hapusBarisMasuk({{ $i }})" class="btn btn-ghost h-9 px-2 text-danger text-sm">Hapus</button>
+                        </div>
+                    @endforeach
+                </div>
+
+                <button type="button" wire:click="tambahBarisMasuk" class="btn btn-ghost text-sm text-muted">+ Tambah baris</button>
+
+                <div>
+                    <label class="block text-sm mb-1.5">Keterangan <span class="text-muted">(opsional)</span></label>
+                    <input type="text" wire:model="keteranganMasuk" class="input" maxlength="200" placeholder="Contoh: belanja di Toko Makmur">
+                </div>
+
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" wire:model="dariKas">
+                    Dibayar dari laci kas (tercatat sebagai pengeluaran shift)
+                </label>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-3">
+                    <span class="text-muted">Total belanja <x-rupiah :nilai="$this->totalMasuk()" class="text-fg text-lg font-semibold" /></span>
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="simpanMasuk">Simpan Stok Masuk</button>
+                </div>
+            </form>
+        @endif
+
+    {{-- ================= OPNAME ================= --}}
+    @elseif ($tab === 'opname')
+        @if (! $this->bolehOpname())
+            <div class="surface p-6 text-center text-muted">Anda tidak punya izin melakukan opname.</div>
+        @else
+            <p class="text-sm text-muted mb-3">Hitung stok di rak/kulkas, lalu isi kolom <strong>Fisik</strong>. Produk yang dikosongkan tidak diubah.</p>
+
+            <input type="search" wire:model.live.debounce.300ms="cari" class="input sm:w-72 mb-3" placeholder="Cari produk">
+
+            <form onsubmit="return false">
+                <div class="surface overflow-x-auto mb-4">
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-xs text-muted border-b border-line">
+                            <tr>
+                                <th class="px-3 py-2 font-medium">Produk</th>
+                                <th class="px-3 py-2 font-medium text-right">Sistem</th>
+                                <th class="px-3 py-2 font-medium w-32">Fisik</th>
+                                <th class="px-3 py-2 font-medium text-right">Selisih</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-line">
+                            @foreach ($this->daftarProduk as $p)
+                                @php
+                                    $isi = $fisik[$p->id] ?? null;
+                                    $selisih = ($isi === null || $isi === '') ? null : (int) $isi - $p->sisaStok();
+                                @endphp
+                                <tr wire:key="opn-{{ $p->id }}">
+                                    <td class="px-3 py-2">{{ $p->nama }}</td>
+                                    <td class="px-3 py-2 text-right num">{{ $p->sisaStok() }}</td>
+                                    <td class="px-3 py-2">
+                                        <input type="number" inputmode="numeric" min="0"
+                                               wire:model.live.debounce.400ms="fisik.{{ $p->id }}" class="input num h-8">
+                                    </td>
+                                    <td @class([
+                                        'px-3 py-2 text-right num',
+                                        'text-danger' => $selisih !== null && $selisih < 0,
+                                        'text-accent' => $selisih !== null && $selisih > 0,
+                                        'text-muted' => $selisih === 0 || $selisih === null,
+                                    ])>
+                                        {{ $selisih === null ? '-' : ($selisih > 0 ? '+'.$selisih : $selisih) }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="surface p-4 space-y-3 max-w-xl">
+                    <div>
+                        <label class="block text-sm mb-1.5">Keterangan</label>
+                        <input type="text" wire:model="alasanOpname" class="input" maxlength="200" placeholder="Contoh: opname akhir bulan">
+                        @error('alasanOpname') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+                    <x-confirm-button action="simpanOpname"
+                                      title="Simpan hasil opname?"
+                                      text="Stok sistem akan disesuaikan dengan hitung fisik."
+                                      class="btn-primary w-full">
+                        Simpan Opname
+                    </x-confirm-button>
+                </div>
+            </form>
+        @endif
+
+    {{-- ================= RIWAYAT ================= --}}
+    @elseif ($tab === 'riwayat')
+        <div class="flex flex-wrap gap-2 mb-3">
+            <input type="search" wire:model.live.debounce.300ms="cari" class="input sm:w-72" placeholder="Cari produk">
+            <select wire:model.live="jenisRiwayat" class="input sm:w-48">
+                <option value="">Semua jenis</option>
+                @foreach (\App\Models\StokMutasi::JENIS as $kode => $nama)
+                    <option value="{{ $kode }}">{{ $nama }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="surface overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="text-left text-xs text-muted border-b border-line">
+                    <tr>
+                        <th class="px-3 py-2 font-medium">Waktu</th>
+                        <th class="px-3 py-2 font-medium">Produk</th>
+                        <th class="px-3 py-2 font-medium">Jenis</th>
+                        <th class="px-3 py-2 font-medium text-right">Qty</th>
+                        <th class="px-3 py-2 font-medium hidden md:table-cell">Keterangan</th>
+                        <th class="px-3 py-2 font-medium hidden md:table-cell">Oleh</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @forelse ($riwayat as $m)
+                        <tr wire:key="mts-{{ $m->id }}">
+                            <td class="px-3 py-2 num whitespace-nowrap text-muted">{{ $m->created_at->format('d/m H:i') }}</td>
+                            <td class="px-3 py-2">{{ $m->produk?->nama }}</td>
+                            <td class="px-3 py-2">{{ \App\Models\StokMutasi::JENIS[$m->jenis] ?? $m->jenis }}</td>
+                            <td @class(['px-3 py-2 text-right num', 'text-accent' => $m->qty > 0, 'text-danger' => $m->qty < 0])>
+                                {{ $m->qty > 0 ? '+'.$m->qty : $m->qty }}
+                            </td>
+                            <td class="px-3 py-2 hidden md:table-cell text-muted">{{ $m->keterangan }}</td>
+                            <td class="px-3 py-2 hidden md:table-cell text-muted">{{ $m->user?->name ?? 'Sistem' }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="6" class="px-3 py-8 text-center text-muted">Belum ada riwayat.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        @if ($riwayat && (! $riwayat->onFirstPage() || $riwayat->hasMorePages()))
+            <div class="flex justify-between gap-2 mt-3">
+                <button type="button" wire:click="previousPage" class="btn h-9" @disabled($riwayat->onFirstPage())>Sebelumnya</button>
+                <button type="button" wire:click="nextPage" class="btn h-9" @disabled(! $riwayat->hasMorePages())>Berikutnya</button>
+            </div>
+        @endif
+    @endif
+</div>

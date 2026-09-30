@@ -1,0 +1,54 @@
+@layer base {
+    html {
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+    }
+
+    body {
+        font-family: var(--font-sans);
+        font-size: 14px;
+        line-height: 1.45;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+
+    /* Transisi tema halus, hanya properti warna */
+    body,
+    .surface,
+    .kartu,
+    .btn,
+    .input {
+        transition:
+            background-color 150ms ease,
+            border-color 150ms ease,
+            color 150ms ease;
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+    }
+
+    ::selection {
+        background: color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    /* Scrollbar tipis */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            transition-duration: 0ms !important;
+            animation-duration: 0ms !important;
+        }
+    }
+}

@@ -1,0 +1,146 @@
+@layer components {
+    /* Angka timer, uang, nomor */
+    .num {
+        font-family: var(--font-mono);
+        font-variant-numeric: tabular-nums;
+        letter-spacing: -0.01em;
+    }
+
+    /* Label kecil huruf kapital (gaya Stitch) */
+    .label {
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .surface,
+    .kartu {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+    }
+
+    /* Kartu dengan garis warna status di atas */
+    .kartu-status {
+        border-top: 2px solid var(--warna-status, var(--border));
+    }
+
+    .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.125rem 0.4rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        font-family: var(--font-mono);
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background: currentColor;
+        flex-shrink: 0;
+    }
+
+    /* Button */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        height: 2.25rem;
+        padding: 0 0.875rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        color: var(--text);
+        font-weight: 500;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+    .btn:hover {
+        border-color: color-mix(in srgb, var(--text-muted) 45%, var(--border));
+    }
+    .btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .btn-primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--accent-contrast);
+        font-weight: 600;
+    }
+    .btn-primary:hover {
+        border-color: var(--accent);
+        filter: brightness(1.06);
+    }
+    .btn-danger {
+        background: var(--danger);
+        border-color: var(--danger);
+        color: #fff;
+        font-weight: 600;
+    }
+    .btn-ghost {
+        background: transparent;
+        border-color: transparent;
+    }
+    .btn-ghost:hover {
+        background: var(--surface-2);
+        border-color: transparent;
+    }
+    .btn-ikon {
+        width: 2.25rem;
+        padding: 0;
+    }
+
+    /* Input */
+    .input {
+        width: 100%;
+        height: 2.25rem;
+        padding: 0 0.75rem;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border);
+        background: var(--bg);
+        color: var(--text);
+    }
+    .input::placeholder {
+        color: var(--text-muted);
+    }
+    .input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    /* Badge status */
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        padding: 0.125rem 0.5rem;
+        border-radius: var(--radius-sm);
+        font-family: var(--font-mono);
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        border: 1px solid currentColor;
+    }
+    .badge-kosong { color: var(--status-kosong); }
+    .badge-main { color: var(--status-main); }
+    .badge-pause { color: var(--status-pause); }
+    .badge-hampir { color: var(--status-hampir-habis); }
+    .badge-servis { color: var(--status-servis); }
+    .badge-offline { color: var(--status-offline); }
+}

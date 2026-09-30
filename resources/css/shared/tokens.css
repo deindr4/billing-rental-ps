@@ -1,0 +1,102 @@
+/*
+ | Design tokens (mengikuti desain Stitch: navy gelap + aksen mint)
+ | Diganti lewat atribut <html>:
+ |   data-theme="dark" | "light"
+ |   style="--accent: ..." (menu Tema & Warna)
+ | Warna status unit dan danger sengaja tidak ikut tema.
+ */
+
+:root,
+[data-theme='dark'] {
+    --bg: #0a1420;
+    --surface: #0f1c2b;
+    --surface-2: #152537;
+    --border: #1e3144;
+    --text: #e6edf5;
+    --text-muted: #7f90a6;
+
+    --accent: #4ade80;
+    --accent-contrast: #052e16;
+
+    --danger: #f87171;
+
+    --status-kosong: #4ade80;
+    --status-main: #38bdf8;
+    --status-pause: #a5b4c8;
+    --status-hampir-habis: #fbbf24;
+    --status-servis: #fb923c;
+    --status-offline: #f87171;
+
+    color-scheme: dark;
+}
+
+[data-theme='light'] {
+    --bg: #f3f6f9;
+    --surface: #ffffff;
+    --surface-2: #eef2f6;
+    --border: #d9e1ea;
+    --text: #0f1c2b;
+    --text-muted: #5b6b80;
+
+    --status-kosong: #16a34a;
+    --status-main: #0284c7;
+    --status-pause: #64748b;
+    --status-hampir-habis: #d97706;
+    --status-servis: #ea580c;
+    --status-offline: #dc2626;
+    --danger: #dc2626;
+
+    color-scheme: light;
+}
+
+/* Mode "Ikuti sistem": gelap secara default, terang jika perangkat memakai mode terang */
+[data-theme='sistem'] {
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: light) {
+    [data-theme='sistem'] {
+        --bg: #f3f6f9;
+        --surface: #ffffff;
+        --surface-2: #eef2f6;
+        --border: #d9e1ea;
+        --text: #0f1c2b;
+        --text-muted: #5b6b80;
+
+        --status-kosong: #16a34a;
+        --status-main: #0284c7;
+        --status-pause: #64748b;
+        --status-hampir-habis: #d97706;
+        --status-servis: #ea580c;
+        --status-offline: #dc2626;
+        --danger: #dc2626;
+
+        color-scheme: light;
+}
+}
+
+@theme inline {
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-line: var(--border);
+    --color-fg: var(--text);
+    --color-muted: var(--text-muted);
+    --color-accent: var(--accent);
+    --color-accent-contrast: var(--accent-contrast);
+    --color-danger: var(--danger);
+
+    --color-st-kosong: var(--status-kosong);
+    --color-st-main: var(--status-main);
+    --color-st-pause: var(--status-pause);
+    --color-st-hampir: var(--status-hampir-habis);
+    --color-st-servis: var(--status-servis);
+    --color-st-offline: var(--status-offline);
+
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+}

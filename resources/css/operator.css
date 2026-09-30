@@ -1,0 +1,21 @@
+/* Entry: layar operator (Rental, POS, Kas, Transaksi, Stok, Laporan) + login */
+
+/* Font dipasang lokal (tetap tampil saat internet mati) */
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+@import 'tailwindcss' source(none);
+
+@source '../views/layouts/operator.blade.php';
+@source '../views/layouts/guest.blade.php';
+@source '../views/operator/**/*.blade.php';
+@source '../views/components/**/*.blade.php';
+@source '../views/livewire/**/*.blade.php';
+@source '../js/operator.js';
+@source '../../app/Support/MenuOperator.php';
+
+@import './shared/tokens.css';
+@import './shared/base.css';
+@import './shared/components.css';
+@import './shared/alert.css';

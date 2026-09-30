@@ -1,0 +1,89 @@
+/*
+ | CSS khusus halaman Laporan di panel admin (Filament).
+ | Tanpa preflight Tailwind & token dibatasi di dalam .lap, supaya tidak mengganggu tampilan Filament.
+ */
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+@import './shared/components.css';
+
+@source '../views/laporan/**/*.blade.php';
+@source '../views/filament/pages/laporan.blade.php';
+@source '../views/components/rupiah.blade.php';
+
+/* Mode terang Filament */
+.lap {
+    --bg: #f3f6f9;
+    --surface: #ffffff;
+    --surface-2: #eef2f6;
+    --border: #d9e1ea;
+    --text: #0f1c2b;
+    --text-muted: #5b6b80;
+    --accent: #16a34a;
+    --accent-contrast: #ffffff;
+    --danger: #dc2626;
+    --status-kosong: #16a34a;
+    --status-main: #0284c7;
+    --status-pause: #64748b;
+    --status-hampir-habis: #d97706;
+    --status-servis: #ea580c;
+    --status-offline: #dc2626;
+
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+/* Mode gelap Filament */
+.dark .lap {
+    --bg: #0a1420;
+    --surface: #0f1c2b;
+    --surface-2: #152537;
+    --border: #1e3144;
+    --text: #e6edf5;
+    --text-muted: #7f90a6;
+    --accent: #4ade80;
+    --accent-contrast: #052e16;
+    --danger: #f87171;
+    --status-kosong: #4ade80;
+    --status-main: #38bdf8;
+    --status-pause: #a5b4c8;
+    --status-hampir-habis: #fbbf24;
+    --status-servis: #fb923c;
+    --status-offline: #f87171;
+}
+
+.lap table {
+    border-collapse: collapse;
+}
+
+@theme inline {
+    --color-bg: var(--bg);
+    --color-surface: var(--surface);
+    --color-surface-2: var(--surface-2);
+    --color-line: var(--border);
+    --color-fg: var(--text);
+    --color-muted: var(--text-muted);
+    --color-accent: var(--accent);
+    --color-accent-contrast: var(--accent-contrast);
+    --color-danger: var(--danger);
+
+    --color-st-kosong: var(--status-kosong);
+    --color-st-main: var(--status-main);
+    --color-st-pause: var(--status-pause);
+    --color-st-hampir: var(--status-hampir-habis);
+    --color-st-servis: var(--status-servis);
+    --color-st-offline: var(--status-offline);
+
+    --font-sans: 'Inter Variable', 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+
+    --radius-sm: 4px;
+    --radius-md: 6px;
+    --radius-lg: 10px;
+}

@@ -1,0 +1,24 @@
+<?php
+
+use App\Models\Iklan;
+use App\Services\Publik\BookingService;
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
+
+Artisan::command('inspire', function () {
+    $this->comment(Inspiring::quote());
+})->purpose('Display an inspiring quote');
+
+// Backup harian jam 02:00 (butuh scheduler berjalan: `php artisan schedule:work` atau Task Scheduler/cron)
+Schedule::command('backup:buat')->dailyAt('02:00')->withoutOverlapping();
+
+// Booking yang lewat toleransi tanpa datang -> "tidak datang" (slot dilepas)
+Schedule::call(fn () => app(BookingService::class)->tandaiKedaluwarsa())->everyFiveMinutes()->name('booking-kedaluwarsa');
+
+// Iklan billboard yang masa tayangnya habis terhapus otomatis (ikut tersinkron ke cloud)
+Schedule::call(fn () => Iklan::hapusKedaluwarsa())->hourly()->name('iklan-kedaluwarsa');
+
+// Sinkron lokal -> cloud tiap menit (diam jika belum diatur); cloud membersihkan antrean lama
+Schedule::command('sync jalankan --diam')->everyMinute()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
+Schedule::command('sync bersihkan')->dailyAt('03:30')->when(fn () => config('app.mode') === 'cloud');

@@ -1,0 +1,15 @@
+/* Entry: portal booking & pendaftaran turnamen publik (mobile-first) */
+@import '@fontsource-variable/inter';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/600.css';
+
+@import 'tailwindcss' source(none);
+
+@source '../views/booking/**/*.blade.php';
+@source '../views/components/**/*.blade.php';
+@source '../js/booking.js';
+
+@import './shared/tokens.css';
+@import './shared/base.css';
+@import './shared/components.css';
+@import './shared/alert.css';

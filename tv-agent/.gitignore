@@ -1,0 +1,12 @@
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
+captures/
+*.keystore
+!debug.keystore
+
+# Android build (tv-agent)
+/tv-agent/.kotlin
