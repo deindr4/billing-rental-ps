@@ -261,6 +261,63 @@ final class BillingService
         });
     }
 
+    /**
+     * Bonus waktu (kompensasi PS restart / hang / stik error), menit diketik operator.
+     * - Paket: waktu berakhir mundur X menit, gratis (seperti tambah waktu gratis).
+     * - Open billing: X menit tidak ditagih (dikurangkan dari durasi berjalan).
+     * Tercatat sebagai item Rp0 berisi alasan, log aktivitas "waktu gratis" & log sesi.
+     */
+    public function bonusWaktu(Sesi $sesi, User $user, int $menit, string $alasan): Sesi
+    {
+        if ($menit < 1 || $menit > 240) {
+            throw new BillingException('Bonus waktu 1–240 menit.');
+        }
+
+        if (blank($alasan)) {
+            throw new BillingException('Bonus waktu wajib disertai alasan.');
+        }
+
+        if ($sesi->isPaket()) {
+            return $this->tambahWaktu($sesi, $user, $menit, true, 'Bonus: '.$alasan);
+        }
+
+        return DB::transaction(function () use ($sesi, $user, $menit, $alasan) {
+            $sesi = $this->kunciSesi($sesi->id);
+            $this->pastikanAktif($sesi);
+            $this->shift->wajibAktif($user, $sesi->cabang_id);
+
+            $sesi->bonus_detik = (int) $sesi->bonus_detik + $menit * 60;
+            $sesi->versi_tagihan = $sesi->versi_tagihan + 1;
+            $sesi->save();
+
+            $transaksi = Transaksi::withoutGlobalScopes()->findOrFail($sesi->transaksi_id);
+            $this->tambahItem($transaksi, TransaksiItem::JENIS_TAMBAH_WAKTU, "Bonus waktu {$menit} menit", 0, null, "Alasan: {$alasan}");
+            $transaksi->hitungUlang();
+
+            Audit::catat('waktu_gratis', "Bonus {$menit} menit (open billing) di {$transaksi->nomor}: {$alasan}", $transaksi, ['menit' => $menit, 'alasan' => $alasan], userId: $user->id);
+            $this->log($sesi, 'bonus_waktu', ['menit' => $menit, 'alasan' => $alasan], $user);
+
+            return $sesi;
+        });
+    }
+
+    /** Open billing berjalan: perkiraan biaya sewa sampai saat ini (null untuk paket / sesi selesai) */
+    public function estimasiSewaOpen(Sesi $sesi): ?int
+    {
+        if ($sesi->isPaket() || ! $sesi->isAktif()) {
+            return null;
+        }
+
+        return $this->kalkulator->hitung(
+            (int) $sesi->tarif_per_jam,
+            $sesi->durasiBerjalanDetik(),
+            (int) Pengaturan::ambil('open_billing.blok_menit', 15, $sesi->cabang_id),
+            (int) Pengaturan::ambil('open_billing.toleransi_menit', 5, $sesi->cabang_id),
+            (int) Pengaturan::ambil('open_billing.minimal_menit', 60, $sesi->cabang_id),
+            (int) Pengaturan::ambil('open_billing.pembulatan_rupiah', 0, $sesi->cabang_id),
+        )['biaya'];
+    }
+
     /* ================= PAUSE / RESUME ================= */
 
     public function pause(Sesi $sesi, User $user, ?string $alasan = null): Sesi

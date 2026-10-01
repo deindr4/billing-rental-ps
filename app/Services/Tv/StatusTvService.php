@@ -12,7 +12,6 @@ use App\Models\TransaksiDiskon;
 use App\Models\TransaksiItem;
 use App\Models\Unit;
 use App\Services\Billing\BillingService;
-use App\Services\Billing\KalkulatorOpenBilling;
 use App\Services\Gateway\BayarMandiriService;
 use App\Services\Gateway\PengaturanGateway;
 use App\Services\Publik\QrisService;
@@ -29,8 +28,6 @@ use Illuminate\Support\Facades\Storage;
 final class StatusTvService
 {
     public const POLL_DETIK = 15;
-
-    public function __construct(private KalkulatorOpenBilling $kalkulator) {}
 
     public function untuk(PerangkatTv $perangkat): array
     {
@@ -209,17 +206,8 @@ final class StatusTvService
         $tagihan = (int) ($transaksi?->total ?? 0);
         $estimasiSewa = null;
 
-        // Open billing berjalan: perkiraan biaya sewa sampai detik ini
-        if (! $sesi->isPaket() && $sesi->isAktif()) {
-            $estimasiSewa = $this->kalkulator->hitung(
-                (int) $sesi->tarif_per_jam,
-                $sesi->durasiBerjalanDetik(),
-                (int) Pengaturan::ambil('open_billing.blok_menit', 15, $sesi->cabang_id),
-                (int) Pengaturan::ambil('open_billing.toleransi_menit', 5, $sesi->cabang_id),
-                (int) Pengaturan::ambil('open_billing.minimal_menit', 60, $sesi->cabang_id),
-                (int) Pengaturan::ambil('open_billing.pembulatan_rupiah', 0, $sesi->cabang_id),
-            )['biaya'];
-        }
+        // Open billing berjalan: perkiraan biaya sewa sampai detik ini (bonus waktu tidak ditagih)
+        $estimasiSewa = app(BillingService::class)->estimasiSewaOpen($sesi);
 
         return [
             'id' => $sesi->id,
@@ -230,7 +218,8 @@ final class StatusTvService
             'berakhir_ms' => $sesi->berakhir_pada?->getTimestampMs(),
             'dijeda_ms' => $sesi->dijeda_pada?->getTimestampMs(),
             'selesai_ms' => $sesi->selesai_pada?->getTimestampMs(),
-            'total_jeda_detik' => (int) $sesi->total_jeda_detik,
+            // TV menghitung "sudah main" = sekarang - mulai - nilai ini; bonus waktu ikut dikurangkan (tidak ditagih)
+            'total_jeda_detik' => (int) $sesi->total_jeda_detik + (int) $sesi->bonus_detik,
             'sisa_detik' => $sesi->sisaDetik(),
             'durasi_detik' => $sesi->durasiBerjalanDetik(),
             'tarif_per_jam' => $sesi->tarif_per_jam,

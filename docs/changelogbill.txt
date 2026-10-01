@@ -5,6 +5,23 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-01 (sore)
+-----------------------------------------------------------------------------
+Kasir - panel sesi
+- Tombol baru "Bonus Waktu": kompensasi PS restart / hang / stik error, menit diketik operator (1-240),
+  alasan dipilih/ditulis. Paket: waktu selesai diundur gratis. Open billing: menit bonus tidak ditagih
+  (timer kasir & TV ikut menyesuaikan). Tercatat di tagihan (Rp0 + alasan) & log aktivitas.
+  Owner/supervisor langsung; kasir perlu PIN owner/supervisor.
+- Tombol baru "Cetak Struk" di panel sesi. Open bill yang masih berjalan kini bisa dicetak sebagai
+  tagihan sementara: "Sewa berjalan (perkiraan)" + "TOTAL SEMENTARA". Rincian tagihan open billing
+  di panel juga menampilkan perkiraan sewa berjalan.
+- Centang "Gratis (kompensasi)" di Tambah Waktu diganti tombol Bonus Waktu.
+
+Perbaikan
+- Kolom nominal Rupiah di form yang dibuka dari tombol (Turnamen baru, Aset) tidak terkirim -> tersimpan 0
+  (biaya daftar turnamen tampil "Gratis"). Komponen input Rupiah diperbaiki; turnamen contoh diperbaiki ke 20.000.
+
+
 2026-10-01
 -----------------------------------------------------------------------------
 Dokumentasi

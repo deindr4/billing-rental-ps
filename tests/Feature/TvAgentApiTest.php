@@ -36,6 +36,7 @@ use App\Support\Tenancy;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -316,7 +317,7 @@ class TvAgentApiTest extends TestCase
         $this->assertContains('kunci', $perintah());
 
         // Remote kartu unit tidak boleh dipakai untuk tutup aplikasi (jalan pintas tanpa PIN)
-        \Illuminate\Support\Facades\Cache::forget('tv:perintah:'.$perangkat->id);
+        Cache::forget('tv:perintah:'.$perangkat->id);
         $this->actingAs($this->owner);
         Livewire::test(Rental::class)->call('perintahTv', $this->unit->id, 'tutup_aplikasi');
         $this->assertNotContains('tutup_aplikasi', $perintah());

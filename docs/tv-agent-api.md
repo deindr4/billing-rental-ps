@@ -87,6 +87,9 @@ memakai zona cabang), `pengumuman` (teks berjalan), `pengaturan.suara_aktif`, da
 | `servis` | Layar "Dalam perbaikan" |
 | `bypass` | Terbuka sementara sampai `bypass_sampai_ms` |
 
+`sesi.total_jeda_detik` sudah termasuk **bonus waktu** open billing (menit kompensasi yang tidak ditagih),
+supaya "sudah main" di TV sama dengan durasi yang ditagih.
+
 **Timer dihitung lokal** dari `server_time_ms` (selisih jam TV vs server dihitung sekali):
 - paket: `sisa = berakhir_ms - sekarang` (saat `jeda`, pakai `dijeda_ms` sebagai sekarang)
 - open: `jalan = (sekarang - mulai_ms)/1000 - total_jeda_detik`

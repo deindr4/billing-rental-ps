@@ -8,6 +8,7 @@ use App\Models\Pembayaran;
 use App\Models\Pengaturan;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
+use App\Services\Billing\BillingService;
 use App\Services\Member\PengaturanMember;
 use App\Support\EscPos;
 
@@ -51,11 +52,16 @@ final class StrukService
 
         $cabang = Cabang::with('tenant')->find($transaksi->cabang_id);
 
+        // Open billing masih berjalan: sewa belum jadi item, cetak sebagai tagihan sementara dengan perkiraan
+        $sesi = $transaksi->sesi()->withoutGlobalScopes()->first();
+        $estimasi = $sesi ? app(BillingService::class)->estimasiSewaOpen($sesi) : null;
+
         return [
             'trx' => $transaksi,
             'cabang' => $cabang,
             'setelan' => $this->setelan($transaksi->cabang_id),
-            'sisa' => $transaksi->isDibatalkan() ? 0 : $transaksi->sisaTagihan(),
+            'estimasi_sewa' => $estimasi,
+            'sisa' => $transaksi->isDibatalkan() ? 0 : $transaksi->sisaTagihan() + (int) $estimasi,
             'diskon' => $transaksi->diskon->where('nilai', '>', 0)->values(),
             'member' => $this->infoMember($transaksi),
         ];
@@ -170,6 +176,11 @@ final class StrukService
             }
         }
 
+        if (($d['estimasi_sewa'] ?? null) !== null) {
+            $kk('Sewa berjalan (perkiraan)', $rp($d['estimasi_sewa']));
+            $tambah('  s.d. '.now()->format('H:i').' - final saat selesai');
+        }
+
         foreach ($d['diskon'] as $diskon) {
             $kk($diskon->nama, $rp(-$diskon->nilai));
         }
@@ -182,7 +193,11 @@ final class StrukService
             $kk('Diskon', $rp(-$trx->total_diskon));
         }
 
-        $kk('TOTAL', 'Rp '.$rp($trx->total), true);
+        if (($d['estimasi_sewa'] ?? null) !== null) {
+            $kk('TOTAL SEMENTARA', 'Rp '.$rp($trx->total + $d['estimasi_sewa']), true);
+        } else {
+            $kk('TOTAL', 'Rp '.$rp($trx->total), true);
+        }
 
         foreach ($trx->pembayaran as $p) {
             $kk(self::METODE[$p->metode] ?? $p->metode, $rp($p->jumlah));

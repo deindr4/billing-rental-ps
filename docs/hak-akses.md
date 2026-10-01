@@ -34,7 +34,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | **Transaksi** | | | | |
 | Lihat daftar transaksi | ✅ | ✅ | ✅ | – |
 | Batalkan transaksi | PIN | PIN | – | – |
-| Tambah waktu gratis | PIN | PIN | – | – |
+| Bonus waktu (kompensasi PS restart/hang, menit diketik) | ✅ langsung | ✅ langsung | minta PIN | – |
 | **Member** | | | | |
 | Daftar & ubah data member | ✅ | ✅ | ✅ | – |
 | Top up saldo member | ✅ | ✅ | ✅ | – |

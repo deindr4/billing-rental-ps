@@ -13,7 +13,7 @@
                      mulai: {{ $sesi->mulai_pada->getTimestampMs() }},
                      berakhir: {{ $sesi->berakhir_pada?->getTimestampMs() ?? 'null' }},
                      dijeda: {{ $sesi->dijeda_pada?->getTimestampMs() ?? 'null' }},
-                     jedaDetik: {{ (int) $sesi->total_jeda_detik }},
+                     jedaDetik: {{ (int) $sesi->total_jeda_detik + (int) $sesi->bonus_detik }},
                      peringatanMenit: 5,
                      serverNow: {{ now()->getTimestampMs() }},
                  })"
@@ -56,12 +56,15 @@
                     <ul class="divide-y divide-line text-sm">
                         @if (! $sesi->isPaket())
                             <li class="px-3 py-2 flex justify-between gap-3 text-muted">
-                                <span>Sewa (open billing)</span>
                                 <span>
-                                    Dihitung saat selesai
+                                    Sewa (open billing)
                                     @if ($this->tarifPerJam)
-                                        · <x-rupiah :nilai="$this->tarifPerJam" /> / jam
+                                        <span class="block text-xs"><x-rupiah :nilai="$this->tarifPerJam" /> / jam · final saat selesai</span>
                                     @endif
+                                </span>
+                                <span class="text-right">
+                                    <span class="block text-xs">perkiraan s.d. {{ now()->format('H:i') }}</span>
+                                    <x-rupiah :nilai="$this->estimasiSewa ?? 0" />
                                 </span>
                             </li>
                         @endif
@@ -101,6 +104,13 @@
 
                     <button type="button" wire:click="kePanel('pindah')" class="btn">Pindah Unit</button>
 
+                    {{-- Kompensasi PS restart / hang: menit diketik operator --}}
+                    <button type="button" wire:click="kePanel('bonus')" class="btn">Bonus Waktu</button>
+
+                    {{-- Struk / tagihan sementara (open bill: termasuk perkiraan sewa berjalan) --}}
+                    <button type="button" class="btn"
+                            wire:click="$dispatch('buka-pratinjau-struk', { transaksiId: '{{ $trx->id }}' })">Cetak Struk</button>
+
                     <x-confirm-button action="selesai"
                                       title="Selesaikan sesi?"
                                       text="TV akan dikunci dan tagihan ditampilkan."
@@ -131,29 +141,7 @@
                         @enderror
                     </div>
 
-                    <label class="flex items-center gap-2 text-sm">
-                        <input type="checkbox" wire:model.live="gratis">
-                        Gratis (kompensasi)
-                    </label>
-
-                    @if ($gratis)
-                        <div>
-                            <label for="alasanGratis" class="block text-sm mb-1.5">Alasan</label>
-                            <textarea id="alasanGratis" wire:model="alasanGratis" rows="2" class="input h-auto py-2"
-                                      placeholder="Contoh: stik error 10 menit"></textarea>
-                            @error('alasanGratis')
-                                <p class="text-sm text-danger mt-1.5">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label for="pinGratis" class="block text-sm mb-1.5">PIN supervisor / owner</label>
-                            <input id="pinGratis" type="password" inputmode="numeric" autocomplete="off" maxlength="6"
-                                   wire:model="pinGratis" class="input num tracking-[0.4em] text-center" placeholder="••••••">
-                            @error('pinGratis')
-                                <p class="text-sm text-danger mt-1.5">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    @endif
+                    <p class="text-xs text-muted">Waktu gratis (kompensasi PS restart/hang) pakai tombol <b>Bonus Waktu</b>.</p>
 
                     <div class="rounded-md border border-line px-3 py-2 text-sm space-y-1">
                         <div class="flex justify-between">
@@ -171,6 +159,60 @@
                     <div class="grid grid-cols-2 gap-2">
                         <button type="button" wire:click="kePanel('utama')" class="btn">Kembali</button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="tambahWaktu">Simpan</button>
+                    </div>
+                </form>
+
+            {{-- ================= PANEL BONUS WAKTU ================= --}}
+            @elseif ($panel === 'bonus')
+                <form wire:submit="bonusWaktu" class="space-y-4">
+                    <div class="rounded-md border border-line px-3 py-2 text-sm text-muted">
+                        @if ($sesi->isPaket())
+                            Waktu selesai diundur sesuai bonus, tanpa biaya.
+                        @else
+                            Menit bonus <b>tidak ditagih</b> (dikurangkan dari durasi open billing).
+                        @endif
+                        Tercatat di tagihan & log aktivitas.
+                    </div>
+
+                    <div>
+                        <div class="text-sm mb-1.5">Bonus berapa menit?</div>
+                        <div class="grid grid-cols-4 gap-2 mb-2">
+                            @foreach (\App\Livewire\Operator\KelolaSesi::PILIHAN_BONUS as $m)
+                                <button type="button" wire:click="$set('bonusMenit', {{ $m }})"
+                                        @class(['btn num', 'btn-primary' => (int) $bonusMenit === $m])>{{ $m }} mnt</button>
+                            @endforeach
+                        </div>
+                        <input type="number" inputmode="numeric" min="1" max="240"
+                               wire:model.live.debounce.300ms="bonusMenit" class="input num" placeholder="Ketik menit lain">
+                        @error('bonusMenit') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+
+                    <div>
+                        <div class="text-sm mb-1.5">Alasan</div>
+                        <div class="flex flex-wrap gap-1.5 mb-2">
+                            @foreach (\App\Livewire\Operator\KelolaSesi::ALASAN_BONUS as $a)
+                                <button type="button" wire:click="$set('bonusAlasan', @js($a))"
+                                        @class(['btn h-8 px-3 text-xs', 'btn-primary' => $bonusAlasan === $a])>{{ $a }}</button>
+                            @endforeach
+                        </div>
+                        <input type="text" wire:model="bonusAlasan" maxlength="200" class="input" placeholder="Atau tulis alasan">
+                        @error('bonusAlasan') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
+                    </div>
+
+                    @if ($this->bonusButuhPin)
+                        <div>
+                            <label for="bonusPin" class="block text-sm mb-1.5">PIN supervisor / owner</label>
+                            <input id="bonusPin" type="password" inputmode="numeric" autocomplete="off" maxlength="6"
+                                   wire:model="bonusPin" class="input num tracking-[0.4em] text-center" placeholder="••••••">
+                            @error('bonusPin') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
+                        </div>
+                    @endif
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" wire:click="kePanel('utama')" class="btn">Kembali</button>
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="bonusWaktu">
+                            Beri bonus {{ (int) $bonusMenit ?: '' }} menit
+                        </button>
                     </div>
                 </form>
 

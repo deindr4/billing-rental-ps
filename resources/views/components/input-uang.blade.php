@@ -12,9 +12,14 @@
     $live = $wireModel->hasModifier('live');
 @endphp
 
+{{--
+    Tidak memakai $wire.entangle(): bila properti belum ada saat halaman dimuat (mis. form.biaya_daftar
+    di form yang baru diisi saat tombol "Tambah" ditekan), entangle gagal permanen dan nilai tidak pernah
+    terkirim (tersimpan 0). Baca/tulis langsung ke $wire + pantau perubahan dari server.
+--}}
 <div class="relative"
      x-data="{
-         nilai: $wire.entangle('{{ $model }}'){{ $live ? '.live' : '' }},
+         nilai: null,
          tampil: '',
          angka(teks) {
              const digit = String(teks ?? '').replace(/\D/g, '');
@@ -28,12 +33,16 @@
              this.nilai = n;
              this.tampil = this.format(n);
              e.target.value = this.tampil;
+             $wire.set('{{ $model }}', n, {{ $live ? 'true' : 'false' }});
+         },
+         dariServer(v) {
+             v = (v === undefined || v === '') ? null : v;
+             this.nilai = v;
+             if (this.angka(this.tampil) !== (v === null ? null : Number(v))) this.tampil = this.format(v);
          },
          init() {
-             this.tampil = this.format(this.nilai);
-             this.$watch('nilai', (v) => {
-                 if (this.angka(this.tampil) !== v) this.tampil = this.format(v);
-             });
+             this.dariServer($wire.get('{{ $model }}'));
+             $wire.$watch('{{ $model }}', (v) => this.dariServer(v));
          },
      }">
     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none">Rp</span>

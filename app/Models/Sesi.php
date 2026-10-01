@@ -34,7 +34,7 @@ class Sesi extends Model
     protected $fillable = [
         'tenant_id', 'cabang_id', 'unit_id', 'transaksi_id', 'shift_id', 'user_id', 'paket_harga_id',
         'mode', 'tarif_per_jam', 'durasi_menit', 'mulai_pada', 'berakhir_pada', 'selesai_pada',
-        'dijeda_pada', 'total_jeda_detik', 'jumlah_jeda', 'status', 'bayar_di_awal', 'versi_tagihan',
+        'dijeda_pada', 'total_jeda_detik', 'bonus_detik', 'jumlah_jeda', 'status', 'bayar_di_awal', 'versi_tagihan',
     ];
 
     protected function casts(): array
@@ -47,6 +47,7 @@ class Sesi extends Model
             'selesai_pada' => 'datetime',
             'dijeda_pada' => 'datetime',
             'total_jeda_detik' => 'integer',
+            'bonus_detik' => 'integer',
             'jumlah_jeda' => 'integer',
             'bayar_di_awal' => 'boolean',
             'versi_tagihan' => 'integer',
@@ -112,7 +113,8 @@ class Sesi extends Model
     {
         $akhir = $this->selesai_pada ?? $this->dijeda_pada ?? $now ?? now();
 
-        return max(0, (int) $this->mulai_pada->diffInSeconds($akhir, false) - $this->total_jeda_detik);
+        // Jeda & bonus waktu (kompensasi PS restart/hang) tidak dihitung sebagai waktu sewa
+        return max(0, (int) $this->mulai_pada->diffInSeconds($akhir, false) - $this->total_jeda_detik - (int) $this->bonus_detik);
     }
 
     public static function formatDurasi(int $detik): string

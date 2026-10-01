@@ -111,7 +111,8 @@ class DetailTransaksi extends Component
 
     public function bolehCetak(): bool
     {
-        return $this->transaksi && $this->transaksi->items->isNotEmpty();
+        // Open billing berjalan belum punya item sewa: tetap bisa dicetak sebagai tagihan sementara
+        return $this->transaksi && ($this->transaksi->items->isNotEmpty() || $this->transaksi->sesi?->isAktif());
     }
 
     public function kirimWa(StrukService $struk, WhatsappService $wa): void

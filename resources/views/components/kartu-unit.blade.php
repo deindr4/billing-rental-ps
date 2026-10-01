@@ -68,7 +68,7 @@
                     mulai: {{ $sesi->mulai_pada->getTimestampMs() }},
                     berakhir: {{ $sesi->berakhir_pada?->getTimestampMs() ?? 'null' }},
                     dijeda: {{ $sesi->dijeda_pada?->getTimestampMs() ?? 'null' }},
-                    jedaDetik: {{ (int) $sesi->total_jeda_detik }},
+                    jedaDetik: {{ (int) $sesi->total_jeda_detik + (int) $sesi->bonus_detik }}, {{-- bonus waktu tidak ditagih --}}
                     peringatanMenit: {{ (int) $peringatanMenit }},
                     serverNow: {{ $serverNow }},
                  })"

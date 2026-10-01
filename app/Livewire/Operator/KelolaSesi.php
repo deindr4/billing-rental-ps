@@ -39,6 +39,17 @@ class KelolaSesi extends Component
 
     public string $pinGratis = '';
 
+    // Bonus waktu (kompensasi PS restart / hang): menit diketik operator
+    public const PILIHAN_BONUS = [5, 10, 15, 30];
+
+    public const ALASAN_BONUS = ['PS restart sendiri', 'PS hang / freeze', 'Stik error', 'TV bermasalah', 'Listrik padam'];
+
+    public ?int $bonusMenit = 10;
+
+    public string $bonusAlasan = '';
+
+    public string $bonusPin = '';
+
     // Pindah unit
     public ?string $unitTujuanId = null;
 
@@ -72,8 +83,8 @@ class KelolaSesi extends Component
     public function kePanel(string $panel): void
     {
         $this->resetValidation();
-        $this->reset(['tambahMenit', 'gratis', 'alasanGratis', 'pinGratis', 'unitTujuanId', 'alasanPindah', 'unitLamaServis']);
-        $this->panel = in_array($panel, ['utama', 'tambah', 'pindah'], true) ? $panel : 'utama';
+        $this->reset(['tambahMenit', 'gratis', 'alasanGratis', 'pinGratis', 'unitTujuanId', 'alasanPindah', 'unitLamaServis', 'bonusMenit', 'bonusAlasan', 'bonusPin']);
+        $this->panel = in_array($panel, ['utama', 'tambah', 'pindah', 'bonus'], true) ? $panel : 'utama';
         $this->segarkanData();
     }
 
@@ -157,6 +168,59 @@ class KelolaSesi extends Component
             fn () => $this->billing()->tambahWaktu($this->sesi, auth()->user(), $menit, $this->gratis, $alasan),
             "Waktu ditambah {$menit} menit"
         );
+    }
+
+    /** Open billing berjalan: perkiraan sewa sampai saat ini */
+    #[Computed]
+    public function estimasiSewa(): ?int
+    {
+        return $this->sesi ? $this->billing()->estimasiSewaOpen($this->sesi) : null;
+    }
+
+    /** Owner/supervisor (izin "tambah waktu gratis") langsung; selain itu perlu PIN orang yang berizin */
+    #[Computed]
+    public function bonusButuhPin(): bool
+    {
+        return ! auth()->user()->can('sesi.gratis');
+    }
+
+    public function bonusWaktu(): void
+    {
+        $this->validate([
+            'bonusMenit' => 'required|integer|min:1|max:240',
+            'bonusAlasan' => 'required|string|max:200',
+        ], [
+            'bonusMenit.required' => 'Isi berapa menit bonus.',
+            'bonusMenit.min' => 'Minimal 1 menit.',
+            'bonusMenit.max' => 'Maksimal 240 menit (4 jam).',
+            'bonusAlasan.required' => 'Pilih atau tulis alasan bonus.',
+        ]);
+
+        $alasan = trim($this->bonusAlasan);
+
+        if ($this->bonusButuhPin) {
+            try {
+                $penyetuju = app(PinService::class)->setujui($this->bonusPin, 'sesi.gratis', app(Tenancy::class)->tenantId());
+            } catch (BillingException $e) {
+                $this->addError('bonusPin', $e->getMessage());
+                $this->bonusPin = '';
+
+                return;
+            }
+
+            $alasan .= " (disetujui {$penyetuju->name})";
+        }
+
+        $menit = (int) $this->bonusMenit;
+        $paket = $this->sesi?->isPaket();
+
+        if ($this->jalankan(
+            fn () => $this->billing()->bonusWaktu($this->sesi, auth()->user(), $menit, $alasan),
+            $paket ? "Bonus {$menit} menit: waktu selesai diundur" : "Bonus {$menit} menit: tidak ditagih"
+        )) {
+            $this->bonusAlasan = '';
+            $this->bonusPin = '';
+        }
     }
 
     public function pause(): void
@@ -249,7 +313,7 @@ class KelolaSesi extends Component
 
     private function segarkanData(): void
     {
-        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah);
+        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah, $this->estimasiSewa);
     }
 
     private function billing(): BillingService
