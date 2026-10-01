@@ -7,6 +7,13 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 
 2026-10-01
 -----------------------------------------------------------------------------
+Dokumentasi
+- README.md proyek (daftar dokumen & cara menjalankan), menggantikan README bawaan Laravel.
+- Baru: docs/pembayaran-online.md, docs/server-publik.md (Cloudflare, port, .env produksi, checklist publik),
+  docs/hak-akses.md, docs/rilis-apk.md.
+- Diperbarui: docs/tv-agent-api.md (bayar_mandiri, opasitas_timer, perintah remote & update),
+  docs/sinkron.md (token acak, superadmin), docs/desain/README.md (status layar TV).
+
 TV
 - Pengaturan baru per cabang: Pengaturan -> Operasional -> Sesi & TV -> "Kepekatan timer di TV (%)"
   (30-100%, bawaan 90%). Butuh APK TV 0.4.2 ke atas.
