@@ -4,7 +4,8 @@
 
 1. Naikkan `versionCode` (+1) dan `versionName` di `tv-agent/app/build.gradle.kts`, lalu build.
 2. Admin (super admin) → **Platform → Rilis APK TV → Unggah rilis baru**: file APK, versi & kode yang sama persis.
-3. Commit lalu beri tag git: `git tag apk-<versi>` (dipakai untuk rollback).
+3. Tulis perubahannya di `docs/changelog.txt` (isi juga catatan rilis di form), commit, lalu beri tag git:
+   `git tag apk-<versi>` (dipakai untuk rollback).
 4. TV otomatis diberi tahu. Atau tekan **Push update** (Rilis APK / Perangkat TV) — per TV, TV terpilih, atau semua.
    - Bawaan: TV yang sedang dipakai memasang setelah sesinya selesai.
    - "Pasang sekarang juga": langsung, menutupi game (untuk perbaikan mendesak).

@@ -1,0 +1,57 @@
+CHANGELOG APK TV AGENT
+======================
+Versi terbaru di atas. Format: versi (kode versi) - tanggal.
+Kode versi = versionCode; rilis berikutnya wajib lebih besar.
+Cara merilis, push update & rollback: docs/rilis-apk.md
+Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
+
+
+0.4.0 (kode 5) - 2026-10-01                                    [tag apk-0.4.0]
+-----------------------------------------------------------------------------
+- Pojok kiri atas layar menampilkan nama unit persis seperti di Admin -> Unit
+  (mis. "TV 1 - PS5"), tidak lagi "STASIUN TV1".
+- Versi APK terpasang tampil di bawah layar, di samping tombol Menu staf (mis. v0.4.0).
+
+
+0.3.1 (kode 4) - 2026-10-01                                    [tag apk-0.3.1]
+-----------------------------------------------------------------------------
+- Menerima "Push update" dari admin (Perangkat TV / Rilis APK):
+  * mode biasa  : dipasang saat TV kosong (terkunci);
+  * mode paksa  : dipasang saat itu juga walau TV sedang dipakai.
+- Update yang tertunda karena TV sedang dipakai langsung dipasang begitu sesi selesai
+  (sebelumnya baru dicoba lagi 6 jam kemudian).
+- Unduhan update dicoba ulang otomatis sampai 3x bila koneksi putus di tengah.
+Catatan: TV versi 0.2.0 ke bawah belum mengenal perintah push; lompatan pertama lewat
+pemberitahuan rilis otomatis atau unduh manual http://IP-server/apk.
+
+(0.3.0 / kode 3 hanya build uji, tidak dirilis.)
+
+
+0.2.0 (kode 2) - 2026-09-30                                    [tag apk-0.2.0]
+-----------------------------------------------------------------------------
+- Bayar mandiri QRIS di TV:
+  * layar kunci menampilkan QR "Scan untuk main" + tarif per jam & minimal menit;
+  * setelah pelanggan mengetik nominal di HP, QRIS nominal itu muncul di TV dengan hitung mundur;
+  * TV terbuka otomatis setelah pembayaran terdeteksi (plus waktu pilih game);
+  * saat waktu habis, layar tagihan menampilkan QR "isi ulang waktu".
+  * DOKU: TV menampilkan QR tautan halaman pembayaran.
+- Status dicek tiap 4 detik selama ada QRIS yang menunggu dibayar.
+- Gambar latar & logo: unduh ulang otomatis (5 dtk / 15 dtk / 60 dtk) & diperkecil saat dimuat.
+
+
+0.1.0 (kode 1) - 2026-09-29
+-----------------------------------------------------------------------------
+Rilis pertama (tahap 8):
+- Pairing TV dengan kode 6 angka dari Admin -> Perangkat TV.
+- Layar kunci "Ready to play", layar main dengan timer, layar waktu habis + rincian tagihan.
+- Timer melayang di atas game, banner peringatan 5 & 1 menit + bunyi.
+- Pindah otomatis ke HDMI PlayStation saat sesi dimulai (input dipilih saat setup).
+- Waktu pilih game sebelum hitungan dimulai.
+- Panggil kasir dari TV.
+- Menu staf dengan PIN: bypass (YouTube / aplikasi yang diizinkan), ganti server, izin, input HDMI.
+- Kode darurat (berganti tiap 5 menit) untuk membuka TV saat server/jaringan mati.
+- Tetap mengunci saat offline (timer dihitung di TV).
+- Realtime (Reverb) dengan cadangan polling; remote dari kasir (layar, volume, restart).
+- Failover otomatis server lokal <-> cloud, kembali ke lokal saat hidup lagi.
+- Mode kiosk (Home -> PIN untuk keluar), jalan otomatis saat TV menyala.
+- Cek update APK otomatis (tiap 6 jam / saat diberi tahu server) dengan verifikasi SHA-256.

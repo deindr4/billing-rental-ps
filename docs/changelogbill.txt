@@ -1,0 +1,85 @@
+CHANGELOG APLIKASI BILLING (server: kasir, admin, publik)
+========================================================
+Terbaru di atas. Perubahan APK TV ada di docs/changelog.txt.
+Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
+Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
+
+
+2026-10-01
+-----------------------------------------------------------------------------
+Rilis & update APK TV
+- Push update APK manual dari admin: per TV, TV terpilih, atau semua TV
+  (Perangkat TV & Rilis APK TV), dengan pilihan "pasang sekarang juga walau TV dipakai".
+- Kolom "Versi app" di Perangkat TV: kuning = belum terbaru, hijau = terbaru.
+- Daftar Rilis APK bisa dilihat Owner (menu Rental, hanya baca + push ke TV miliknya),
+  tombol Unduh APK per rilis.
+- Tombol "Tarik" rilis bermasalah & "Rollback ke versi ini" (panduan + skrip
+  tv-agent/build-rollback.ps1). Panduan: docs/rilis-apk.md.
+
+Keamanan & kesiapan publik
+- Pembayaran online tidak bisa diproses dua kali walau callback gateway & pengecekan
+  berkala datang bersamaan (mencegah isi ulang waktu ganda).
+- Dukungan Cloudflare / reverse proxy: TRUSTED_PROXIES di .env (IP pengunjung & https terbaca benar).
+- Header keamanan di semua halaman (anti clickjacking, nosniff, HSTS saat https).
+- "Simulasi bayar" di server produksi hanya untuk Owner.
+- Halaman Pemeliharaan memperingatkan password bawaan, gateway simulasi, alamat aplikasi.
+
+Admin & sistem
+- Halaman baru Pengaturan -> Pemeliharaan sistem: tombol Optimalkan, Bersihkan cache,
+  Kosongkan cache data, Update database (migrasi), Pasang ulang trigger sinkron,
+  Tautkan folder unggahan, Restart antrean, Restart realtime; kondisi sistem; log error.
+- Perintah "php artisan superadmin": buat super admin di server baru / reset password.
+- Sinkronisasi: tombol "Buat token acak" di server lokal + kolom "Token dari server lokal"
+  di cloud; tautan langsung ke halaman token cloud.
+- Unggahan (wallpaper, logo, foto) tidak lagi macet "Memuat" bila admin dibuka lewat
+  alamat selain APP_URL (localhost / IP LAN / domain).
+- Batas waktu unggah file besar (APK / backup) 30 menit.
+
+Publik
+- Billboard: jam & timer per TV langsung terisi (tidak berkedip "--:--").
+
+
+2026-09-30
+-----------------------------------------------------------------------------
+Pembayaran online & bayar mandiri di TV
+- Payment gateway pilihan: Tripay, Midtrans, Duitku, iPaymu, DOKU, Simulasi (uji tanpa akun);
+  Winpay menyusul (akun belum ada). Kunci rahasia disimpan terenkripsi, tombol Tes koneksi.
+  Menu: Admin -> Pengaturan -> Pembayaran online.
+- Bayar mandiri: pelanggan scan QR di TV -> ketik nominal di HP -> bayar QRIS di TV ->
+  sesi dimulai otomatis (waktu = nominal / tarif per jam; nominal = harga paket -> paket).
+  Hanya saat kas buka, minimal 30 menit (bisa diatur), maks. 12 jam sekali bayar.
+- Isi ulang waktu lewat QR saat waktu habis; kasir tetap bisa tambah manual & tagihan
+  menampilkan bagian yang sudah dibayar online (metode "QRIS online").
+- Menu kasir "Pembayaran online": daftar tagihan, status, tindakan bila perlu.
+- Sesi bayar mandiri yang habis & lunas diselesaikan otomatis.
+- Pengaturan per cabang: Pengaturan -> Operasional -> Bayar mandiri di TV.
+
+Perbaikan penting
+- Waktu mulai sesi / buka kas / waktu bayar tidak lagi ikut berubah setiap data diubah
+  (kolom waktu MariaDB). Sebelumnya masa pilih game bisa ter-reset.
+
+Tahap 13 - Publik (revisi)
+- Billboard jadi halaman link untuk HP (responsif), tanpa panggilan antrean.
+- Menu F&B dihapus dari billboard; diganti iklan bergambar dengan masa tayang
+  (Admin -> Rental -> Iklan billboard; otomatis terhapus saat habis).
+- Status BUKA / TUTUP mengikuti kas, jam operasional tampil (Pengaturan -> Operasional).
+- Semua gambar unggahan dikompres otomatis ke WebP; perintah "php artisan gambar:kompres".
+- Wallpaper layar kunci TV per unit / umum langsung terlihat di TV.
+- /admin/rental diarahkan ke daftar unit; tombol ke admin untuk Owner di aplikasi kasir.
+
+
+Sebelumnya (snapshot awal 2026-09-30, tahap 1-13)
+-----------------------------------------------------------------------------
+1  Setup: multi-tenant & cabang, login, peran & izin.
+2  Master data: unit, tipe konsol, kategori, paket harga, produk.
+3  Inti billing: sesi paket / durasi / open billing, jeda, tambah waktu, pindah unit, diskon.
+4  Aplikasi kasir: grid rental, panel unit, pembayaran (tunai, QRIS, transfer, saldo member).
+5  POS F&B & stok.
+6  Admin (Filament) & pengaturan.
+7  Pengeluaran (PIN), laporan, laporan otomatis Telegram/WA + PDF, struk thermal & nota A4.
+8  TV Agent: API, pairing, realtime (Reverb), kode darurat, remote TV, rilis APK.
+9  Member: saldo, poin, stamp, tier & diskon.
+10 Maintenance unit, aset & modal (penyusutan, ROI).
+11 Log aktivitas (audit), backup & restore.
+12 Sinkronisasi server lokal <-> cloud, status sistem di dasbor admin.
+13 Publik: billboard, booking online, turnamen, QRIS.
