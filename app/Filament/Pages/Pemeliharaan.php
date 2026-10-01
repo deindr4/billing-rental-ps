@@ -155,6 +155,8 @@ class Pemeliharaan extends Page
                 $gateway === 'simulasi' && $prod ? false : null],
             ['Alamat aplikasi', config('app.url'), $cloud && $prod ? str_starts_with((string) config('app.url'), 'https://') : null],
             ['Proxy tepercaya', config('billing.proxy_tepercaya') ?: 'Tidak ada', null],
+            // Di balik Cloudflare: "Tidak" padahal dibuka lewat https = TRUSTED_PROXIES belum benar (IP & skema salah terbaca)
+            ['HTTPS terbaca', request()->isSecure() ? 'Ya' : 'Tidak', $cloud && $prod ? request()->isSecure() : null],
             ['Mode server', config('app.mode') === 'cloud' ? 'Cloud' : 'Lokal', null],
             ['Lingkungan', app()->environment(), $prod ? true : null],
             ['Mode debug', config('app.debug') ? 'Nyala' : 'Mati', ! config('app.debug') || ! $prod],

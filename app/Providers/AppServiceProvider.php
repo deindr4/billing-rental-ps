@@ -19,11 +19,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
+    /** Rentang IP Cloudflare (cloudflare.com/ips) untuk TRUSTED_PROXIES=cloudflare */
+    public const IP_CLOUDFLARE = [
+        '173.245.48.0/20', '103.21.244.0/22', '103.22.200.0/22', '103.31.4.0/22', '141.101.64.0/18',
+        '108.162.192.0/18', '190.93.240.0/20', '188.114.96.0/20', '197.234.240.0/22', '198.41.128.0/17',
+        '162.158.0.0/15', '104.16.0.0/13', '104.24.0.0/14', '172.64.0.0/13', '131.0.72.0/22',
+        '2400:cb00::/32', '2606:4700::/32', '2803:f800::/32', '2405:b500::/32', '2405:8100::/32',
+        '2a06:98c0::/29', '2c0f:f248::/32',
+    ];
+
     public function register(): void
     {
         // Konteks tenant & cabang aktif selama satu request / job (scoped: direset antar job di queue:work)
@@ -33,8 +43,16 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // Di belakang Cloudflare / reverse proxy: baca IP asli & skema https dari header X-Forwarded-*
+        // TRUSTED_PROXIES boleh berisi kata "cloudflare" (= semua rentang IP Cloudflare), mis. "cloudflare,127.0.0.1"
         if ($proxy = config('billing.proxy_tepercaya')) {
-            TrustProxies::at($proxy === '*' ? '*' : array_map('trim', explode(',', $proxy)));
+            TrustProxies::at($proxy === '*' ? '*' : collect(explode(',', $proxy))->map(fn ($p) => trim($p))
+                ->flatMap(fn ($p) => strtolower($p) === 'cloudflare' ? self::IP_CLOUDFLARE : [$p])->filter()->values()->all());
+        }
+
+        // APP_URL https (server cloud): semua tautan, aset Livewire/Filament & redirect selalu https,
+        // walau header proxy tidak sampai (mencegah mixed content / aset gagal dimuat di balik Cloudflare)
+        if (str_starts_with((string) config('app.url'), 'https://')) {
+            URL::forceScheme('https');
         }
 
         // Kolom standar tabel yang disinkronkan lokal <-> VPS: $table->syncColumns();
