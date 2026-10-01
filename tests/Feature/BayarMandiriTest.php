@@ -6,6 +6,7 @@ use App\Exceptions\BillingException;
 use App\Livewire\Publik\MainMandiri;
 use App\Models\Cabang;
 use App\Models\PaketHarga;
+use App\Models\Pembayaran;
 use App\Models\PembayaranOnline;
 use App\Models\Pengaturan;
 use App\Models\PerangkatTv;
@@ -260,6 +261,23 @@ class BayarMandiriTest extends TestCase
 
         $this->assertSame('selesai', $p->fresh()->status);
         $this->assertSame(Unit::STATUS_MAIN, $this->unit->fresh()->status);
+    }
+
+    public function test_notifikasi_ganda_dengan_data_basi_tidak_diproses_dua_kali(): void
+    {
+        $this->bukaKas();
+        $basi = $this->layanan->buatTagihan($this->unit, 12_000);   // salinan lama, status "menunggu"
+        $this->bayar(PembayaranOnline::findOrFail($basi->id));       // pengecekan berkala memproses lebih dulu
+
+        // Callback gateway datang belakangan dengan objek basi
+        $this->layanan->perbarui($basi, 'dibayar', 0);
+        $this->layanan->perbarui($basi, 'kedaluwarsa');
+
+        $p = $basi->fresh();
+        $this->assertSame('selesai', $p->status);
+        $this->assertSame(1, Sesi::where('unit_id', $this->unit->id)->count());
+        $this->assertSame(1, Pembayaran::where('metode', 'qris_gateway')->count());
+        $this->assertSame(90, (int) Sesi::findOrFail($p->sesi_id)->durasi_menit);
     }
 
     public function test_paket_dipakai_saat_nominal_pas(): void

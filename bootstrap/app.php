@@ -2,6 +2,7 @@
 
 use App\Http\Middleware\AutentikasiTv;
 use App\Http\Middleware\EnsureShiftAktif;
+use App\Http\Middleware\HeaderKeamanan;
 use App\Http\Middleware\SetTenancy;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'shift' => EnsureShiftAktif::class,
             'tv' => AutentikasiTv::class,
         ]);
+        $middleware->appendToGroup('web', HeaderKeamanan::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // API TV selalu menerima JSON (termasuk error validasi & 404)

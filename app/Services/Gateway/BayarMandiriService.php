@@ -207,20 +207,27 @@ final class BayarMandiriService
     /** Terapkan status dari gateway (cek berkala atau callback) */
     public function perbarui(PembayaranOnline $p, string $status, ?int $biaya = null): PembayaranOnline
     {
-        if ($status === 'dibayar' && in_array($p->status, ['menunggu', 'kedaluwarsa'], true)) {
+        // Perubahan status bersyarat di database (atomik): callback gateway & pengecekan berkala bisa datang
+        // bersamaan dengan data $p yang sudah basi; tanpa syarat ini tagihan "selesai" bisa diproses dua kali.
+        $ubah = fn (array $dari, array $isi) => PembayaranOnline::withoutGlobalScopes()->whereKey($p->id)
+            ->whereIn('status', $dari)->update($isi + ['updated_at' => now()]) === 1;
+
+        if ($status === 'dibayar') {
             // Tetap diproses walau sudah lewat masa QR / diganti QR baru: uang pelanggan sudah masuk
-            $p->update(['status' => 'dibayar', 'dibayar_pada' => now(), 'biaya' => $biaya ?? $p->biaya]);
+            if ($ubah(['menunggu', 'kedaluwarsa'], ['status' => 'dibayar', 'dibayar_pada' => now(), 'biaya' => $biaya ?? $p->biaya])) {
+                return $this->proses($p);
+            }
 
-            return $this->proses($p);
+            return $p->refresh();
         }
 
-        if ($p->status === 'menunggu' && ($status === 'kedaluwarsa' || $p->kedaluwarsa_pada->isPast())) {
-            $p->update(['status' => 'kedaluwarsa']);
-        } elseif ($p->status === 'menunggu' && $status === 'gagal') {
-            $p->update(['status' => 'gagal']);
+        if ($status === 'kedaluwarsa' || ($p->status === 'menunggu' && $p->kedaluwarsa_pada->isPast())) {
+            $ubah(['menunggu'], ['status' => 'kedaluwarsa']);
+        } elseif ($status === 'gagal') {
+            $ubah(['menunggu'], ['status' => 'gagal']);
         }
 
-        return $p;
+        return $p->refresh();
     }
 
     /**

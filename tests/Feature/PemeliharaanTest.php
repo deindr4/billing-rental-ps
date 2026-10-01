@@ -7,8 +7,10 @@ use App\Models\AuditLog;
 use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -41,6 +43,33 @@ class PemeliharaanTest extends TestCase
 
         $this->assertFalse(Cache::has('uji-pemeliharaan'));
         $this->assertTrue(AuditLog::where('aksi', 'pemeliharaan')->where('keterangan', 'Kosongkan cache data')->exists());
+    }
+
+    public function test_peringatan_password_bawaan_dan_header_keamanan(): void
+    {
+        $this->actingAs($this->owner)->get('/admin/pemeliharaan')
+            ->assertSee('Masih dipakai: ')->assertSee('owner@billing.test')
+            ->assertHeader('X-Frame-Options', 'SAMEORIGIN')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+
+        $this->owner->forceFill(['password' => Hash::make('baru-kuat-123')])->save();
+        User::where('email', 'admin@billing.test')->first()->forceFill(['password' => Hash::make('baru-kuat-123')])->save();
+
+        Livewire::test(Pemeliharaan::class)->assertSee('Aman');
+    }
+
+    public function test_ip_asli_terbaca_di_belakang_proxy_tepercaya(): void
+    {
+        TrustProxies::at(['127.0.0.1']);
+
+        try {
+            Route::get('/uji-ip', fn () => request()->ip().'|'.(request()->isSecure() ? 'https' : 'http'))->middleware('web');
+
+            $this->get('/uji-ip', ['X-Forwarded-For' => '36.77.1.2', 'X-Forwarded-Proto' => 'https'])
+                ->assertSee('36.77.1.2|https');
+        } finally {
+            TrustProxies::flushState();
+        }
     }
 
     public function test_hanya_perintah_dalam_daftar(): void

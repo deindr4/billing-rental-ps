@@ -64,6 +64,13 @@ class PembayaranOnlineKasir extends Component
     {
         $p = PembayaranOnline::findOrFail($id);
 
+        // Simulasi = "lunas tanpa uang": di server produksi hanya owner yang boleh (cegah sesi gratis oleh kasir)
+        if (app()->isProduction() && ! auth()->user()->hasRole('Owner') && ! auth()->user()->isSuperAdmin()) {
+            $this->error('Simulasi bayar di server produksi hanya untuk owner.');
+
+            return;
+        }
+
         try {
             SimulasiGateway::bayar((string) $p->referensi);
             $layanan->perbarui($p, 'dibayar', 0);

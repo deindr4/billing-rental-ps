@@ -14,6 +14,7 @@ use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Di belakang Cloudflare / reverse proxy: baca IP asli & skema https dari header X-Forwarded-*
+        if ($proxy = config('billing.proxy_tepercaya')) {
+            TrustProxies::at($proxy === '*' ? '*' : array_map('trim', explode(',', $proxy)));
+        }
+
         // Kolom standar tabel yang disinkronkan lokal <-> VPS: $table->syncColumns();
         Blueprint::macro('syncColumns', function () {
             /** @var Blueprint $this */

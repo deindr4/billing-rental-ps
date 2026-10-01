@@ -2,12 +2,15 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
+use App\Services\Gateway\PengaturanGateway;
 use App\Support\Audit;
 use BackedEnum;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Throwable;
 use UnitEnum;
 
@@ -140,7 +143,18 @@ class Pemeliharaan extends Page
         $bebas = @disk_free_space(base_path());
         $log = storage_path('logs/laravel.log');
 
+        // Akun demo dari seeder yang password-nya masih "password"
+        $demo = User::withoutGlobalScopes()->whereIn('email', ['admin@billing.test', 'owner@billing.test'])->get(['email', 'password'])
+            ->filter(fn ($u) => Hash::check('password', $u->password))->pluck('email');
+        $gateway = app(PengaturanGateway::class)->provider();
+        $cloud = config('app.mode') === 'cloud';
+
         return [
+            ['Password bawaan', $demo->isEmpty() ? 'Aman' : 'Masih dipakai: '.$demo->implode(', '), $demo->isEmpty()],
+            ['Payment gateway', PengaturanGateway::PROVIDER[$gateway].($gateway !== 'nonaktif' && app(PengaturanGateway::class)->sandbox() ? ' (sandbox)' : ''),
+                $gateway === 'simulasi' && $prod ? false : null],
+            ['Alamat aplikasi', config('app.url'), $cloud && $prod ? str_starts_with((string) config('app.url'), 'https://') : null],
+            ['Proxy tepercaya', config('billing.proxy_tepercaya') ?: 'Tidak ada', null],
             ['Mode server', config('app.mode') === 'cloud' ? 'Cloud' : 'Lokal', null],
             ['Lingkungan', app()->environment(), $prod ? true : null],
             ['Mode debug', config('app.debug') ? 'Nyala' : 'Mati', ! config('app.debug') || ! $prod],
