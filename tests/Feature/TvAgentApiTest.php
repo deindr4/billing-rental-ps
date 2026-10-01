@@ -378,6 +378,35 @@ class TvAgentApiTest extends TestCase
         Livewire::test(ListPerangkatTv::class)->assertTableActionHidden('pushUpdate', $tv->fresh());
     }
 
+    public function test_tarik_rilis_dan_panduan_rollback(): void
+    {
+        Storage::fake('local');
+        $token = $this->pasangkanTv();
+        Storage::disk('local')->put('apk/a.apk', 'a');
+        $lama = RilisApk::create(['versi_nama' => '0.3.0', 'versi_kode' => 3, 'file' => 'apk/a.apk', 'ukuran' => 1, 'sha256' => hash('sha256', 'a'), 'aktif' => true]);
+        $baru = RilisApk::create(['versi_nama' => '0.4.0', 'versi_kode' => 5, 'file' => 'apk/a.apk', 'ukuran' => 1, 'sha256' => hash('sha256', 'a'), 'aktif' => true]);
+
+        $this->actingAs(User::where('email', 'admin@billing.test')->firstOrFail());
+
+        // Rilis bermasalah ditarik: TV versi 3 tidak lagi ditawari 0.4.0
+        Livewire::test(ListRilisApk::class)->callTableAction('tarik', $baru)->assertNotified('Rilis 0.4.0 ditarik');
+        $this->assertFalse($baru->fresh()->aktif);
+        $this->withToken($token)->getJson('/api/tv/update?versi_kode=3')->assertJson(['ada_update' => false]);
+
+        // Rollback ke 0.3.0: panduan build ulang dengan kode baru (6) & nama berikutnya (0.4.1)
+        Livewire::test(ListRilisApk::class)
+            ->assertTableActionHidden('rollback', $baru)
+            ->assertTableActionVisible('rollback', $lama);
+
+        $panduan = RilisApkResource::panduanRollback($lama);
+        $this->assertStringContainsString('-Dari 0.3.0 -Kode 6 -Nama 0.4.1', $panduan);
+        $this->assertStringContainsString('tidak mengizinkan', $panduan);
+
+        // Owner tidak melihat tombol kelola rilis
+        $this->actingAs($this->owner);
+        Livewire::test(ListRilisApk::class)->assertTableActionHidden('tarik', $lama)->assertTableActionHidden('rollback', $lama);
+    }
+
     public function test_heartbeat_menyimpan_diagnostik(): void
     {
         $token = $this->pasangkanTv();

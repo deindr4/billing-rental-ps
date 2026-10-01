@@ -16,6 +16,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -24,6 +25,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Number;
 
 /**
@@ -148,6 +150,31 @@ class RilisApkResource extends Resource
                 TextColumn::make('sha256')->label('SHA-256')->limit(16)->copyable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
+                Action::make('tarik')
+                    ->label('Tarik')
+                    ->icon('heroicon-o-hand-raised')
+                    ->color('danger')
+                    ->visible(fn (RilisApk $r) => $r->aktif && auth()->user()->isSuperAdmin())
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (RilisApk $r) => 'Tarik rilis '.$r->versi_nama.'?')
+                    ->modalDescription('Rilis berhenti ditawarkan: TV yang belum memasang tidak akan mengunduhnya (update tertunda dibatalkan). '
+                        .'TV yang SUDAH terpasang versi ini tetap memakainya — kembalikan dengan tombol "Rollback" pada versi lama.')
+                    ->action(function (RilisApk $r) {
+                        $r->update(['aktif' => false]);
+                        app(RilisApkService::class)->beriTahuSemuaTv();
+                        Notification::make()->title('Rilis '.$r->versi_nama.' ditarik')->success()->send();
+                    }),
+
+                Action::make('rollback')
+                    ->label('Rollback ke versi ini')
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('warning')
+                    ->visible(fn (RilisApk $r) => auth()->user()->isSuperAdmin() && $r->versi_kode < (int) RilisApk::max('versi_kode'))
+                    ->modalHeading(fn (RilisApk $r) => 'Kembali ke versi '.$r->versi_nama)
+                    ->modalContent(fn (RilisApk $r) => new HtmlString(self::panduanRollback($r)))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup'),
+
                 Action::make('unduh')
                     ->label('Unduh')
                     ->icon('heroicon-o-arrow-down-tray')
@@ -156,6 +183,33 @@ class RilisApkResource extends Resource
                 EditAction::make(),
                 DeleteAction::make()->after(fn (RilisApk $r) => app(RilisApkService::class)->hapusFile($r)),
             ]);
+    }
+
+    /**
+     * Android menolak memasang versionCode yang lebih kecil (downgrade) kecuali aplikasi sistem.
+     * Rollback = build ulang kode versi lama dengan versionCode baru (tv-agent/build-rollback.ps1), lalu rilis wajib + push.
+     */
+    public static function panduanRollback(RilisApk $r): string
+    {
+        $kode = (int) RilisApk::max('versi_kode') + 1;
+        $terbaru = (string) RilisApk::orderByDesc('versi_kode')->value('versi_nama');
+        $bagian = array_map('intval', explode('.', $terbaru ?: '0.0.0')) + [0, 0, 0];
+        $nama = $bagian[0].'.'.$bagian[1].'.'.($bagian[2] + 1);
+        $perintah = "powershell -ExecutionPolicy Bypass -File build-rollback.ps1 -Dari {$r->versi_nama} -Kode {$kode} -Nama {$nama}";
+
+        return '<div style="font-size:14px; line-height:1.6;">'
+            .'<p>Android <b>tidak mengizinkan</b> memasang versi dengan nomor lebih kecil di atas versi yang lebih baru '
+            .'(hanya aplikasi sistem yang bisa). Uninstall lalu pasang ulang akan menghapus pairing semua TV.</p>'
+            .'<p style="margin-top:8px;">Caranya: kode versi '.e($r->versi_nama).' di-build ulang dengan nomor versi baru, '
+            .'jadi TV melihatnya sebagai update biasa.</p>'
+            .'<ol style="margin:10px 0 0 18px; list-style:decimal;">'
+            .'<li><b>Tarik</b> rilis yang bermasalah (tombol Tarik di daftar) supaya TV lain tidak ikut mengunduhnya.</li>'
+            .'<li>Di PC pengembang, folder <code>tv-agent</code>, jalankan:'
+            .'<pre style="white-space:pre-wrap; word-break:break-all; font-size:12px; padding:8px; border-radius:6px; background:rgba(127,127,127,.12); margin:6px 0; user-select:all;">'.e($perintah).'</pre>'
+            .'Hasilnya <code>tv-agent\\rilis\\tv-agent-'.e($nama).'.apk</code>.</li>'
+            .'<li><b>Unggah rilis baru</b>: versi <b>'.e($nama).'</b>, kode <b>'.$kode.'</b>, catatan "Rollback ke '.e($r->versi_nama).'", centang <b>Update wajib</b>.</li>'
+            .'<li><b>Push update ke semua TV</b> dengan pilihan <b>pasang sekarang juga</b>.</li>'
+            .'</ol></div>';
     }
 
     public static function getPages(): array

@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import id.rentalps.tvagent.BuildConfig
 import id.rentalps.tvagent.core.Agent
 import id.rentalps.tvagent.core.Jam
 import id.rentalps.tvagent.core.Keadaan
@@ -245,7 +246,7 @@ private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaH
         }
 
         Column(Modifier.fillMaxSize().padding(horizontal = 36.dp, vertical = 24.dp)) {
-            // Bar atas: stasiun + status | jam
+            // Bar atas: nama unit + status | jam
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -255,7 +256,7 @@ private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaH
                         .border(1.dp, Warna.garis, RoundedCornerShape(8.dp))
                         .padding(horizontal = 14.dp, vertical = 9.dp),
                 ) {
-                    Text("STASIUN ${s?.unit?.kode ?: "-"}", color = Warna.teks, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                    Text(s?.unit?.nama ?: s?.unit?.kode ?: "-", color = Warna.teks, fontSize = 16.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                     Titik(warnaStatus)
                     Label(teksStatus, warna = warnaStatus)
                 }
@@ -463,12 +464,12 @@ private fun LayarTagihan(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        // Kepala stasiun
+        // Kepala: nama unit
         Panel(modifier = Modifier.fillMaxWidth()) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("STASIUN ${s.unit?.kode ?: "-"}", color = Warna.teks, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
+                        Text(s.unit?.nama ?: s.unit?.kode ?: "-", color = Warna.teks, fontSize = 18.sp, fontWeight = FontWeight.Bold, fontFamily = FontFamily.Monospace)
                         s.unit?.kategori?.let { Chip(it, warna = Warna.kuning, garis = Warna.kuning.copy(alpha = 0.5f)) }
                         s.unit?.konsol?.let { Chip(it) }
                     }
@@ -710,6 +711,8 @@ private fun BarKoneksi(k: Keadaan, fokusMenu: FocusRequester, onBukaMenu: () -> 
             modifier = Modifier.width(320.dp),
         )
         TombolTv("Menu staf", kecil = true, focusRequester = fokusMenu, onClick = onBukaMenu)
+        // Versi APK terpasang (dicocokkan dengan Admin → Perangkat TV / Rilis APK)
+        Text("v${BuildConfig.VERSION_NAME}", color = Warna.redup, fontSize = 10.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
     }
 }
 

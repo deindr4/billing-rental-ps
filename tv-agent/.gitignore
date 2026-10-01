@@ -10,3 +10,6 @@ captures/
 
 # Android build (tv-agent)
 /tv-agent/.kotlin
+
+# Hasil build-rollback.ps1
+rilis/
