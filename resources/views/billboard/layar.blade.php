@@ -9,6 +9,13 @@
     ];
     $rp = fn ($n) => 'Rp '.number_format((int) $n, 0, ',', '.');
     $t = $d['turnamen'];
+    // Nilai awal dari server (billboard.js memperbarui tiap detik); tanpa ini sempat tampil --:-- setiap Livewire memperbarui halaman
+    $durasi = function ($ms) {
+        $s = max(0, intdiv((int) $ms, 1000));
+
+        return sprintf('%02d:%02d:%02d', intdiv($s, 3600), intdiv($s % 3600, 60), $s % 60);
+    };
+    $jam = \Illuminate\Support\Carbon::createFromTimestampMs($d['server_ms'])->setTimezone(config('app.timezone'))->format('H:i');
 @endphp
 <div wire:poll.10s style="--accent: {{ $d['aksen'] }};" x-data x-init="window.aturWaktuServer({{ $d['server_ms'] }})">
     {{-- ================= Kepala ================= --}}
@@ -22,7 +29,7 @@
                 <div class="label truncate">{{ $d['cabang'] }}</div>
             </div>
             <div class="ml-auto text-right shrink-0">
-                <div class="text-xl font-semibold num" data-jam>--:--</div>
+                <div class="text-xl font-semibold num" data-jam>{{ $jam }}</div>
                 @if ($d['buka'])
                     <div class="label flex items-center justify-end gap-1" style="color: var(--status-kosong)"><span class="dot bb-denyut"></span> Buka</div>
                 @else
@@ -103,12 +110,12 @@
                             @if ($u['berakhir_ms'] && in_array($u['status'], ['main', 'hampir'], true))
                                 <div>
                                     <div class="label">Sisa waktu</div>
-                                    <div class="text-2xl font-semibold num" style="color: {{ $hex }}" data-berakhir="{{ $u['berakhir_ms'] }}">--:--:--</div>
+                                    <div class="text-2xl font-semibold num" style="color: {{ $hex }}" data-berakhir="{{ $u['berakhir_ms'] }}">{{ $durasi($u['berakhir_ms'] - $d['server_ms']) }}</div>
                                 </div>
                             @elseif ($u['mulai_ms'] && in_array($u['status'], ['main', 'hampir'], true))
                                 <div>
                                     <div class="label">Sudah main</div>
-                                    <div class="text-2xl font-semibold num" style="color: {{ $hex }}" data-mulai="{{ $u['mulai_ms'] }}">--:--:--</div>
+                                    <div class="text-2xl font-semibold num" style="color: {{ $hex }}" data-mulai="{{ $u['mulai_ms'] }}">{{ $durasi($d['server_ms'] - $u['mulai_ms']) }}</div>
                                 </div>
                             @else
                                 <div class="text-sm text-muted">{{ $u['status'] === 'kosong' && $d['buka'] ? 'Langsung datang & main' : $label }}</div>
