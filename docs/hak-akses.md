@@ -61,7 +61,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Lihat log aktivitas | ✅ | – | – | – |
 | **TV** | | | | |
 | Remote TV (volume, layar, restart) | ✅ | ✅ | – | ✅ |
-| Bypass TV / menu staf di TV | ✅ | ✅ | – | ✅ |
+| Unlock TV, Tutup aplikasi TV, akses staf di TV (Home → OK → PIN), kode darurat | PIN | PIN | – | PIN |
 | **Admin** | | | | |
 | Masuk panel admin | ✅ | ✅ | – | – |
 | Kelola unit, paket harga, produk, iklan, perangkat TV | ✅ | ✅ | – | – |
@@ -112,6 +112,11 @@ Di server lokal rental (satu rental) Owner boleh semuanya kecuali mengelola rili
 | Aset & modal | Lihat aset | ✅ | ✅ | – | ✅ |
 | Turnamen | Turnamen | ✅ | ✅ | ✅ | – |
 | Tombol "Admin" | Masuk panel admin | ✅ | ✅ | – | – |
+| Panel TV (ikon TV di kartu unit): **Lock** | Rental | ✅ | ✅ | ✅ | – |
+| Panel TV: **Unlock** (pilih menit), **Tutup aplikasi**, Kode darurat | Rental + PIN orang berizin Unlock TV | ✅ | ✅ | minta PIN | – |
+
+Lock tidak butuh PIN (mengunci selalu aman). Tutup aplikasi tidak bisa dikirim lewat tombol remote kartu unit — hanya
+dari panel TV dengan PIN.
 
 Super Admin tidak memakai aplikasi kasir (tidak terikat rental, tidak punya kas/shift).
 

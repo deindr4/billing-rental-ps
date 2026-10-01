@@ -25,10 +25,17 @@ final class TvRemoteService
         'volume_senyap' => 'Senyap / bunyikan',
         'restart_aplikasi' => 'Restart aplikasi TV Agent',
         'restart_tv' => 'Restart TV',
+        // Lock: tampilkan & kunci lagi aplikasi TV (setelah unlock / aplikasi ditutup). APK >= 0.5.0
+        'kunci' => 'Kunci TV',
+        // Tutup aplikasi: TV bebas (layar Google TV) sampai Lock atau sesi berikutnya dimulai. APK >= 0.5.0
+        'tutup_aplikasi' => 'Tutup aplikasi TV Agent',
         // TV mengunduh rilis APK terbaru; dipasang saat TV kosong (terkunci), atau langsung untuk versi "paksa"
         'update_aplikasi' => 'Update aplikasi (saat TV kosong)',
         'update_aplikasi_paksa' => 'Update aplikasi sekarang',
     ];
+
+    /** Perintah yang hanya boleh dikirim lewat jalurnya sendiri (PIN di panel TV / admin), bukan remote kartu unit */
+    public const PERINTAH_KHUSUS = ['tutup_aplikasi', 'update_aplikasi', 'update_aplikasi_paksa'];
 
     /** Perintah update APK ke banyak TV (hanya yang versinya belum terbaru). Return jumlah TV yang dikirimi. */
     public function pushUpdate(iterable $perangkat, User $user, bool $paksa = false): int

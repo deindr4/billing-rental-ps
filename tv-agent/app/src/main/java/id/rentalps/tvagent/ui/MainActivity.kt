@@ -1,19 +1,23 @@
 package id.rentalps.tvagent.ui
 
+import android.content.Intent
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.compose.setContent
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.rentalps.tvagent.AgentApp
 import id.rentalps.tvagent.core.Hdmi
+import id.rentalps.tvagent.core.Tahap
 import id.rentalps.tvagent.service.AgentService
 
 /**
- * Layar kunci / pairing. Tombol Back diabaikan supaya pelanggan tidak bisa keluar;
- * staf memakai "Menu staf".
+ * Layar kunci / pairing. Tombol Back diabaikan supaya pelanggan tidak bisa keluar.
+ * Akses staf: tekan Home, lalu OK → PIN → pilih Google TV / HDMI / YouTube / tutup aplikasi.
  */
 class MainActivity : ComponentActivity() {
 
@@ -31,6 +35,15 @@ class MainActivity : ComponentActivity() {
         setContent {
             val keadaan by agent.keadaan.collectAsStateWithLifecycle()
 
+            // "Tutup aplikasi" (dari TV atau kasir): pindah ke layar Google TV dari activity ini
+            val keLauncher by (application as AgentApp).mintaKeLauncher.collectAsStateWithLifecycle()
+            LaunchedEffect(keLauncher) {
+                if (keLauncher > 0 && System.currentTimeMillis() - keLauncher < 10_000) {
+                    bukaLauncherBawaan(this@MainActivity)
+                    moveTaskToBack(true)
+                }
+            }
+
             // Tidak ada "mundur ke belakang" otomatis: jika HDMI gagal, layar TV Agent tetap tampil
             // dengan pilihan input (bukan memperlihatkan aplikasi terakhir seperti YouTube).
             Aplikasi(agent, keadaan, onBukaHdmi = {
@@ -39,25 +52,39 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    /** TV Agent = layar utama: tombol Home saat TV terkunci -> dialog PIN staf untuk keluar sementara */
-    override fun onNewIntent(intent: android.content.Intent) {
+    /** TV Agent = layar utama: tombol Home ditekan */
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+        if (!intent.hasCategory(Intent.CATEGORY_HOME)) return
+
         val app = application as AgentApp
         val k = app.agent.keadaan.value
 
-        // Bypass / buka darurat = TV sedang terbuka untuk staf: Home langsung ke layar utama Google TV
-        if (intent.hasCategory(android.content.Intent.CATEGORY_HOME) && k.layar in setOf("bypass", "darurat")) {
+        // Bypass / buka darurat / aplikasi ditutup / masih dalam izin keluar staf: Home ke layar utama Google TV
+        if (k.layar in setOf("bypass", "darurat") || app.bolehKeluar()) {
             bukaLauncherBawaan(this)
             return
         }
 
-        if (intent.hasCategory(android.content.Intent.CATEGORY_HOME) &&
-            k.tahap == id.rentalps.tvagent.core.Tahap.Aktif &&
-            k.layar in id.rentalps.tvagent.core.Agent.LAYAR_TERKUNCI
-        ) {
-            // Masih dalam waktu keluar staf (PIN sudah benar): Home langsung ke layar TV bawaan
-            if (app.bolehKeluar()) bukaLauncherBawaan(this) else app.mintaPinKeluar.value = true
+        // Selain itu: siapkan akses staf (tekan OK dalam 10 detik untuk PIN)
+        if (k.tahap == Tahap.Aktif) app.siapkanAksesStaf()
+    }
+
+    /** OK / Enter setelah Home → dialog PIN akses staf */
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        val app = application as AgentApp
+        val ok = event.keyCode == KeyEvent.KEYCODE_DPAD_CENTER || event.keyCode == KeyEvent.KEYCODE_ENTER ||
+            event.keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER
+
+        if (ok && app.aksesStafSiap() && app.agent.keadaan.value.tahap == Tahap.Aktif) {
+            if (event.action == KeyEvent.ACTION_UP) {
+                app.aksesStafSampaiMs.value = 0
+                app.mintaPinKeluar.value = true
+            }
+            return true
         }
+
+        return super.dispatchKeyEvent(event)
     }
 
     override fun onResume() {

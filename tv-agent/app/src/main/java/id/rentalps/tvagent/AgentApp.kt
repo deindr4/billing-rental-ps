@@ -25,8 +25,39 @@ class AgentApp : Application() {
 
     fun bolehKeluar(): Boolean = System.currentTimeMillis() < bolehKeluarSampaiMs
 
-    /** Tombol Home ditekan saat TV terkunci: tampilkan dialog PIN staf untuk keluar sementara */
+    /** Tampilkan dialog PIN akses staf (dibuka dengan Home lalu OK) */
     val mintaPinKeluar = MutableStateFlow(false)
+
+    /**
+     * Akses staf = tekan Home, lalu OK dalam 10 detik → dialog PIN. Nilai = batas waktu (ms) menunggu OK;
+     * selama itu layar menampilkan petunjuk kecil. Pelanggan yang hanya menekan OK tidak membuka apa pun.
+     */
+    val aksesStafSampaiMs = MutableStateFlow(0L)
+
+    fun siapkanAksesStaf() {
+        aksesStafSampaiMs.value = System.currentTimeMillis() + 10_000
+    }
+
+    fun aksesStafSiap(): Boolean = System.currentTimeMillis() < aksesStafSampaiMs.value
+
+    /** Aplikasi "ditutup" staf/operator: TV bebas dipakai (layar Google TV) sampai dikunci lagi atau sesi baru dimulai */
+    val tertutup = MutableStateFlow(false)
+
+    fun tutupAplikasi() {
+        tertutup.value = true
+        izinkanKeluar(12 * 60 * 60)
+        mintaKeLauncher.value = System.currentTimeMillis()
+    }
+
+    /** Layar TV Agent (activity) diminta pindah ke layar Google TV — Android melarang membukanya dari latar belakang */
+    val mintaKeLauncher = MutableStateFlow(0L)
+
+    /** Batalkan izin keluar / status ditutup: TV Agent kembali menjaga layar (kiosk) */
+    fun kunciLagi() {
+        tertutup.value = false
+        bolehKeluarSampaiMs = 0
+        aksesStafSampaiMs.value = 0
+    }
 
     override fun onCreate() {
         super.onCreate()

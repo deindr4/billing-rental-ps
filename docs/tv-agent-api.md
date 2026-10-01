@@ -39,7 +39,7 @@ Jawaban `401 { "kode": "perlu_pairing" }` → hapus token, kembali ke layar pair
 | `POST /bypass/akhiri` | Tutup bypass lebih awal |
 | `POST /broadcasting/auth` | Otorisasi channel Reverb (lihat bagian 3) |
 | `POST /panggil-kasir` | Pelanggan menekan "Panggil Kasir" → notifikasi berbunyi di aplikasi kasir (maks. 1x / 30 detik per TV) |
-| `POST /verifikasi-pin` | `{ pin }` → buka Menu staf di TV (PIN user berizin `tv.bypass`) |
+| `POST /verifikasi-pin` | `{ pin }` → akses staf di TV (Home → OK → PIN; user berizin `tv.bypass`) |
 | `POST /input-hdmi` | `{ id, label }` → simpan input HDMI tempat PS tersambung |
 | `GET /update` | Cek rilis APK (bagian 5) |
 
@@ -129,8 +129,20 @@ Jalankan **sekali per `id`**, abaikan yang `waktu_ms`-nya lebih dari 2 menit lal
 | `layar_mati` / `layar_nyala` | Matikan / nyalakan layar |
 | `volume_naik` / `volume_turun` / `volume_senyap` | Volume |
 | `restart_aplikasi` / `restart_tv` | Restart TV Agent / reboot (reboot penuh hanya device owner) |
+| `kunci` | Lock dari kasir: batalkan izin keluar / status ditutup, tampilkan & kunci layar TV Agent (server sudah mengakhiri unlock). APK ≥ 0.5.0 |
+| `tutup_aplikasi` | Tutup aplikasi dari kasir (dengan PIN): TV pindah ke layar Google TV & bebas dipakai sampai `kunci` atau sesi berikutnya dimulai. Heartbeat melapor `layar: "tutup"`. APK ≥ 0.5.0 |
 | `update_aplikasi` | Cek & pasang rilis APK terbaru saat TV kosong (terkunci); jika sedang dipakai, pasang begitu sesi selesai (APK ≥ 0.3.1) |
 | `update_aplikasi_paksa` | Cek & pasang rilis terbaru saat itu juga walau TV dipakai (APK ≥ 0.3.1) |
+
+### Akses staf di TV (APK ≥ 0.5.0)
+
+Tidak ada tombol "Menu staf" di layar. Staf menekan **Home** lalu **OK** (dalam 10 detik) → PIN staf
+(`POST /verifikasi-pin`, izin Bypass TV) atau kode darurat → pilih durasi & tujuan: **Google TV**, **HDMI (PlayStation)**,
+**YouTube**, atau **Tutup aplikasi**. Tujuan dibuka sebagai bypass di server (`POST /bypass { pin, menit }`) sehingga tercatat
+& tampil di kasir; bila server tidak terjangkau, TV dibuka lokal selama durasi yang sama. "Pengaturan TV Agent" (info,
+input HDMI, ganti server, izin) tersedia dari menu yang sama. OK tanpa Home tidak membuka apa pun.
+
+Status "aplikasi ditutup" dibatalkan otomatis saat sesi berikutnya dimulai, supaya TV terkunci lagi ketika waktu habis.
 
 ## 2b. Failover server lokal ↔ cloud
 

@@ -15,6 +15,10 @@ Dokumentasi
   docs/sinkron.md (token acak, superadmin), docs/desain/README.md (status layar TV).
 
 TV
+- Panel TV di kasir (ikon TV di kartu unit): tombol "Bypass" menjadi "Unlock" (pilih menit, PIN),
+  tombol baru "Lock" (akhiri unlock & kunci lagi aplikasi TV, tanpa PIN) dan "Tutup aplikasi" (PIN).
+  Status "Aplikasi ditutup (TV bebas)" tampil di panel. Butuh APK TV 0.5.0.
+- Keamanan: perintah tutup aplikasi & update APK tidak bisa dikirim lewat tombol remote kartu unit.
 - Pengaturan baru per cabang: Pengaturan -> Operasional -> Sesi & TV -> "Kepekatan timer di TV (%)"
   (30-100%, bawaan 90%). Butuh APK TV 0.4.2 ke atas.
 

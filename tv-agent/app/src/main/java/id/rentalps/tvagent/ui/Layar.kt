@@ -86,19 +86,48 @@ fun Aplikasi(agent: Agent, keadaan: Keadaan, onBukaHdmi: () -> Unit) {
                     if (perluSetupHdmi && keadaan.layar in setOf("kunci", "belum_ada_unit", "servis")) {
                         LayarPilihHdmi(agent)
                     } else if (keadaan.layar == "habis" || keadaan.layar == "menunggu_bayar") {
-                        LayarTagihan(agent, keadaan, onBukaMenu = { menuStaf = true })
+                        LayarTagihan(agent, keadaan)
                     } else {
-                        LayarKunci(agent, keadaan, onBukaMenu = { menuStaf = true }, onBukaHdmi = onBukaHdmi)
+                        LayarKunci(agent, keadaan, onBukaHdmi = onBukaHdmi)
                     }
+                    // Pengaturan teknis (info, input HDMI, ganti server) — hanya dari akses staf setelah PIN benar
                     if (menuStaf) {
-                        MenuStaf(agent, keadaan, onTutup = { menuStaf = false })
+                        MenuStaf(agent, keadaan, sudahPin = true, onTutup = { menuStaf = false })
                     }
 
-                    // Tombol Home saat TV terkunci -> PIN staf untuk keluar sementara
+                    // Akses staf: Home lalu OK -> PIN -> Google TV / HDMI / YouTube / tutup aplikasi
                     val app = androidx.compose.ui.platform.LocalContext.current.applicationContext as id.rentalps.tvagent.AgentApp
                     val mintaPin by app.mintaPinKeluar.collectAsState()
-                    if (mintaPin && !menuStaf && keadaan.layar in Agent.LAYAR_TERKUNCI) {
-                        DialogPinKeluar(agent, onTutup = { app.mintaPinKeluar.value = false })
+                    if (mintaPin && !menuStaf) {
+                        DialogPinKeluar(
+                            agent, keadaan,
+                            onPengaturan = { menuStaf = true },
+                            onTutup = { app.mintaPinKeluar.value = false },
+                        )
+                    }
+
+                    // Petunjuk singkat setelah Home ditekan
+                    val siapSampai by app.aksesStafSampaiMs.collectAsState()
+                    var tampilPetunjuk by remember { mutableStateOf(false) }
+                    LaunchedEffect(siapSampai) {
+                        val sisa = siapSampai - System.currentTimeMillis()
+                        tampilPetunjuk = sisa > 0
+                        if (sisa > 0) {
+                            delay(sisa)
+                            tampilPetunjuk = false
+                        }
+                    }
+                    if (tampilPetunjuk && !mintaPin) {
+                        Box(Modifier.fillMaxSize().padding(bottom = 64.dp), contentAlignment = Alignment.BottomCenter) {
+                            Box(
+                                Modifier
+                                    .background(Warna.permukaan, RoundedCornerShape(20.dp))
+                                    .border(1.dp, aksen, RoundedCornerShape(20.dp))
+                                    .padding(horizontal = 18.dp, vertical = 8.dp),
+                            ) {
+                                Text("Akses staf: tekan OK", color = Warna.teks, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                            }
+                        }
                     }
                 }
             }
@@ -201,11 +230,10 @@ private fun LayarPairing(tahap: Tahap.Pairing, server: String?, onGantiServer: (
 /* ================= Layar kunci (desain Stitch 10) ================= */
 
 @Composable
-private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaHdmi: () -> Unit) {
+private fun LayarKunci(agent: Agent, k: Keadaan, onBukaHdmi: () -> Unit) {
     val s = k.status
     val aksen = LocalAksen.current
     val sekarang = detikSekarang()
-    val fokusMenu = remember { FocusRequester() }
     val logo = gambarDariUrl(s?.tema?.logoUrl, agent.api.http)
     val terbuka = k.layar in Agent.LAYAR_TERBUKA
 
@@ -353,7 +381,7 @@ private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaH
                         s?.unit?.kategori?.let { Chip(it) }
                         s?.unit?.lokasi?.let { Chip(it) }
                     }
-                    BarKoneksi(k, fokusMenu, onBukaMenu)
+                    BarKoneksi(k)
                 }
                 Spacer(Modifier.weight(1f))
                 val bm = s?.bayarMandiri
@@ -368,9 +396,6 @@ private fun LayarKunci(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit, onBukaH
             Pengumuman(s)
         }
     }
-
-    // Layar bypass memfokuskan pilihan tujuan sendiri
-    LaunchedEffect(k.layar) { if (k.layar != "bypass") runCatching { fokusMenu.requestFocus() } }
 }
 
 /** Bypass (owner): pilih mau ke PS, YouTube, atau aplikasi lain yang diizinkan admin */
@@ -449,7 +474,7 @@ private fun KartuAjakan(k: Keadaan) {
 /* ================= Waktu habis / menunggu bayar (desain Stitch 11) ================= */
 
 @Composable
-private fun LayarTagihan(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit) {
+private fun LayarTagihan(agent: Agent, k: Keadaan) {
     val s = k.status ?: return
     val sesi = s.sesi
     val tagihan = sesi?.tagihan
@@ -589,7 +614,6 @@ private fun LayarTagihan(agent: Agent, k: Keadaan, onBukaMenu: () -> Unit) {
                         TombolTv("Panggil Kasir", utama = true, focusRequester = fokus, modifier = Modifier.weight(1f)) {
                             scope.launch { pesanPanggil = agent.panggilKasir() }
                         }
-                        TombolTv("Menu staf", kecil = true, onClick = onBukaMenu)
                     }
                     pesanPanggil?.let {
                         Spacer(Modifier.height(6.dp))
@@ -695,7 +719,7 @@ private fun BarisRingkas(label: String, nilai: String, warna: Color = Warna.redu
 /* ================= Bagian bersama ================= */
 
 @Composable
-private fun BarKoneksi(k: Keadaan, fokusMenu: FocusRequester, onBukaMenu: () -> Unit) {
+private fun BarKoneksi(k: Keadaan) {
     val (teks, warna) = when {
         k.offline -> "Offline · ${k.pesan ?: "server tidak terjangkau"}" to Warna.kuning
         // Sedang memakai server cadangan (lokal mati)
@@ -710,7 +734,6 @@ private fun BarKoneksi(k: Keadaan, fokusMenu: FocusRequester, onBukaMenu: () -> 
             letterSpacing = 1.4.sp, maxLines = 1, overflow = TextOverflow.Ellipsis,
             modifier = Modifier.width(320.dp),
         )
-        TombolTv("Menu staf", kecil = true, focusRequester = fokusMenu, onClick = onBukaMenu)
         // Versi APK terpasang (dicocokkan dengan Admin → Perangkat TV / Rilis APK)
         Text("v${BuildConfig.VERSION_NAME}", color = Warna.redup, fontSize = 10.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
     }

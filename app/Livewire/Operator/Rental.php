@@ -46,6 +46,14 @@ class Rental extends Component
     public function perintahTv(string $unitId, string $perintah, array $konfirmasi = []): void
     {
         $user = auth()->user();
+
+        // Tutup aplikasi (butuh PIN, panel TV) & update APK (admin) tidak boleh lewat remote kartu unit
+        if (in_array($perintah, TvRemoteService::PERINTAH_KHUSUS, true)) {
+            $this->alert('Akses ditolak', 'Perintah ini hanya dari panel TV (dengan PIN) atau admin.', 'error');
+
+            return;
+        }
+
         $izin = str_starts_with($perintah, 'volume_') ? 'rental.kelola' : 'tv.remote';
 
         if (! $user->can($izin)) {

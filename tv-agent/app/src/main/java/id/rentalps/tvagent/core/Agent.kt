@@ -325,6 +325,34 @@ class Agent(private val ctx: Context) {
 
         if (p.waktuMs > 0 && Jam.sekarang() - p.waktuMs > 120_000) return
 
+        val app = ctx.applicationContext as id.rentalps.tvagent.AgentApp
+
+        // Lock dari kasir: bypass sudah diakhiri server; batalkan izin keluar / status ditutup & tampilkan layar kunci
+        if (p.perintah == "kunci") {
+            app.kunciLagi()
+            akhiriDarurat()
+            Remote.laporan = "dikunci dari kasir"
+            segarkanSekarang()
+            runCatching {
+                ctx.startActivity(
+                    android.content.Intent(ctx, id.rentalps.tvagent.ui.MainActivity::class.java).addFlags(
+                        android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or
+                            android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                    ),
+                )
+            }
+            sinyalHeartbeat.trySend(Unit)
+            return
+        }
+
+        // Tutup aplikasi dari kasir: TV bebas (layar Google TV) sampai Lock / sesi berikutnya
+        if (p.perintah == "tutup_aplikasi") {
+            app.tutupAplikasi() // layar TV Agent pindah sendiri ke Google TV
+            Remote.laporan = "aplikasi ditutup dari kasir"
+            sinyalHeartbeat.trySend(Unit)
+            return
+        }
+
         // Push update dari admin: "paksa" dipasang walau TV sedang dipakai
         if (p.perintah == "update_aplikasi" || p.perintah == "update_aplikasi_paksa") {
             val paksa = p.perintah == "update_aplikasi_paksa"
@@ -343,7 +371,9 @@ class Agent(private val ctx: Context) {
                 val data = buildJsonObject {
                     put("versi_app", JsonPrimitive(BuildConfig.VERSION_NAME))
                     put("versi_android", JsonPrimitive(Build.VERSION.RELEASE))
-                    put("layar", JsonPrimitive(_keadaan.value.layar))
+                    // "tutup" = aplikasi ditutup staf/kasir (TV bebas sampai Lock); ditampilkan di panel TV kasir
+                    val tertutup = (ctx.applicationContext as id.rentalps.tvagent.AgentApp).tertutup.value
+                    put("layar", JsonPrimitive(if (tertutup) "tutup" else _keadaan.value.layar))
                     runCatching {
                         put("volume", JsonPrimitive(Remote.volumePersen(ctx)))
                         put("senyap", JsonPrimitive(Remote.senyap(ctx)))

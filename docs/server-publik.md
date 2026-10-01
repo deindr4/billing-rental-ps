@@ -73,7 +73,7 @@ Scheduler wajib jalan (`php artisan schedule:run` tiap menit) + worker antrean +
 
 Admin server lokal → Pengaturan → Operasional → **Server lokal & cloud** → isi alamat lokal (`http://192.168.x.x`)
 & cloud (`https://...`). TV menerima keduanya otomatis; tidak perlu diketik di TV.
-Cek di TV: Menu staf → Info → Server.
+Cek di TV: Home → OK → PIN → Pengaturan TV Agent → Info & diagnostik → Server.
 
 ## Checklist sebelum publik
 

@@ -30,6 +30,7 @@ use App\Services\Tv\BypassTvService;
 use App\Services\Tv\KodeDarurat;
 use App\Services\Tv\PairingTvService;
 use App\Services\Tv\StatusTvService;
+use App\Services\Tv\TvRemoteService;
 use App\Support\HakAkses;
 use App\Support\Tenancy;
 use Database\Seeders\DatabaseSeeder;
@@ -294,6 +295,32 @@ class TvAgentApiTest extends TestCase
         $komponen->call('lihatKodeDarurat', ['pin' => '5555'])->assertSet('kodeDarurat', null);
         $komponen->call('lihatKodeDarurat', ['pin' => '1234'])
             ->assertSet('kodeDarurat', KodeDarurat::buat($perangkat->fresh()->rahasia_offline));
+
+        $perintah = fn () => collect(TvRemoteService::antrean($perangkat->id))->pluck('perintah')->all();
+
+        // Tutup aplikasi: butuh PIN supervisor/owner
+        $komponen->call('tutupAplikasi', ['pin' => '5555']);
+        $this->assertNotContains('tutup_aplikasi', $perintah());
+        $komponen->call('tutupAplikasi', ['pin' => '1234']);
+        $this->assertContains('tutup_aplikasi', $perintah());
+
+        // TV melapor aplikasi ditutup -> panel kasir menampilkannya
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['versi_app' => '0.5.0', 'layar' => 'tutup'])->assertOk();
+        $komponen->call('$refresh')->assertSee('Aplikasi ditutup');
+
+        // Lock (tanpa PIN): unlock berjalan diakhiri + TV diperintah tampil & terkunci lagi
+        $komponen->call('bypass', ['pin' => '1234']);
+        $this->assertTrue($perangkat->fresh()->sedangBypass());
+        $komponen->call('kunci');
+        $this->assertFalse($perangkat->fresh()->sedangBypass());
+        $this->assertContains('kunci', $perintah());
+
+        // Remote kartu unit tidak boleh dipakai untuk tutup aplikasi (jalan pintas tanpa PIN)
+        \Illuminate\Support\Facades\Cache::forget('tv:perintah:'.$perangkat->id);
+        $this->actingAs($this->owner);
+        Livewire::test(Rental::class)->call('perintahTv', $this->unit->id, 'tutup_aplikasi');
+        $this->assertNotContains('tutup_aplikasi', $perintah());
+        $this->assertDatabaseHas('log_tv', ['perangkat_id' => $perangkat->id, 'jenis' => 'perintah', 'user_id' => $kasir->id]);
     }
 
     public function test_super_admin_merilis_apk_dan_tv_mengunduh(): void

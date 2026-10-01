@@ -13,7 +13,8 @@
                     $online = $tv->isOnline();
                     $layar = [
                         'kunci' => 'Terkunci', 'main' => 'Main', 'jeda' => 'Dijeda', 'habis' => 'Waktu habis',
-                        'menunggu_bayar' => 'Menunggu bayar', 'servis' => 'Maintenance', 'bypass' => 'Bypass',
+                        'menunggu_bayar' => 'Menunggu bayar', 'servis' => 'Maintenance', 'bypass' => 'Unlock',
+                        'tutup' => 'Aplikasi ditutup (TV bebas)', 'darurat' => 'Buka darurat',
                         'belum_ada_unit' => 'Belum ada unit',
                     ][$tv->layar] ?? '-';
                 @endphp
@@ -36,7 +37,7 @@
                     </div>
                     @if ($tv->sedangBypass())
                         <div class="px-3 py-2 flex justify-between gap-3" style="color: var(--status-hampir-habis);">
-                            <dt>Bypass</dt>
+                            <dt>Unlock</dt>
                             <dd class="font-medium">sampai {{ $tv->bypass_sampai->format('H:i') }}</dd>
                         </div>
                     @endif
@@ -81,7 +82,7 @@
                 <x-slot:footer>
                     {{-- Durasi bypass / perpanjangan --}}
                     <div class="flex items-center gap-2 mb-2">
-                        <span class="label shrink-0">{{ $tv->sedangBypass() ? 'Tambah' : 'Durasi' }}</span>
+                        <span class="label shrink-0">{{ $tv->sedangBypass() ? 'Tambah' : 'Unlock' }}</span>
                         <div class="flex gap-1.5 overflow-x-auto">
                             @foreach ($this->pilihanMenit as $m)
                                 <button type="button" wire:click="pilihMenit({{ $m }})"
@@ -95,34 +96,46 @@
                     <div class="grid grid-cols-2 gap-2">
                         @if ($tv->sedangBypass())
                             <x-confirm-button action="perpanjangBypass"
-                                              title="Perpanjang bypass {{ $menitBypass }} menit?"
+                                              title="Perpanjang unlock {{ $menitBypass }} menit?"
                                               text="Butuh PIN supervisor/owner."
                                               confirm-text="Perpanjang"
                                               pin
                                               class="w-full">
                                 Perpanjang
                             </x-confirm-button>
-                            <button type="button" wire:click="akhiriBypass" class="btn">Akhiri bypass</button>
                         @else
                             <x-confirm-button action="bypass"
-                                              title="Buka TV {{ $menitBypass }} menit?"
-                                              text="TV terbuka tanpa sesi (nonton YouTube, tes, servis). Di TV bisa dipilih: PS, YouTube, atau aplikasi lain yang diizinkan. Butuh PIN supervisor/owner."
-                                              confirm-text="Buka TV"
+                                              title="Unlock TV {{ $menitBypass }} menit?"
+                                              text="TV terbuka tanpa sesi (Google TV, YouTube, HDMI, tes, servis), lalu terkunci otomatis setelah waktunya habis. Butuh PIN supervisor/owner."
+                                              confirm-text="Unlock"
                                               pin
                                               class="w-full">
-                                Bypass
+                                Unlock
                             </x-confirm-button>
                         @endif
+
+                        {{-- Lock: akhiri unlock & paksa aplikasi TV tampil + terkunci lagi (juga setelah aplikasi ditutup) --}}
+                        <button type="button" wire:click="kunci" wire:loading.attr="disabled" class="btn">Lock</button>
+
+                        <x-confirm-button action="tutupAplikasi"
+                                          title="Tutup aplikasi TV?"
+                                          text="TV Agent berhenti menjaga layar: TV bebas dipakai (layar Google TV) sampai Anda menekan Lock atau sesi berikutnya dimulai. Butuh PIN supervisor/owner."
+                                          confirm-text="Tutup aplikasi"
+                                          pin
+                                          class="w-full">
+                            Tutup aplikasi
+                        </x-confirm-button>
 
                         <x-confirm-button action="lihatKodeDarurat"
                                           title="Lihat kode darurat?"
                                           text="Untuk membuka TV saat jaringan putus. Butuh PIN supervisor/owner."
                                           confirm-text="Tampilkan"
                                           pin
-                                          @class(['w-full', 'col-span-2' => $tv->sedangBypass()])>
+                                          class="w-full">
                             Kode darurat
                         </x-confirm-button>
                     </div>
+                    <p class="text-xs text-muted mt-2">Di TV: tekan Home lalu OK untuk akses staf (PIN).</p>
                 </x-slot:footer>
             @endif
         @endif

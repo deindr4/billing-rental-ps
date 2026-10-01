@@ -87,7 +87,7 @@ class AgentService : Service() {
                         if (!masihTerlepas) break
                         if (!app.bolehKeluar()) {
                             Log.i(Agent.TAG, "Kiosk: layar kunci ditarik kembali ke depan")
-                            app.mintaPinKeluar.value = true // tawarkan PIN staf untuk keluar
+                            app.siapkanAksesStaf() // petunjuk "Akses staf: tekan OK" (Home lalu OK)
                             tampilkanLayarKunci()
                         }
                         delay(1_800)
@@ -128,6 +128,8 @@ class AgentService : Service() {
             // Bypass: tidak otomatis ke HDMI — owner memilih PS / YouTube / aplikasi lain di layar bypass
             "bypass" -> tampilkanLayarKunci()
             in Agent.LAYAR_TERBUKA -> {
+                // Sesi dimulai: aplikasi yang "ditutup" staf kembali menjaga TV, supaya saat waktu habis TV terkunci lagi
+                (application as AgentApp).kunciLagi()
                 // Gagal pindah HDMI: tetap di layar TV Agent (dengan pilihan input), jangan tampilkan aplikasi lain
                 val berhasil = Hdmi.buka(this, agent.inputHdmi())
                 agent.setHdmiGagal(!berhasil)

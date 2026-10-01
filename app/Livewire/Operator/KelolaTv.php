@@ -11,6 +11,7 @@ use App\Services\PinService;
 use App\Services\Tv\BypassTvService;
 use App\Services\Tv\KodeDarurat;
 use App\Services\Tv\StatusTvService;
+use App\Services\Tv\TvRemoteService;
 use App\Support\Audit;
 use App\Support\Tenancy;
 use Illuminate\Support\Collection;
@@ -149,6 +150,50 @@ class KelolaTv extends Component
 
         $this->segarkan();
         $this->success('Bypass diakhiri, TV terkunci kembali');
+    }
+
+    /**
+     * Lock: akhiri unlock (bypass) lalu perintahkan TV menampilkan & mengunci lagi aplikasinya
+     * (juga setelah aplikasi ditutup). Tanpa PIN — mengunci selalu aman.
+     */
+    public function kunci(): void
+    {
+        if (! $perangkat = $this->perangkat) {
+            return;
+        }
+
+        app(BypassTvService::class)->akhiri($perangkat, 'operator', auth()->user());
+
+        try {
+            app(TvRemoteService::class)->kirim($perangkat->refresh(), 'kunci', auth()->user());
+        } catch (BillingException $e) {
+            $this->alert('Gagal', $e->getMessage(), 'error');
+
+            return;
+        }
+
+        $this->segarkan();
+        $this->success('TV dikunci kembali');
+    }
+
+    /** Tutup aplikasi TV Agent (TV bebas sampai Lock / sesi berikutnya). Dipanggil dari tombol konfirmasi: $konfirmasi['pin'] */
+    public function tutupAplikasi(array $konfirmasi = []): void
+    {
+        if (! $perangkat = $this->perangkat) {
+            return;
+        }
+
+        try {
+            $this->setujui($konfirmasi, 'tv.bypass');
+            app(TvRemoteService::class)->kirim($perangkat, 'tutup_aplikasi', auth()->user());
+        } catch (BillingException $e) {
+            $this->alert('Ditolak', $e->getMessage(), 'error');
+
+            return;
+        }
+
+        $this->segarkan();
+        $this->success('Aplikasi TV ditutup. Tekan Lock untuk mengunci lagi.');
     }
 
     /** Dipanggil dari tombol konfirmasi: $konfirmasi['pin'] */

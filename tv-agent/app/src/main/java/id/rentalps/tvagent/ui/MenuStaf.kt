@@ -50,11 +50,11 @@ import kotlinx.coroutines.launch
 private enum class Panel { Utama, Bypass, Darurat, Hdmi, Info, GantiServer, Gerbang }
 
 /**
- * Menu staf (dibuka dari tombol "Menu staf" di layar kunci).
+ * Pengaturan TV Agent (dibuka dari Akses staf: Home → OK → PIN → "Pengaturan TV Agent").
  * Aksi yang membuka TV butuh PIN supervisor/owner atau kode darurat.
  */
 @Composable
-fun MenuStaf(agent: Agent, k: Keadaan, onTutup: () -> Unit) {
+fun MenuStaf(agent: Agent, k: Keadaan, sudahPin: Boolean = false, onTutup: () -> Unit) {
     var panel by remember { mutableStateOf(Panel.Utama) }
     var pesan by remember { mutableStateOf<Pair<String, Boolean>?>(null) } // teks, sukses?
     var isian by remember { mutableStateOf("") }
@@ -72,7 +72,7 @@ fun MenuStaf(agent: Agent, k: Keadaan, onTutup: () -> Unit) {
 
     // Aksi berbahaya (ganti server, izin/Settings, input HDMI) wajib PIN supervisor/owner atau kode darurat,
     // supaya pelanggan tidak bisa melepas/mengacak TV dengan remote. Berlaku selama menu terbuka.
-    var terverifikasi by remember { mutableStateOf(false) }
+    var terverifikasi by remember { mutableStateOf(sudahPin) }
     var tujuan by remember { mutableStateOf(Panel.Utama) }
 
     fun lewatGerbang(p: Panel) {

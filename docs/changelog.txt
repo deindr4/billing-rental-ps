@@ -6,6 +6,20 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.5.0 (kode 8) - 2026-10-01                                    [tag apk-0.5.0]
+-----------------------------------------------------------------------------
+- Tombol "Menu staf" dihapus dari layar TV (layar kunci & layar tagihan).
+- Akses staf: tekan Home lalu OK (dalam 10 detik) -> PIN staf / kode darurat -> pilih durasi & tujuan:
+  Google TV, HDMI (PlayStation), YouTube, atau Tutup aplikasi. Petunjuk "Akses staf: tekan OK" tampil setelah Home.
+  OK saja (tanpa Home) tidak membuka apa pun. "Pengaturan TV Agent" (info, input HDMI, ganti server) di menu yang sama.
+- Tujuan dibuka sebagai unlock (bypass) di server -> tercatat & tampil di kasir; tanpa server dibuka lokal.
+- Perintah baru dari kasir: "kunci" (Lock: tampilkan & kunci lagi aplikasi) dan "tutup_aplikasi"
+  (TV pindah ke Google TV & bebas sampai Lock). Status "aplikasi ditutup" dilaporkan ke kasir.
+- Aplikasi yang ditutup otomatis menjaga TV lagi saat sesi berikutnya dimulai (TV tetap terkunci saat waktu habis).
+- Perbaikan: tombol Google TV kini membuka layar Google TV (sebelumnya bisa membuka layar kosong sistem);
+  dialog PIN tidak menutup sendiri selama tombol remote masih ditekan (batas diam 60 detik).
+
+
 0.4.2 (kode 7) - 2026-10-01                                    [tag apk-0.4.2]
 -----------------------------------------------------------------------------
 - Kepekatan (opacity) timer melayang di atas game mengikuti pengaturan admin
