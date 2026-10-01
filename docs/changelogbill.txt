@@ -7,6 +7,10 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 
 2026-10-01
 -----------------------------------------------------------------------------
+TV
+- Pengaturan baru per cabang: Pengaturan -> Operasional -> Sesi & TV -> "Kepekatan timer di TV (%)"
+  (30-100%, bawaan 90%). Butuh APK TV 0.4.2 ke atas.
+
 Rilis & update APK TV
 - Push update APK manual dari admin: per TV, TV terpilih, atau semua TV
   (Perangkat TV & Rilis APK TV), dengan pilihan "pasang sekarang juga walau TV dipakai".

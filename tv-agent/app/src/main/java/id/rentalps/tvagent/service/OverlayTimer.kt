@@ -156,6 +156,10 @@ class OverlayTimer(private val ctx: Context) {
         waktu.setTextColor(if (pilihGame) warnaBiru else teksUtama)
         pesan.setTextColor(teksUtama)
         judul.setTextColor(if (hampir) warnaGelap else Color.parseColor("#7F90A6"))
+
+        // Kepekatan diatur admin (Pengaturan → Operasional); peringatan selalu pekat supaya jelas terbaca
+        val opasitas = (k.status?.pengaturan?.opasitasTimer ?: 90).coerceIn(30, 100)
+        kotak.alpha = if (hampir || modeBanner) 1f else opasitas / 100f
     }
 
     private fun parameter(): WindowManager.LayoutParams {

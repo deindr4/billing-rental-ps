@@ -289,6 +289,8 @@ final class StatusTvService
             'posisi_timer' => $unit?->posisi_timer ?? Pengaturan::ambil('tv.posisi_timer', 'kanan_atas', $cabangId),
             'peringatan_menit' => (int) Pengaturan::ambil('tv.peringatan_menit', 5, $cabangId),
             'transparansi_lock' => (int) Pengaturan::ambil('tv.transparansi_lock', 85, $cabangId),
+            // Kepekatan timer melayang (%); TV memakai 100% saat waktu hampir habis / banner peringatan
+            'opasitas_timer' => max(30, min(100, (int) Pengaturan::ambil('tv.opasitas_timer', 90, $cabangId))),
             'durasi_bypass_menit' => $this->durasiBypass($perangkat, $unit),
             'bypass_maks_menit' => $this->bypassMaks($cabangId),
             'bypass_pilihan' => $this->pilihanBypass($perangkat, $unit),

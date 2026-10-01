@@ -157,6 +157,8 @@ data class Pengaturan(
     @SerialName("posisi_timer") val posisiTimer: String = "kanan_atas",
     @SerialName("peringatan_menit") val peringatanMenit: Int = 5,
     @SerialName("transparansi_lock") val transparansiLock: Int = 85,
+    /** Kepekatan timer melayang (30–100%); hampir habis & banner selalu 100% */
+    @SerialName("opasitas_timer") val opasitasTimer: Int = 90,
     @SerialName("durasi_bypass_menit") val durasiBypassMenit: Int = 15,
     @SerialName("bypass_maks_menit") val bypassMaksMenit: Int = 120,
     @SerialName("bypass_pilihan") val bypassPilihan: List<Int> = listOf(15, 30, 60),

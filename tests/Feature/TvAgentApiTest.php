@@ -621,12 +621,22 @@ class TvAgentApiTest extends TestCase
         $cabang = Cabang::where('kode', 'DGH1')->firstOrFail();
         $this->actingAs($this->owner)->withSession(['cabang_id' => $cabang->id]);
         $this->aktifkanTenancy();
+        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengaturan.opasitas_timer', 90);
+
         Livewire::test(PengaturanOperasional::class)
+            ->assertSet('data.opasitas_timer', 90)
             ->set('data.tv_pengumuman', 'Turnamen FC Sabtu ini!')
-            ->call('simpan');
+            ->set('data.opasitas_timer', 50)
+            ->call('simpan')
+            ->assertHasNoErrors();
         Event::assertDispatched(TvSegarkan::class, fn ($e) => $e->perangkatId === $perangkatId && $e->alasan === 'pengaturan');
 
-        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengumuman', 'Turnamen FC Sabtu ini!');
+        $this->withToken($token)->getJson('/api/tv/status')
+            ->assertJsonPath('pengumuman', 'Turnamen FC Sabtu ini!')
+            ->assertJsonPath('pengaturan.opasitas_timer', 50);
+
+        // Di luar batas ditolak form
+        Livewire::test(PengaturanOperasional::class)->set('data.opasitas_timer', 10)->call('simpan')->assertHasErrors(['data.opasitas_timer']);
     }
 
     public function test_menu_staf_di_tv_butuh_pin_berizin(): void

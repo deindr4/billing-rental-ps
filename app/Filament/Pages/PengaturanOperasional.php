@@ -54,6 +54,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         'open_billing.pembulatan_rupiah' => ['pembulatan_rupiah', 0],
         'pause.maksimal_kali' => ['maks_pause', 2],
         'tv.peringatan_menit' => ['peringatan_menit', 5],
+        'tv.opasitas_timer' => ['opasitas_timer', 90],
         'sesi.pilih_game_menit' => ['pilih_game_menit', 5],
         'tv.durasi_bypass_menit' => ['durasi_bypass', 15],
         'tv.bypass_maks_menit' => ['bypass_maks', 120],
@@ -186,6 +187,11 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->label('Peringatan sisa waktu (menit)')
                             ->helperText('Timer berwarna kuning & TV memberi peringatan.')
                             ->numeric()->minValue(1)->maxValue(30)->required(),
+                        TextInput::make('opasitas_timer')
+                            ->label('Kepekatan timer di TV (%)')
+                            ->helperText('Timer melayang di atas game. 100 = pekat, 40 = tembus pandang (game di belakang terlihat). '
+                                .'Saat waktu hampir habis & peringatan, timer selalu tampil penuh.')
+                            ->numeric()->minValue(30)->maxValue(100)->suffix('%')->required(),
                         TextInput::make('pilih_game_menit')
                             ->label('Waktu pilih game (menit)')
                             ->helperText('TV terbuka lebih dulu, waktu sewa mulai setelahnya & tidak ditagih. Isi 0 untuk mematikan.')

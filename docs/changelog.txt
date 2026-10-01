@@ -6,6 +6,13 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.4.2 (kode 7) - 2026-10-01                                    [tag apk-0.4.2]
+-----------------------------------------------------------------------------
+- Kepekatan (opacity) timer melayang di atas game mengikuti pengaturan admin
+  (Pengaturan -> Operasional -> Sesi & TV -> "Kepekatan timer di TV (%)", 30-100%, bawaan 90%).
+- Saat waktu hampir habis (kuning) & saat banner peringatan, timer selalu tampil 100% supaya jelas.
+
+
 0.4.1 (kode 6) - 2026-10-01                                    [tag apk-0.4.1]
 -----------------------------------------------------------------------------
 - Panel QR bayar mandiri di layar kunci dibuat lebih ringkas (±23% lebih sempit, ±21% lebih pendek):
