@@ -41,7 +41,9 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            // Relatif: ikut host yang sedang dibuka (localhost, IP LAN, domain cloud). Dengan APP_URL absolut,
+            // pratinjau unggahan di admin macet "Memuat" bila admin dibuka lewat alamat lain (diblokir CORS).
+            'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
             'report' => false,
