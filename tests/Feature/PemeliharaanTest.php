@@ -8,6 +8,7 @@ use App\Models\User;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -57,5 +58,23 @@ class PemeliharaanTest extends TestCase
         $this->actingAs(User::where('email', 'admin@billing.test')->firstOrFail());
         $this->assertTrue(Pemeliharaan::canAccess());
         Livewire::test(Pemeliharaan::class)->assertOk()->assertSee('Mode server')->assertSee('Cloud');
+    }
+
+    public function test_perintah_superadmin_buat_dan_reset(): void
+    {
+        $this->artisan('superadmin', ['email' => 'Bos@Cloud.id', '--password' => 'rahasia123'])->assertSuccessful();
+
+        $u = User::where('email', 'bos@cloud.id')->firstOrFail();
+        $this->assertTrue($u->isSuperAdmin());
+        $this->assertNull($u->tenant_id);
+        $this->assertTrue(Hash::check('rahasia123', $u->password));
+
+        $this->artisan('superadmin', ['email' => 'bos@cloud.id', '--password' => 'gantibaru99'])->assertSuccessful();
+        $this->assertTrue(Hash::check('gantibaru99', $u->fresh()->password));
+
+        // Akun rental tidak bisa dijadikan super admin, password pendek ditolak
+        $this->artisan('superadmin', ['email' => 'owner@billing.test', '--password' => 'rahasia123'])->assertFailed();
+        $this->artisan('superadmin', ['email' => 'lain@cloud.id', '--password' => 'pendek'])->assertFailed();
+        $this->assertFalse(User::where('email', 'owner@billing.test')->first()->isSuperAdmin());
     }
 }

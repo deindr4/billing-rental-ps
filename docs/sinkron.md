@@ -27,7 +27,10 @@ Tidak disinkronkan: sesi login, cache, antrean tugas, nomor urut, pairing TV, ri
 # .env: APP_MODE=cloud
 php artisan migrate --force
 php artisan db:seed --class=HakAksesSeeder --force   # daftar izin (tanpa data demo)
+php artisan superadmin                                 # buat akun super admin (ditanya email & password)
 ```
+
+Lupa password super admin: jalankan `php artisan superadmin email@anda.com` lagi → password diganti.
 
 Login super admin → **Pengaturan → Sinkronisasi** → isi nama rental → **Buat token** → salin token
 (hanya tampil sekali). Pilih tenant hanya jika tenant rental itu sudah ada di cloud; jika belum, biarkan
