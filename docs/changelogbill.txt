@@ -5,6 +5,19 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-01 (malam)
+-----------------------------------------------------------------------------
+Turnamen (panduan: docs/turnamen.md)
+- Pilihan format: Sistem gugur, Gugur ganda (bagan atas/bawah, grand final + final ulang),
+  Liga (sekali / pulang-pergi, klasemen menang 3 seri 1), Fase grup + gugur (2-8 grup, 1-2 lolos,
+  babak gugur silang antar grup). Liga & grup boleh seri.
+- Bundling F&B: produk gratis untuk setiap pendaftar (mis. Daftar 20.000 + Teh Botol Kotak),
+  stok berkurang & modal tercatat saat pendaftaran dibayar.
+- Total hadiah + tab Keuangan: pemasukan (perkiraan kuota penuh & realisasi), modal bonus, dana bersih,
+  sisa untuk rental, saran hadiah 50/60/70%. Hitungan juga tampil langsung di form.
+- Halaman publik & billboard: format, bonus F&B, total hadiah, klasemen grup/liga & bagan semua format.
+
+
 2026-10-01 (sore)
 -----------------------------------------------------------------------------
 Kasir - panel sesi

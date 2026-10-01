@@ -5,10 +5,12 @@ namespace App\Livewire\Operator;
 use App\Exceptions\BillingException;
 use App\Livewire\Concerns\WithAlert;
 use App\Models\Cabang;
+use App\Models\Produk;
 use App\Models\Turnamen;
 use App\Models\TurnamenPertandingan;
 use App\Models\TurnamenPeserta;
 use App\Models\Unit;
+use App\Services\Billing\StokService;
 use App\Services\Publik\TurnamenService;
 use App\Support\Tenancy;
 use Illuminate\Support\Collection;
@@ -77,10 +79,47 @@ class DaftarTurnamen extends Component
         return $this->terpilih?->peserta()->where('status', '!=', 'batal')->orderBy('created_at')->get() ?? collect();
     }
 
+    /** Bagan / klasemen per bagian (semua format) */
     #[Computed]
-    public function bagan(): Collection
+    public function bagian(): array
     {
-        return $this->terpilih?->pertandingan()->with(['pesertaA:id,nama', 'pesertaB:id,nama', 'unit:id,nama'])->get()->groupBy('babak') ?? collect();
+        return $this->terpilih ? app(TurnamenService::class)->tampilan($this->terpilih) : [];
+    }
+
+    #[Computed]
+    public function keuangan(): array
+    {
+        return app(TurnamenService::class)->keuangan($this->terpilih);
+    }
+
+    /** Produk aktif untuk bonus bundling */
+    #[Computed]
+    public function produkList(): Collection
+    {
+        return Produk::query()->where('is_active', true)->orderBy('nama')->get(['id', 'nama', 'lacak_stok']);
+    }
+
+    /** Hitungan cepat di form: uang masuk bila kuota penuh, modal bonus, sisa setelah hadiah */
+    #[Computed]
+    public function ringkasForm(): array
+    {
+        $peserta = max(0, (int) ($this->form['kuota'] ?? 0));
+        $biaya = max(0, (int) ($this->form['biaya_daftar'] ?? 0));
+        $hadiah = max(0, (int) ($this->form['total_hadiah'] ?? 0));
+        $produk = ($this->form['bonus_produk_id'] ?? null) ? Produk::find($this->form['bonus_produk_id']) : null;
+        $qty = $produk ? max(1, (int) ($this->form['bonus_qty'] ?? 1)) : 0;
+        $hpp = $produk?->lacak_stok ? (int) app(StokService::class)->kunci($produk, $this->cabang()->id)->hpp_rata : 0;
+
+        $masuk = $peserta * $biaya;
+        $modal = $peserta * $qty * $hpp;
+        $bersih = $masuk - $modal;
+
+        return [
+            'peserta' => $peserta, 'biaya' => $biaya, 'masuk' => $masuk, 'modal_bonus' => $modal,
+            'label_bonus' => $produk ? ($qty > 1 ? "{$qty}x " : '').$produk->nama.' ('.$peserta * $qty.' × Rp'.number_format($hpp, 0, ',', '.').')' : null,
+            'bersih' => $bersih, 'hadiah' => $hadiah, 'sisa' => $bersih - $hadiah,
+            'saran' => collect([50, 60, 70])->mapWithKeys(fn ($p) => [$p => (int) (floor($bersih * $p / 100 / 1000) * 1000)])->all(),
+        ];
     }
 
     #[Computed]
@@ -110,7 +149,9 @@ class DaftarTurnamen extends Component
         $this->editId = null;
         $this->form = [
             'nama' => '', 'game' => '', 'mulai_pada' => now()->addWeek()->setTime(19, 0)->format('Y-m-d\TH:i'),
-            'biaya_daftar' => 0, 'kuota' => 16, 'hadiah' => '', 'aturan' => '', 'daftar_online' => true,
+            'format' => 'gugur', 'jumlah_grup' => 4, 'lolos_per_grup' => 2, 'putaran' => 1,
+            'biaya_daftar' => 0, 'kuota' => 16, 'bonus_produk_id' => '', 'bonus_qty' => 1,
+            'hadiah' => '', 'total_hadiah' => 0, 'aturan' => '', 'daftar_online' => true,
         ];
         $this->formBuka = true;
     }
@@ -128,7 +169,9 @@ class DaftarTurnamen extends Component
         $this->editId = $t->id;
         $this->form = [
             'nama' => $t->nama, 'game' => $t->game, 'mulai_pada' => $t->mulai_pada->format('Y-m-d\TH:i'),
-            'biaya_daftar' => $t->biaya_daftar, 'kuota' => $t->kuota, 'hadiah' => (string) $t->hadiah,
+            'format' => $t->format, 'jumlah_grup' => $t->jumlah_grup ?? 4, 'lolos_per_grup' => $t->lolos_per_grup ?? 2, 'putaran' => $t->putaran,
+            'biaya_daftar' => $t->biaya_daftar, 'kuota' => $t->kuota, 'bonus_produk_id' => (string) $t->bonus_produk_id, 'bonus_qty' => max(1, $t->bonus_qty),
+            'hadiah' => (string) $t->hadiah, 'total_hadiah' => $t->total_hadiah,
             'aturan' => (string) $t->aturan, 'daftar_online' => $t->daftar_online,
         ];
         $this->formBuka = true;
@@ -141,7 +184,14 @@ class DaftarTurnamen extends Component
             'form.nama' => 'required|string|min:3|max:120',
             'form.game' => 'required|string|max:100',
             'form.mulai_pada' => 'required|date',
+            'form.format' => 'required|in:'.implode(',', array_keys(Turnamen::FORMAT)),
+            'form.jumlah_grup' => 'nullable|integer|min:2|max:8',
+            'form.lolos_per_grup' => 'nullable|integer|min:1|max:2',
+            'form.putaran' => 'nullable|integer|min:1|max:2',
             'form.biaya_daftar' => 'nullable|integer|min:0',
+            'form.bonus_produk_id' => 'nullable|string',
+            'form.bonus_qty' => 'nullable|integer|min:1|max:20',
+            'form.total_hadiah' => 'nullable|integer|min:0',
             'form.kuota' => 'required|integer|min:2|max:128',
             'form.hadiah' => 'nullable|string|max:1000',
             'form.aturan' => 'nullable|string|max:3000',
@@ -312,7 +362,7 @@ class DaftarTurnamen extends Component
 
     public function segarkan(): void
     {
-        unset($this->daftar, $this->terpilih, $this->peserta, $this->bagan);
+        unset($this->daftar, $this->terpilih, $this->peserta, $this->bagian, $this->keuangan);
     }
 
     private function izin(): void

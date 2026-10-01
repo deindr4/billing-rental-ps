@@ -163,14 +163,30 @@
                     </div>
                     <div class="text-right text-sm">
                         <div class="num font-semibold">{{ $t['peserta'] }}/{{ $t['kuota'] }} peserta</div>
-                        @if ($t['biaya'] > 0) <div class="text-muted">Daftar {{ $rp($t['biaya']) }}</div> @endif
+                        @if ($t['biaya'] > 0) <div class="text-muted">Daftar {{ $rp($t['biaya']) }}{{ $t['bonus'] ? ' + '.$t['bonus'] : '' }}</div> @endif
+                        <div class="text-muted">{{ $t['format'] }}</div>
                     </div>
                 </div>
+                @if ($t['total_hadiah'] > 0) <p class="text-sm"><span class="label">Total hadiah</span> <b style="color: var(--accent)">{{ $rp($t['total_hadiah']) }}</b></p> @endif
                 @if ($t['hadiah']) <p class="text-sm"><span class="label">Hadiah</span> {{ $t['hadiah'] }}</p> @endif
 
-                @if ($t['babak'])
+                @foreach ($t['bagian'] as $bg)
+                    <div class="label mt-1">{{ $bg['judul'] }}</div>
+                    @if ($bg['klasemen'])
+                        <div class="rounded-md border border-line bg-bg text-sm divide-y divide-line">
+                            @foreach ($bg['klasemen'] as $i => $r)
+                                <div class="flex items-center gap-2 px-3 py-1.5 {{ $bg['lolos'] && $i < $bg['lolos'] ? 'font-semibold' : '' }}" style="{{ $bg['lolos'] && $i < $bg['lolos'] ? 'color: var(--accent)' : '' }}">
+                                    <span class="num w-5 text-muted">{{ $i + 1 }}</span>
+                                    <span class="flex-1 truncate">{{ $r['nama'] }}</span>
+                                    <span class="num text-muted text-xs">{{ $r['main'] }} main · {{ $r['sg'] > 0 ? '+' : '' }}{{ $r['sg'] }}</span>
+                                    <span class="num w-8 text-right font-bold">{{ $r['poin'] }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    @if ($bg['kolom'])
                     <div class="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
-                        @foreach ($t['babak'] as $b)
+                        @foreach ($bg['kolom'] as $b)
                             <div class="min-w-40 flex-1 flex flex-col">
                                 <div class="label text-center mb-2">{{ $b['nama'] }}</div>
                                 <div class="flex-1 flex flex-col justify-around gap-2">
@@ -189,7 +205,8 @@
                             </div>
                         @endforeach
                     </div>
-                @endif
+                    @endif
+                @endforeach
             </section>
         @endif
 

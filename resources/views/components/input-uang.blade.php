@@ -33,7 +33,13 @@
              this.nilai = n;
              this.tampil = this.format(n);
              e.target.value = this.tampil;
-             $wire.set('{{ $model }}', n, {{ $live ? 'true' : 'false' }});
+             @if ($live)
+                 // Mode live: kirim setelah berhenti mengetik (bukan satu request per tombol)
+                 clearTimeout(this._jeda);
+                 this._jeda = setTimeout(() => $wire.set('{{ $model }}', n, true), 350);
+             @else
+                 $wire.set('{{ $model }}', n, false);
+             @endif
          },
          dariServer(v) {
              v = (v === undefined || v === '') ? null : v;

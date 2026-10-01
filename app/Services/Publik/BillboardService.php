@@ -155,8 +155,15 @@ final class BillboardService
             return null;
         }
 
-        $pertandingan = $t->pertandingan()->with(['pesertaA:id,nama', 'pesertaB:id,nama', 'pemenang:id,nama', 'unit:id,nama'])->get();
-        $totalBabak = (int) $pertandingan->max('babak');
+        $laga = fn ($p) => [
+            'a' => $p->pesertaA?->nama,
+            'b' => $p->pesertaB?->nama,
+            'skor_a' => $p->skor_a,
+            'skor_b' => $p->skor_b,
+            'pemenang' => $p->pemenang?->nama,
+            'status' => $p->status,
+            'unit' => $p->unit?->nama,
+        ];
 
         return [
             'nama' => $t->nama,
@@ -167,18 +174,20 @@ final class BillboardService
             'biaya' => $t->biaya_daftar,
             'peserta' => $t->pesertaAktif()->count(),
             'kuota' => $t->kuota,
-            'babak' => $pertandingan->groupBy('babak')->map(fn ($ps, $babak) => [
-                'nama' => Turnamen::namaBabak((int) $babak, $totalBabak),
-                'laga' => $ps->map(fn ($p) => [
-                    'a' => $p->pesertaA?->nama,
-                    'b' => $p->pesertaB?->nama,
-                    'skor_a' => $p->skor_a,
-                    'skor_b' => $p->skor_b,
-                    'pemenang' => $p->pemenang?->nama,
-                    'status' => $p->status,
-                    'unit' => $p->unit?->nama,
-                ])->values()->all(),
-            ])->values()->all(),
+            'format' => $t->namaFormat(),
+            'bonus' => $t->labelBonus(),
+            'total_hadiah' => $t->total_hadiah,
+            // Bagan / klasemen per bagian (semua format); laga liga/grup tidak ditampilkan di billboard, cukup klasemen
+            'bagian' => collect(app(TurnamenService::class)->tampilan($t))->map(fn ($bg) => [
+                'judul' => $bg['judul'],
+                'klasemen' => $bg['jenis'] === 'klasemen'
+                    ? array_map(fn ($r) => ['nama' => $r['peserta']->nama, 'main' => $r['main'], 'sg' => $r['sg'], 'poin' => $r['poin']], $bg['klasemen'])
+                    : null,
+                'lolos' => $bg['lolos'] ?? 0,
+                'kolom' => $bg['jenis'] === 'bagan'
+                    ? array_map(fn ($k) => ['nama' => $k['nama'], 'laga' => $k['laga']->map($laga)->all()], $bg['kolom'])
+                    : [],
+            ])->all(),
         ];
     }
 

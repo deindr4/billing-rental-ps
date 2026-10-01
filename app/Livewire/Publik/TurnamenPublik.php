@@ -55,10 +55,11 @@ class TurnamenPublik extends Component
         return $this->turnamen->pesertaAktif()->orderBy('created_at')->get(['id', 'nama', 'status']);
     }
 
+    /** Bagan / klasemen per bagian (semua format) */
     #[Computed]
-    public function bagan()
+    public function bagian(): array
     {
-        return $this->turnamen->pertandingan()->with(['pesertaA:id,nama', 'pesertaB:id,nama'])->get()->groupBy('babak');
+        return app(TurnamenService::class)->tampilan($this->turnamen);
     }
 
     public function juara(): array

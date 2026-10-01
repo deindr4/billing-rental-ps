@@ -4,7 +4,7 @@
 <div>
     <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
         <div>
-            <div class="label">Sistem gugur · pendaftaran online & kasir · tampil di billboard</div>
+            <div class="label">Gugur · gugur ganda · liga · fase grup · pendaftaran online & kasir · tampil di billboard</div>
             <h1 class="text-xl font-semibold tracking-tight">Turnamen</h1>
         </div>
         <button type="button" wire:click="tambah" class="btn btn-primary h-10 px-4"><x-ikon name="plus" size="16" /> Turnamen baru</button>
@@ -40,10 +40,15 @@
                         </div>
                         <span class="chip" style="color: {{ $warna[$t->status] }}; border-color: {{ $warna[$t->status] }}">{{ \App\Models\Turnamen::STATUS[$t->status] }}</span>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 text-sm">
+                    <div class="flex flex-wrap gap-1.5">
+                        <span class="chip">{{ $t->namaFormat() }}{{ $t->format === 'grup_gugur' ? " · {$t->jumlah_grup} grup, {$t->lolos_per_grup} lolos" : '' }}{{ in_array($t->format, ['liga', 'grup_gugur'], true) && $t->putaran > 1 ? ' · pulang-pergi' : '' }}</span>
+                        @if ($t->labelBonus()) <span class="chip" style="color: var(--accent)">+ {{ $t->labelBonus() }} gratis</span> @endif
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm">
                         <div class="rounded-md bg-bg px-3 py-2"><div class="label">Peserta</div><span class="font-semibold num">{{ $this->peserta->count() }}/{{ $t->kuota }}</span></div>
                         <div class="rounded-md bg-bg px-3 py-2"><div class="label">Biaya daftar</div><x-rupiah :nilai="$t->biaya_daftar" class="font-semibold" /></div>
                         <div class="rounded-md bg-bg px-3 py-2"><div class="label">Lunas</div><span class="font-semibold num">{{ $this->peserta->where('status', 'lunas')->count() }}</span></div>
+                        <div class="rounded-md bg-bg px-3 py-2"><div class="label">Total hadiah</div><x-rupiah :nilai="$t->total_hadiah" class="font-semibold" /></div>
                     </div>
                     @if ($t->hadiah) <p class="text-sm"><span class="label">Hadiah</span> {{ $t->hadiah }}</p> @endif
 
@@ -69,8 +74,8 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-1.5 rounded-md border border-line bg-bg p-1 max-w-xs">
-                    @foreach (['peserta' => 'Peserta', 'bagan' => 'Bagan'] as $k => $n)
+                <div class="grid grid-cols-3 gap-1.5 rounded-md border border-line bg-bg p-1 max-w-sm">
+                    @foreach (['peserta' => 'Peserta', 'bagan' => in_array($t->format, ['liga', 'grup_gugur'], true) ? 'Klasemen' : 'Bagan', 'keuangan' => 'Keuangan'] as $k => $n)
                         <button type="button" wire:click="$set('tab', '{{ $k }}')" @class(['h-8 rounded text-sm font-medium', 'bg-surface-2 text-fg border border-line' => $tab === $k, 'text-muted' => $tab !== $k])>{{ $n }}</button>
                     @endforeach
                 </div>
@@ -93,6 +98,7 @@
                                 <span class="w-6 text-muted num">{{ $i + 1 }}</span>
                                 <span class="flex-1 min-w-0">
                                     <span class="font-medium">{{ $p->nama }}</span>
+                                    @if ($p->grup) <span class="chip ml-1">Grup {{ $p->grup }}</span> @endif
                                     <span class="text-muted num"> · {{ $p->telepon }} · {{ $p->sumber }}</span>
                                 </span>
                                 @if ($t->status === 'pendaftaran')
@@ -113,51 +119,48 @@
                         @endforelse
                     </div>
 
-                {{-- ---------- Bagan ---------- --}}
-                @else
-                    @if ($this->bagan->isEmpty())
-                        <div class="kartu p-6 text-center text-sm text-muted">Bagan dibuat saat turnamen dimulai.</div>
+                {{-- ---------- Bagan / klasemen ---------- --}}
+                @elseif ($tab === 'bagan')
+                    @if ($this->bagian === [])
+                        <div class="kartu p-6 text-center text-sm text-muted">Bagan / jadwal dibuat saat turnamen dimulai ({{ $t->namaFormat() }}).</div>
                     @else
-                        @php $totalBabak = $this->bagan->keys()->max(); @endphp
-                        <div class="flex gap-3 overflow-x-auto pb-2">
-                            @foreach ($this->bagan as $babak => $laga)
-                                <div class="min-w-64 flex-1 flex flex-col gap-2">
-                                    <div class="label text-center">{{ \App\Models\Turnamen::namaBabak($babak, $totalBabak) }}</div>
-                                    <div class="flex-1 flex flex-col justify-around gap-2">
-                                        @foreach ($laga as $m)
-                                            <div wire:key="m-{{ $m->id }}" class="kartu p-3 space-y-2 text-sm" @if ($m->status === 'main') style="border-color: var(--accent)" @endif>
-                                                @foreach ([['pesertaA', 'skor_a', 'a'], ['pesertaB', 'skor_b', 'b']] as [$rel, $kol, $sisi])
-                                                    @php $pp = $m->$rel; $menang = $m->pemenang_id && $pp && $m->pemenang_id === $pp->id; @endphp
-                                                    <div class="flex items-center justify-between gap-2 {{ $menang ? 'font-bold text-accent' : ($m->pemenang_id ? 'text-muted' : '') }}">
-                                                        <span class="truncate">{{ $pp?->nama ?? ($m->babak === 1 ? 'BYE' : 'TBD') }}</span>
-                                                        @if ($m->peserta_a_id && $m->peserta_b_id && $m->status !== 'selesai')
-                                                            <input type="number" min="0" wire:model="skor.{{ $m->id }}.{{ $sisi }}" class="input h-8 w-16 num text-sm">
-                                                        @else
-                                                            <span class="num">{{ $m->$kol }}</span>
-                                                        @endif
-                                                    </div>
-                                                @endforeach
-                                                @if ($m->peserta_a_id && $m->peserta_b_id && $m->status !== 'selesai')
-                                                    <div class="flex items-center gap-1.5 pt-1">
-                                                        <select wire:model="unitMain.{{ $m->id }}" class="input h-8 py-0 text-xs flex-1">
-                                                            <option value="">{{ $m->unit?->nama ?? 'Pilih unit' }}</option>
-                                                            @foreach ($this->units as $u) <option value="{{ $u->id }}">{{ $u->nama }}</option> @endforeach
-                                                        </select>
-                                                        @if ($m->status === 'menunggu')
-                                                            <button type="button" wire:click="main('{{ $m->id }}')" class="btn h-8 px-2 text-xs">Main</button>
-                                                        @endif
-                                                        <button type="button" wire:click="simpanSkor('{{ $m->id }}')" class="btn btn-primary h-8 px-2 text-xs">Skor</button>
-                                                    </div>
-                                                @elseif ($m->unit && $m->status !== 'selesai')
-                                                    <div class="label">{{ $m->unit->nama }}</div>
-                                                @endif
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
-                            @endforeach
+                        <div class="space-y-5">
+                            @include('turnamen.bagian', ['bagian' => $this->bagian, 'ubah' => $t->status === 'berjalan', 'units' => $this->units])
                         </div>
                     @endif
+
+                {{-- ---------- Keuangan ---------- --}}
+                @else
+                    @php $k = $this->keuangan; @endphp
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @foreach (['perkiraan' => 'Perkiraan (kuota penuh)', 'realisasi' => 'Realisasi (peserta lunas)'] as $kunci => $judul)
+                            @php $d = $k[$kunci]; @endphp
+                            <div class="kartu p-4 space-y-1.5 text-sm">
+                                <div class="label">{{ $judul }}</div>
+                                <div class="flex justify-between"><span class="text-muted">Pemasukan ({{ $d['peserta'] }} × <x-rupiah :nilai="$t->biaya_daftar" />)</span><x-rupiah :nilai="$d['masuk']" /></div>
+                                @if ($t->labelBonus())
+                                    <div class="flex justify-between"><span class="text-muted">Modal bonus {{ $t->labelBonus() }} ({{ $d['peserta'] * $t->bonus_qty }} × <x-rupiah :nilai="$k['hpp_bonus']" />)</span><span>− <x-rupiah :nilai="$d['modal_bonus']" /></span></div>
+                                @endif
+                                <div class="flex justify-between border-t border-line pt-1.5 font-semibold"><span>Dana bersih</span><x-rupiah :nilai="$d['bersih']" /></div>
+                                <div class="flex justify-between"><span class="text-muted">Total hadiah</span><span>− <x-rupiah :nilai="$d['hadiah']" /></span></div>
+                                <div @class(['flex justify-between border-t border-line pt-1.5 font-bold', 'text-danger' => $d['sisa'] < 0, 'text-accent' => $d['sisa'] >= 0])>
+                                    <span>{{ $d['sisa'] < 0 ? 'Rugi' : 'Sisa untuk rental' }}</span><x-rupiah :nilai="abs($d['sisa'])" />
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <div class="kartu p-4 text-sm space-y-2">
+                        <div class="label">Saran total hadiah (dari dana bersih bila kuota penuh)</div>
+                        <div class="grid grid-cols-3 gap-2">
+                            @foreach ($k['saran'] as $persen => $nilai)
+                                <div class="rounded-md bg-bg px-3 py-2"><div class="text-xs text-muted">{{ $persen }}%</div><x-rupiah :nilai="$nilai" class="font-semibold" /></div>
+                            @endforeach
+                        </div>
+                        @if ($t->labelBonus() && $k['hpp_bonus'] === 0)
+                            <p class="text-xs text-muted">Modal {{ $t->bonusProduk?->nama }} belum tercatat (catat stok masuk dengan harga beli di menu Stok) — modal bonus dihitung Rp0.</p>
+                        @endif
+                        <p class="text-xs text-muted">Ubah total hadiah lewat tombol <b>Ubah</b>. Contoh pembagian: juara 1 = 50%, juara 2 = 30%, juara 3 = 20% dari total hadiah.</p>
+                    </div>
                 @endif
             @else
                 <div class="kartu p-10 text-center text-muted">Pilih turnamen, atau buat turnamen baru.</div>
@@ -184,20 +187,94 @@
                     <input type="datetime-local" wire:model="form.mulai_pada" class="input">
                 </div>
             </div>
+            {{-- Format turnamen --}}
+            <div>
+                <label class="block text-sm mb-1.5">Format</label>
+                <select wire:model.live="form.format" class="input" @disabled($editId && $this->terpilih?->status !== 'pendaftaran')>
+                    @foreach (\App\Models\Turnamen::FORMAT as $kode => [$namaF, $ketF])
+                        <option value="{{ $kode }}">{{ $namaF }}</option>
+                    @endforeach
+                </select>
+                <p class="text-xs text-muted mt-1">{{ \App\Models\Turnamen::FORMAT[$form['format'] ?? 'gugur'][1] ?? '' }}</p>
+            </div>
+            @if (($form['format'] ?? '') === 'grup_gugur')
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-sm mb-1.5">Jumlah grup</label>
+                        <select wire:model="form.jumlah_grup" class="input">
+                            @foreach (range(2, 8) as $g) <option value="{{ $g }}">{{ $g }} grup ({{ implode(', ', array_map(fn ($i) => chr(65 + $i), range(0, $g - 1))) }})</option> @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1.5">Lolos per grup</label>
+                        <select wire:model="form.lolos_per_grup" class="input">
+                            <option value="1">Juara grup</option>
+                            <option value="2">Juara & runner-up</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm mb-1.5">Fase grup</label>
+                        <select wire:model="form.putaran" class="input"><option value="1">Sekali bertemu</option><option value="2">Pulang-pergi</option></select>
+                    </div>
+                </div>
+            @elseif (($form['format'] ?? '') === 'liga')
+                <div>
+                    <label class="block text-sm mb-1.5">Putaran</label>
+                    <select wire:model="form.putaran" class="input"><option value="1">Sekali bertemu</option><option value="2">Pulang-pergi (2x bertemu)</option></select>
+                </div>
+            @endif
+
             <div class="grid grid-cols-2 gap-3">
                 <div>
                     <label class="block text-sm mb-1.5">Biaya daftar</label>
-                    <x-input-uang wire:model="form.biaya_daftar" />
+                    <x-input-uang wire:model.live.debounce.500ms="form.biaya_daftar" />
                 </div>
                 <div>
                     <label class="block text-sm mb-1.5">Kuota peserta</label>
-                    <input type="number" wire:model="form.kuota" class="input num" min="2" max="128">
+                    <input type="number" wire:model.live.debounce.500ms="form.kuota" class="input num" min="2" max="128">
                     @error('form.kuota') <p class="text-sm text-danger mt-1">{{ $message }}</p> @enderror
                 </div>
             </div>
+
+            {{-- Bundling F&B gratis untuk setiap pendaftar --}}
+            <div class="grid grid-cols-[1fr_90px] gap-3">
+                <div>
+                    <label class="block text-sm mb-1.5">Bonus F&amp;B gratis (bundling)</label>
+                    <select wire:model.live="form.bonus_produk_id" class="input">
+                        <option value="">Tanpa bonus</option>
+                        @foreach ($this->produkList as $pr) <option value="{{ $pr->id }}">{{ $pr->nama }}</option> @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm mb-1.5">Jumlah</label>
+                    <input type="number" wire:model.live.debounce.500ms="form.bonus_qty" class="input num" min="1" max="20" @disabled(empty($form['bonus_produk_id']))>
+                </div>
+            </div>
+
             <div>
-                <label class="block text-sm mb-1.5">Hadiah</label>
-                <textarea wire:model="form.hadiah" rows="2" class="input" maxlength="1000" placeholder="Juara 1 Rp500.000 + main gratis 5 jam"></textarea>
+                <label class="block text-sm mb-1.5">Total hadiah (uang)</label>
+                <x-input-uang wire:model.live.debounce.500ms="form.total_hadiah" />
+            </div>
+
+            {{-- Hitungan cepat: berapa uang masuk & sisa setelah hadiah --}}
+            @php $r = $this->ringkasForm; @endphp
+            <div class="rounded-md border border-line px-3 py-2 text-sm space-y-1">
+                <div class="label">Perkiraan bila kuota penuh</div>
+                <div class="flex justify-between"><span class="text-muted">{{ $r['peserta'] }} peserta × <x-rupiah :nilai="$r['biaya']" /></span><x-rupiah :nilai="$r['masuk']" /></div>
+                @if ($r['modal_bonus'] > 0 || $r['label_bonus'])
+                    <div class="flex justify-between"><span class="text-muted">Modal bonus {{ $r['label_bonus'] }}</span><span>− <x-rupiah :nilai="$r['modal_bonus']" /></span></div>
+                @endif
+                <div class="flex justify-between font-semibold"><span>Dana bersih</span><x-rupiah :nilai="$r['bersih']" /></div>
+                <div class="flex justify-between"><span class="text-muted">Total hadiah</span><span>− <x-rupiah :nilai="$r['hadiah']" /></span></div>
+                <div @class(['flex justify-between font-bold border-t border-line pt-1', 'text-danger' => $r['sisa'] < 0, 'text-accent' => $r['sisa'] >= 0])>
+                    <span>{{ $r['sisa'] < 0 ? 'Rugi' : 'Sisa untuk rental' }}</span><x-rupiah :nilai="abs($r['sisa'])" />
+                </div>
+                <div class="text-xs text-muted">Saran hadiah: 50% <x-rupiah :nilai="$r['saran'][50]" /> · 60% <x-rupiah :nilai="$r['saran'][60]" /> · 70% <x-rupiah :nilai="$r['saran'][70]" /></div>
+            </div>
+
+            <div>
+                <label class="block text-sm mb-1.5">Keterangan hadiah</label>
+                <textarea wire:model="form.hadiah" rows="2" class="input" maxlength="1000" placeholder="Juara 1 Rp100.000, juara 2 Rp60.000, juara 3 Rp40.000 + main gratis 2 jam"></textarea>
             </div>
             <div>
                 <label class="block text-sm mb-1.5">Aturan</label>

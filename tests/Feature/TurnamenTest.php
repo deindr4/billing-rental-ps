@@ -157,7 +157,8 @@ class TurnamenTest extends TestCase
 
         $data = app(BillboardService::class)->data($this->cabang->load('tenant'));
         $this->assertSame('Turnamen FC 25', $data['turnamen']['nama']);
-        $this->assertSame('Final', $data['turnamen']['babak'][0]['nama']);
+        $this->assertSame('Final', $data['turnamen']['bagian'][0]['kolom'][0]['nama']);
+        $this->assertSame('Sistem gugur', $data['turnamen']['format']);
 
         $this->get(route('turnamen.publik', $t->slug))->assertOk()->assertSee('Turnamen FC 25');
         $this->get(route('turnamen'))->assertOk();

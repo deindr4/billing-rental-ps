@@ -1,7 +1,6 @@
 @php
     $t = $this->turnamen;
     $juara = $this->juara();
-    $totalBabak = $this->bagan->keys()->max();
 @endphp
 <div class="max-w-2xl mx-auto px-4 py-6 space-y-5" wire:poll.30s>
     <header class="flex items-center gap-3">
@@ -17,8 +16,16 @@
     <section class="kartu p-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
         <div><div class="label">Game</div><div class="font-semibold">{{ $t->game }}</div></div>
         <div><div class="label">Mulai</div><div class="font-semibold">{{ $t->mulai_pada->translatedFormat('D, d M H:i') }}</div></div>
-        <div><div class="label">Biaya daftar</div><div class="font-semibold">{{ $t->biaya_daftar > 0 ? 'Rp '.number_format($t->biaya_daftar, 0, ',', '.') : 'Gratis' }}</div></div>
+        <div>
+            <div class="label">Biaya daftar</div>
+            <div class="font-semibold">{{ $t->biaya_daftar > 0 ? 'Rp '.number_format($t->biaya_daftar, 0, ',', '.') : 'Gratis' }}</div>
+            @if ($t->labelBonus()) <div class="text-xs" style="color: var(--accent)">+ {{ $t->labelBonus() }} gratis</div> @endif
+        </div>
         <div><div class="label">Peserta</div><div class="font-semibold num">{{ $this->peserta->count() }}/{{ $t->kuota }}</div></div>
+        <div class="col-span-2 sm:col-span-2"><div class="label">Format</div><div class="font-semibold">{{ $t->namaFormat() }}{{ $t->format === 'grup_gugur' ? " ({$t->jumlah_grup} grup)" : '' }}</div></div>
+        @if ($t->total_hadiah > 0)
+            <div class="col-span-2 sm:col-span-2"><div class="label">Total hadiah</div><div class="font-semibold text-accent">Rp {{ number_format($t->total_hadiah, 0, ',', '.') }}</div></div>
+        @endif
     </section>
 
     @if ($juara)
@@ -55,31 +62,11 @@
         <section class="kartu p-4 text-sm text-muted">{{ $t->penuh() ? 'Kuota penuh.' : 'Pendaftaran di kasir.' }}</section>
     @endif
 
-    {{-- Bagan --}}
-    @if ($this->bagan->isNotEmpty())
-        <section>
-            <div class="label mb-2">Bagan</div>
-            <div class="flex gap-3 overflow-x-auto pb-2">
-                @foreach ($this->bagan as $babak => $laga)
-                    <div class="min-w-44 flex-1 flex flex-col">
-                        <div class="label text-center mb-2">{{ \App\Models\Turnamen::namaBabak($babak, $totalBabak) }}</div>
-                        <div class="flex-1 flex flex-col justify-around gap-2">
-                            @foreach ($laga as $m)
-                                <div class="kartu p-2 text-sm" @if ($m->status === 'main') style="border-color: var(--accent)" @endif>
-                                    @foreach ([['pesertaA', 'skor_a'], ['pesertaB', 'skor_b']] as [$rel, $kol])
-                                        @php $pp = $m->$rel; $menang = $pp && $m->pemenang_id === $pp->id; @endphp
-                                        <div class="flex justify-between gap-2 {{ $menang ? 'font-bold text-accent' : ($m->pemenang_id ? 'text-muted' : '') }}">
-                                            <span class="truncate">{{ $pp?->nama ?? ($m->babak === 1 ? 'BYE' : '—') }}</span>
-                                            <span class="num">{{ $m->$kol }}</span>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </section>
+    {{-- Bagan / klasemen (semua format) --}}
+    @if ($this->bagian !== [])
+        <div class="space-y-5">
+            @include('turnamen.bagian', ['bagian' => $this->bagian, 'ubah' => false, 'units' => collect()])
+        </div>
     @elseif ($this->peserta->isNotEmpty())
         <section class="kartu divide-y divide-line">
             <div class="px-4 py-2 label">Peserta terdaftar</div>

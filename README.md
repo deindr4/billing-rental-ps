@@ -13,6 +13,7 @@ Stack: Laravel 13 · Livewire 4 · Filament 5 · Spatie Permission · Reverb · 
 | [docs/changelog.txt](docs/changelog.txt) | Catatan update APK TV per versi |
 | [docs/hak-akses.md](docs/hak-akses.md) | Perbedaan akses Super Admin, Owner, Supervisor, Kasir, Teknisi |
 | [docs/pembayaran-online.md](docs/pembayaran-online.md) | Payment gateway & bayar mandiri QRIS di TV |
+| [docs/turnamen.md](docs/turnamen.md) | Format turnamen (gugur, gugur ganda, liga, grup), bundling F&B, keuangan & hadiah |
 | [docs/sinkron.md](docs/sinkron.md) | Sinkronisasi server lokal ↔ cloud, token |
 | [docs/server-publik.md](docs/server-publik.md) | Server cloud, Cloudflare, port, `.env` produksi, checklist publik |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |

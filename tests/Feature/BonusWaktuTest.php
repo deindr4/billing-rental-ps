@@ -10,6 +10,7 @@ use App\Models\Transaksi;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Billing\BillingService;
+use App\Services\Billing\KalkulatorOpenBilling;
 use App\Services\Billing\ShiftService;
 use App\Services\Struk\StrukService;
 use App\Support\HakAkses;
@@ -66,11 +67,16 @@ class BonusWaktuTest extends TestCase
         $baris = collect(app(StrukService::class)->baris(app(StrukService::class)->data($trx->fresh()), 32))->pluck('t')->implode("\n");
         $this->assertStringContainsString('Sewa berjalan (perkiraan)', $baris);
         $this->assertStringContainsString('TOTAL SEMENTARA', $baris);
-        $this->assertStringContainsString('8.000', $baris);
 
-        // Ditagih 60 menit saja saat selesai
+        // Perkiraan = kalkulator open billing untuk durasi setelah bonus (± 60 menit, bukan 90)
+        $perkiraan = $this->billing->estimasiSewaOpen($sesi->fresh());
+        $tanpaBonus = app(KalkulatorOpenBilling::class)->hitung((int) $sesi->tarif_per_jam, 90 * 60, 15, 5, 60, 0)['biaya'];
+        $this->assertLessThan($tanpaBonus, $perkiraan);
+        $this->assertStringContainsString(number_format($perkiraan, 0, ',', '.'), $baris);
+
+        // Ditagih sesuai durasi setelah bonus saat selesai
         $this->billing->selesai($sesi, $this->owner);
-        $this->assertSame(8000, Transaksi::findOrFail($sesi->transaksi_id)->total);
+        $this->assertSame($perkiraan, Transaksi::findOrFail($sesi->transaksi_id)->total);
     }
 
     public function test_bonus_paket_mengundur_waktu_selesai(): void

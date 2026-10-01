@@ -25,9 +25,18 @@ class Turnamen extends Model
 
     protected $table = 'turnamen';
 
+    /** Format turnamen => [nama, keterangan singkat] */
+    public const FORMAT = [
+        'gugur' => ['Sistem gugur', 'Kalah sekali langsung tersingkir.'],
+        'gugur_ganda' => ['Gugur ganda', 'Tersingkir setelah kalah dua kali (bagan atas, bagan bawah, grand final).'],
+        'liga' => ['Liga', 'Semua peserta saling bertemu; juara dari klasemen (menang 3, seri 1, kalah 0).'],
+        'grup_gugur' => ['Fase grup + gugur', 'Grup saling bertemu, juara & runner-up grup lolos ke babak gugur silang antar grup.'],
+    ];
+
     protected $fillable = [
-        'tenant_id', 'cabang_id', 'slug', 'nama', 'game', 'mulai_pada', 'biaya_daftar', 'kuota',
-        'hadiah', 'aturan', 'daftar_online', 'status',
+        'tenant_id', 'cabang_id', 'slug', 'nama', 'game', 'format', 'jumlah_grup', 'lolos_per_grup', 'putaran',
+        'mulai_pada', 'biaya_daftar', 'bonus_produk_id', 'bonus_qty', 'kuota',
+        'hadiah', 'total_hadiah', 'aturan', 'daftar_online', 'status',
     ];
 
     protected function casts(): array
@@ -35,10 +44,36 @@ class Turnamen extends Model
         return [
             'mulai_pada' => 'datetime',
             'biaya_daftar' => 'integer',
+            'bonus_qty' => 'integer',
+            'jumlah_grup' => 'integer',
+            'lolos_per_grup' => 'integer',
+            'putaran' => 'integer',
             'kuota' => 'integer',
+            'total_hadiah' => 'integer',
             'daftar_online' => 'boolean',
             'synced_at' => 'datetime',
         ];
+    }
+
+    public function namaFormat(): string
+    {
+        return self::FORMAT[$this->format][0] ?? 'Sistem gugur';
+    }
+
+    /** Produk F&B gratis yang didapat setiap pendaftar (bundling) */
+    public function bonusProduk(): BelongsTo
+    {
+        return $this->belongsTo(Produk::class, 'bonus_produk_id')->withoutGlobalScopes();
+    }
+
+    /** "Teh Botol Kotak" atau "2x Teh Botol Kotak"; null = tanpa bundling */
+    public function labelBonus(): ?string
+    {
+        if (! $this->bonus_produk_id || $this->bonus_qty < 1 || ! $this->bonusProduk) {
+            return null;
+        }
+
+        return ($this->bonus_qty > 1 ? $this->bonus_qty.'x ' : '').$this->bonusProduk->nama;
     }
 
     public function cabang(): BelongsTo

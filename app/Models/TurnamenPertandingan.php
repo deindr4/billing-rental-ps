@@ -15,7 +15,7 @@ class TurnamenPertandingan extends Model
     protected $table = 'turnamen_pertandingan';
 
     protected $fillable = [
-        'tenant_id', 'turnamen_id', 'babak', 'nomor', 'peserta_a_id', 'peserta_b_id', 'skor_a', 'skor_b',
+        'tenant_id', 'turnamen_id', 'tahap', 'grup', 'babak', 'nomor', 'peserta_a_id', 'peserta_b_id', 'skor_a', 'skor_b',
         'pemenang_id', 'unit_id', 'status',
     ];
 

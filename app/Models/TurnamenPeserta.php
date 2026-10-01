@@ -15,7 +15,7 @@ class TurnamenPeserta extends Model
     protected $table = 'turnamen_peserta';
 
     protected $fillable = [
-        'tenant_id', 'turnamen_id', 'member_id', 'nama', 'telepon', 'status', 'transaksi_id', 'unggulan', 'sumber',
+        'tenant_id', 'turnamen_id', 'member_id', 'nama', 'telepon', 'status', 'transaksi_id', 'unggulan', 'grup', 'sumber',
     ];
 
     protected function casts(): array
