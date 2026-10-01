@@ -6,6 +6,14 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.4.1 (kode 6) - 2026-10-01                                    [tag apk-0.4.1]
+-----------------------------------------------------------------------------
+- Panel QR bayar mandiri di layar kunci dibuat lebih ringkas (±23% lebih sempit, ±21% lebih pendek):
+  QR ajakan lebih kecil, teks langkah dipersingkat (1 baris per langkah), tarif & minimal menit lebih rapi.
+- Panel QRIS pembayaran juga dirapikan; QRIS tetap cukup besar untuk dipindai dari HP.
+Catatan: ukuran di TV memakai satuan relatif layar, jadi proporsinya sama di TV kecil maupun besar.
+
+
 0.4.0 (kode 5) - 2026-10-01                                    [tag apk-0.4.0]
 -----------------------------------------------------------------------------
 - Pojok kiri atas layar menampilkan nama unit persis seperti di Admin -> Unit

@@ -45,23 +45,25 @@ fun KontenBayarMandiri(bm: BayarMandiri, sekarangMs: Long, besar: Boolean = true
     val aksen = LocalAksen.current
     val t = bm.tagihan
 
+    // Ukuran dalam dp = proporsi layar yang sama di TV kecil maupun besar (layar TV ±960×540 dp).
+    // Panel ajakan dibuat ringkas (±30% lebar layar); QRIS pembayaran tetap cukup besar untuk dipindai dari HP.
     if (t == null) {
-        Label(if (bm.jenis == "isi_ulang") "Isi ulang waktu" else "Main sekarang", warna = aksen)
-        Spacer(Modifier.height(4.dp))
+        Label(if (bm.jenis == "isi_ulang") "Isi ulang waktu" else "Main sekarang", warna = aksen, ukuran = 10.sp)
+        Spacer(Modifier.height(2.dp))
         Text(
             if (bm.jenis == "isi_ulang") "Scan untuk tambah waktu" else "Scan untuk main",
-            color = Warna.teks, fontSize = if (besar) 20.sp else 18.sp, fontWeight = FontWeight.Bold,
+            color = Warna.teks, fontSize = if (besar) 16.sp else 15.sp, fontWeight = FontWeight.Bold,
         )
         Spacer(Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            KotakQr(bm.url, if (besar) 128.dp else 112.dp)
-            Column(Modifier.width(if (besar) 170.dp else 150.dp)) {
-                Text("1. Scan dengan kamera HP", color = Warna.redup, fontSize = 12.sp)
-                Text("2. Ketik nominal, bebas", color = Warna.redup, fontSize = 12.sp)
-                Text("3. Bayar QRIS yang muncul di TV", color = Warna.redup, fontSize = 12.sp)
-                Spacer(Modifier.height(6.dp))
-                bm.tarifPerJam?.let { Label("${rupiah(it)} / jam", warna = aksen, ukuran = 12.sp) }
-                Label("Min. ${bm.minimalMenit} menit · TV terbuka otomatis", ukuran = 10.sp)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            KotakQr(bm.url, if (besar) 92.dp else 84.dp, tepi = 5.dp)
+            Column(Modifier.width(132.dp), verticalArrangement = Arrangement.spacedBy(1.dp)) {
+                Text("1. Scan kamera HP", color = Warna.redup, fontSize = 11.sp, maxLines = 1)
+                Text("2. Ketik nominal", color = Warna.redup, fontSize = 11.sp, maxLines = 1)
+                Text("3. Bayar QRIS di TV", color = Warna.redup, fontSize = 11.sp, maxLines = 1)
+                Spacer(Modifier.height(4.dp))
+                bm.tarifPerJam?.let { Label("${rupiah(it)}/jam", warna = aksen, ukuran = 11.sp) }
+                Label("Min. ${bm.minimalMenit} menit", ukuran = 9.sp)
             }
         }
         return
@@ -71,34 +73,34 @@ fun KontenBayarMandiri(bm: BayarMandiri, sekarangMs: Long, besar: Boolean = true
 
     val tautan = t.tipe == "tautan"
 
-    Label(if (tautan) "Scan untuk bayar" else "Scan QRIS untuk bayar", warna = aksen)
+    Label(if (tautan) "Scan untuk bayar" else "Scan QRIS untuk bayar", warna = aksen, ukuran = 10.sp)
     Spacer(Modifier.height(8.dp))
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-        KotakQr(t.qris, if (besar) 190.dp else 160.dp)
-        Column {
-            Angka(rupiah(t.nominal), aksen, if (besar) 26.sp else 22.sp)
-            Text("= ${t.label}", color = Warna.teks, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
-            Spacer(Modifier.height(8.dp))
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+        KotakQr(t.qris, if (besar) 140.dp else 128.dp)
+        Column(Modifier.width(132.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Angka(rupiah(t.nominal), aksen, if (besar) 20.sp else 18.sp)
+            Text("= ${t.label}", color = Warna.teks, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
+            Spacer(Modifier.height(4.dp))
             Text(
-                if (tautan) "Scan dengan kamera HP,\npilih metode bayar" else "Pakai aplikasi bank /\ne-wallet apa saja",
-                color = Warna.redup, fontSize = 12.sp,
+                if (tautan) "Scan kamera HP, pilih metode bayar" else "Bank / e-wallet apa saja",
+                color = Warna.redup, fontSize = 11.sp,
             )
-            Spacer(Modifier.height(8.dp))
-            Label("Berlaku ${Jam.format(sisa).substring(3)}", warna = if (sisa < 60) Warna.kuning else Warna.redup, ukuran = 11.sp)
-            Label("Menunggu pembayaran…", ukuran = 10.sp)
+            Spacer(Modifier.height(4.dp))
+            Label("Berlaku ${Jam.format(sisa).substring(3)}", warna = if (sisa < 60) Warna.kuning else Warna.redup, ukuran = 10.sp)
+            Label("Menunggu bayar…", ukuran = 9.sp)
         }
     }
 }
 
 /** QR hitam di atas kotak putih (mudah dipindai dari layar TV) */
 @Composable
-fun KotakQr(teks: String, ukuran: Dp) {
+fun KotakQr(teks: String, ukuran: Dp, tepi: Dp = 7.dp) {
     val gambar = remember(teks) { buatQr(teks) }
 
     Box(
         Modifier
-            .background(Color.White, RoundedCornerShape(8.dp))
-            .padding(8.dp),
+            .background(Color.White, RoundedCornerShape(6.dp))
+            .padding(tepi), // zona tenang putih di sekeliling QR (wajib supaya mudah dipindai)
     ) {
         if (gambar != null) {
             Image(gambar, contentDescription = "QR", filterQuality = FilterQuality.None, modifier = Modifier.size(ukuran))
