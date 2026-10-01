@@ -14,6 +14,8 @@ Server cloud di balik Cloudflare (panduan: docs/server-publik.md -> HTTPS & .hta
   header palsu dari IP lain tetap diabaikan.
 - Pemeliharaan sistem: baris baru "HTTPS terbaca".
 - Docs: tabel masalah HTTPS umum (redirect loop Flexible SSL, 419, 404 /admin), contoh Nginx & proxy Reverb.
+- Paket server cloud: installer\build.ps1 -PaketCloud -> BillingPS-cloud-<versi>.tar.gz (aplikasi + vendor + aset,
+  tanpa Node.js/composer di VPS). Panduan pasang & update di CloudPanel: docs/cloudpanel.md.
 
 
 2026-10-01 (tahap 14 - installer Windows)

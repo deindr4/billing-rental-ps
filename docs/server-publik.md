@@ -109,6 +109,9 @@ ProxyPassReverse /app ws://127.0.0.1:8080/app
 
 ## Memasang server cloud (sekali)
 
+Langkah lengkap untuk CloudPanel (paket aplikasi siap unggah, Nginx, cron, supervisor): [cloudpanel.md](cloudpanel.md).
+Ringkasnya:
+
 ```bash
 php artisan migrate --force
 php artisan db:seed --class=HakAksesSeeder --force   # daftar izin, tanpa data demo

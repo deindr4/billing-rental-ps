@@ -72,6 +72,14 @@ dan folder PHP 8.4 **Thread Safe** (lokasi di `installer\bahan.json`, bawaan dar
 Apache (Apache Lounge VS18), MariaDB, NSSM, VC++ redist & cacert diunduh sekali ke `installer\bahan\unduhan`
 (ganti versi lewat URL di `bahan.json`). Bangun APK TV dulu bila ingin ikut dibundel.
 
+**Paket server cloud** (tanpa runtime Windows, untuk VPS / CloudPanel):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File installer\build.ps1 -PaketCloud
+```
+
+Hasil: `installer\keluaran\BillingPS-cloud-<versi>.tar.gz` (aplikasi + `vendor` + aset). Langkah pasang: [cloudpanel.md](cloudpanel.md).
+
 ## Bila pemasangan gagal
 
 - Lihat `C:\BillingPS\logs\pasang-*.log` (password tidak ditulis ke log).

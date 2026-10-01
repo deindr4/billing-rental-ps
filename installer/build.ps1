@@ -8,7 +8,8 @@
 #   (Apache Lounge VS18 butuh VC++ runtime 14.50+ → vc_redist dari aka.ms/vc14)
 param(
     [string] $Versi = (Get-Date -Format 'yyyy.MM.dd'),
-    [switch] $LewatiAset   # lewati npm run build (aset sudah dibangun)
+    [switch] $LewatiAset,  # lewati npm run build (aset sudah dibangun)
+    [switch] $PaketCloud   # hanya aplikasi -> keluaran\BillingPS-cloud-<versi>.tar.gz (VPS / CloudPanel)
 )
 
 $ErrorActionPreference = 'Stop'
@@ -75,7 +76,7 @@ if (-not $LewatiAset) {
 
 Tulis 'Menyalin aplikasi...'
 $app = Join-Path $Staging 'app'
-$kecuali = '^(tests|tv-agent|installer|docs|whatsapp-service|storage|node_modules|\.github)/|^(phpunit\.xml|\.env.*|\.editorconfig|\.gitattributes|package(-lock)?\.json|vite\.config\.js)$'
+$kecuali = '^(tests|tv-agent|installer|docs|whatsapp-service|storage|node_modules|\.github)/|^(phpunit\.xml|\.env(?!\.example$).*|\.editorconfig|\.gitattributes|package(-lock)?\.json|vite\.config\.js)$'
 $daftar = & git -C $Repo ls-files --cached --others --exclude-standard | Where-Object { $_ -notmatch $kecuali }
 foreach ($f in $daftar) {
     $sumber = Join-Path $Repo $f
@@ -107,6 +108,22 @@ Pop-Location
 if ($kode -ne 0) { throw 'composer install gagal' }
 Remove-Item -Recurse -Force (Join-Path $app 'storage')
 Get-ChildItem (Join-Path $app 'bootstrap\cache') -Filter '*.php' | Remove-Item -Force
+
+if ($PaketCloud) {
+    # Kerangka storage kosong (di PC rental storage ada di folder data; di VPS di dalam folder aplikasi)
+    foreach ($d in @('storage\app\public', 'storage\app\private', 'storage\framework\cache\data', 'storage\framework\sessions', 'storage\framework\views', 'storage\logs')) {
+        New-Item -ItemType Directory -Force -Path (Join-Path $app $d) | Out-Null
+        [IO.File]::WriteAllText((Join-Path $app "$d\.gitignore"), "*`n!.gitignore`n")
+    }
+    if (Test-Path (Join-Path $app 'public\storage')) { Remove-Item -Recurse -Force (Join-Path $app 'public\storage') }
+    $tar = Join-Path $Keluaran "BillingPS-cloud-$Versi.tar.gz"
+    if (Test-Path $tar) { Remove-Item -Force $tar }
+    # tar.exe bawaan Windows 10+: jalur pakai "/" (Compress-Archive PS 5.1 memakai "\" yang rusak di Linux)
+    & tar.exe -czf $tar -C $app .
+    if ($LASTEXITCODE -ne 0) { throw 'Membuat paket cloud gagal' }
+    Tulis ("Selesai: {0} ({1:N0} MB)" -f $tar, ((Get-Item $tar).Length / 1MB))
+    exit 0
+}
 
 # ---------------- 2. Runtime ----------------
 $runtime = Join-Path $Staging 'runtime'
