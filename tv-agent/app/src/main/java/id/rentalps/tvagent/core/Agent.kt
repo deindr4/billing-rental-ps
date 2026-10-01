@@ -325,6 +325,14 @@ class Agent(private val ctx: Context) {
 
         if (p.waktuMs > 0 && Jam.sekarang() - p.waktuMs > 120_000) return
 
+        // Push update dari admin: "paksa" dipasang walau TV sedang dipakai
+        if (p.perintah == "update_aplikasi" || p.perintah == "update_aplikasi_paksa") {
+            val paksa = p.perintah == "update_aplikasi_paksa"
+            Remote.laporan = "update diminta admin" + if (paksa) " (sekarang)" else " (saat TV kosong)"
+            scope.launch { cekUpdate(paksa) }
+            return
+        }
+
         Remote.jalankan(ctx, p.perintah)
         sinyalHeartbeat.trySend(Unit) // laporkan volume/layar terbaru ke kasir
     }
@@ -371,12 +379,24 @@ class Agent(private val ctx: Context) {
         }
     }
 
-    /** Pasang update hanya saat TV terkunci (tidak mengganggu yang main), kecuali update wajib */
-    private suspend fun cekUpdate() {
-        val info = updater.cek() ?: return
+    /** Ada update yang ditunda karena TV sedang dipakai: dipasang begitu TV kembali terkunci */
+    @Volatile
+    private var updateTertunda = false
 
-        if (info.wajib || _keadaan.value.layar in LAYAR_TERKUNCI) {
-            updater.pasang(info)
+    /** Pasang update hanya saat TV terkunci (tidak mengganggu yang main), kecuali update wajib / dipaksa admin */
+    private suspend fun cekUpdate(paksa: Boolean = false) {
+        val info = updater.cek()
+
+        if (info == null) {
+            updateTertunda = false
+            return
+        }
+
+        if (paksa || info.wajib || _keadaan.value.layar in LAYAR_TERKUNCI) {
+            updateTertunda = false
+            if (!updater.pasang(info)) updateTertunda = true // gagal unduh: coba lagi saat TV terkunci berikutnya
+        } else {
+            updateTertunda = true
         }
     }
 
@@ -389,6 +409,12 @@ class Agent(private val ctx: Context) {
             if (layar != sebelum) {
                 // Status gagal HDMI hanya berlaku untuk sesi yang sedang dibuka
                 _keadaan.update { it.copy(layar = layar, hdmiGagal = it.hdmiGagal && layar in LAYAR_TERBUKA) }
+
+                // Sesi selesai & TV kosong lagi: pasang update yang tadi ditunda
+                if (updateTertunda && layar in LAYAR_TERKUNCI && sebelum !in LAYAR_TERKUNCI) {
+                    updateTertunda = false
+                    scope.launch { delay(3_000); cekUpdate() }
+                }
             }
             periksaPeringatan(sebelum, layar)
             delay(1_000)

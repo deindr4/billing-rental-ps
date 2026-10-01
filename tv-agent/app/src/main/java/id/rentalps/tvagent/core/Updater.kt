@@ -36,12 +36,22 @@ class Updater(private val ctx: Context, private val api: Api) {
         val file = File(ctx.cacheDir, "update/tv-agent.apk")
 
         return try {
-            api.unduh(url, file)
-
-            if (!info.sha256.isNullOrBlank() && sha256(file) != info.sha256) {
+            // Unduhan besar lewat Wi-Fi bisa putus di tengah: coba sampai 3x (jeda 5 & 15 detik)
+            var percobaan = 0
+            while (true) {
+                try {
+                    api.unduh(url, file)
+                    if (info.sha256.isNullOrBlank() || sha256(file) == info.sha256) break
+                    errorTerakhir = "Checksum APK tidak cocok"
+                } catch (e: java.io.IOException) {
+                    errorTerakhir = "unduh: ${e.javaClass.simpleName} ${e.message}"
+                }
                 file.delete()
-                errorTerakhir = "Checksum APK tidak cocok, unduhan dibatalkan"
-                return false
+                if (++percobaan >= 3) {
+                    Log.w("TvAgent", "Update gagal diunduh: $errorTerakhir")
+                    return false
+                }
+                kotlinx.coroutines.delay(if (percobaan == 1) 5_000L else 15_000L)
             }
 
             val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.files", file)

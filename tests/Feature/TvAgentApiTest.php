@@ -9,6 +9,7 @@ use App\Filament\Pages\PengaturanOperasional;
 use App\Filament\Resources\PerangkatTv\Pages\ListPerangkatTv;
 use App\Filament\Resources\PerangkatTv\PerangkatTvResource;
 use App\Filament\Resources\RilisApk\Pages\CreateRilisApk;
+use App\Filament\Resources\RilisApk\Pages\ListRilisApk;
 use App\Filament\Resources\RilisApk\RilisApkResource;
 use App\Livewire\Operator\KelolaTv;
 use App\Livewire\Operator\PanggilanTv;
@@ -304,8 +305,9 @@ class TvAgentApiTest extends TestCase
         // Belum ada rilis
         $this->withToken($token)->getJson('/api/tv/update?versi_kode=1')->assertOk()->assertJson(['ada_update' => false]);
 
-        // Owner rental tidak boleh membuka menu rilis (khusus super admin)
-        $this->actingAs($this->owner)->get(RilisApkResource::getUrl('index'))->assertForbidden();
+        // Owner rental boleh melihat daftar rilis (untuk push update), tapi tidak boleh mengunggah
+        $this->actingAs($this->owner)->get(RilisApkResource::getUrl('index'))->assertOk();
+        $this->actingAs($this->owner)->get(RilisApkResource::getUrl('create'))->assertForbidden();
 
         Event::fake([TvSegarkan::class]);
 
@@ -343,6 +345,37 @@ class TvAgentApiTest extends TestCase
         $this->withToken($token)->getJson('/api/tv/update?versi_kode=2')->assertJson(['ada_update' => false]);
         RilisApk::query()->update(['aktif' => false]);
         $this->withToken($token)->getJson('/api/tv/update?versi_kode=1')->assertJson(['ada_update' => false]);
+    }
+
+    public function test_admin_push_update_ke_tv_yang_belum_terbaru(): void
+    {
+        Storage::fake('local');
+        $token = $this->pasangkanTv();
+        $tv = PerangkatTv::withoutGlobalScopes()->firstOrFail();
+        $tv->forceFill(['versi_app' => '0.1.0'])->save();
+
+        Storage::disk('local')->put('apk/a.apk', 'isi');
+        RilisApk::create(['versi_nama' => '0.2.0', 'versi_kode' => 2, 'file' => 'apk/a.apk', 'ukuran' => 3, 'sha256' => hash('sha256', 'isi'), 'aktif' => true]);
+
+        $this->actingAs($this->owner);
+
+        // Satu TV dari daftar Perangkat TV, dengan pilihan "pasang sekarang juga"
+        Livewire::test(ListPerangkatTv::class)
+            ->assertSee('Terbaru 0.2.0')
+            ->callTableAction('pushUpdate', $tv, ['paksa' => true])
+            ->assertNotified('Update dikirim ke 1 TV');
+
+        $perintah = $this->withToken($token)->getJson('/api/tv/status')->assertOk()->json('perintah');
+        $this->assertSame('update_aplikasi_paksa', collect($perintah)->last()['perintah']);
+
+        // Dari daftar Rilis APK: semua TV, mode aman (tunggu TV kosong)
+        Livewire::test(ListRilisApk::class)->callAction('pushUpdate', ['paksa' => false])->assertNotified('Update dikirim ke 1 TV');
+        $this->assertSame('update_aplikasi', collect($this->withToken($token)->getJson('/api/tv/status')->json('perintah'))->last()['perintah']);
+
+        // Setelah TV melaporkan versi terbaru: tidak ada yang dikirim lagi, tombol per TV hilang
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['versi_app' => '0.2.0', 'layar' => 'kunci'])->assertOk();
+        Livewire::test(ListRilisApk::class)->callAction('pushUpdate', ['paksa' => false])->assertNotified('Semua TV sudah memakai versi terbaru');
+        Livewire::test(ListPerangkatTv::class)->assertTableActionHidden('pushUpdate', $tv->fresh());
     }
 
     public function test_heartbeat_menyimpan_diagnostik(): void

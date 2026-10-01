@@ -28,9 +28,9 @@ import id.rentalps.tvagent.ui.MainActivity
  * - Restart TV: reboot penuh hanya jika TV Agent device owner; selain itu restart aplikasi.
  */
 object Remote {
+    /** Hasil perintah remote terakhir (dikirim di diagnostik). Juga diisi Agent untuk perintah update. */
     @Volatile
     var laporan: String? = null
-        private set
 
     private var layarGelap: View? = null
 

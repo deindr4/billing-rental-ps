@@ -20,6 +20,17 @@ class ListPerangkatTv extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('pushUpdateSemua')
+                ->label('Push update ke semua TV')
+                ->icon('heroicon-o-arrow-down-tray')
+                ->color('gray')
+                ->visible(fn () => PerangkatTv::query()->aktif()->get(['id', 'status', 'versi_app'])->contains(fn ($p) => PerangkatTvResource::perluUpdate($p)))
+                ->modalHeading(fn () => 'Push update APK '.PerangkatTvResource::versiTerbaru().' ke semua TV')
+                ->modalDescription(fn () => PerangkatTvResource::keteranganPush())
+                ->schema([PerangkatTvResource::isianPaksa()])
+                ->modalSubmitActionLabel('Push')
+                ->action(fn (array $data) => PerangkatTvResource::push(PerangkatTv::query()->aktif()->get(), (bool) $data['paksa'])),
+
             Action::make('pasangkan')
                 ->label('Pasangkan TV')
                 ->icon('heroicon-o-link')

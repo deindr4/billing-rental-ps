@@ -9,6 +9,7 @@ use App\Models\PerangkatTv;
 use App\Models\RilisApk;
 use App\Services\Tv\RilisApkService;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
@@ -21,8 +22,9 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Number;
-use UnitEnum;
 
 /**
  * Rilis APK TV Agent. Satu aplikasi untuk semua tenant, jadi hanya super admin yang mengelola.
@@ -35,15 +37,42 @@ class RilisApkResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = 'heroicon-o-arrow-up-tray';
 
-    protected static string|UnitEnum|null $navigationGroup = 'Platform';
-
     protected static ?string $modelLabel = 'Rilis APK TV';
 
     protected static ?string $pluralModelLabel = 'Rilis APK TV';
 
+    /** Super admin mengelola rilis; owner hanya melihat & mem-push update ke TV miliknya */
     public static function canAccess(): bool
     {
+        $user = auth()->user();
+
+        return (bool) ($user?->isSuperAdmin() || $user?->hasRole('Owner'));
+    }
+
+    public static function canCreate(): bool
+    {
         return (bool) auth()->user()?->isSuperAdmin();
+    }
+
+    public static function canEdit($record): bool
+    {
+        return (bool) auth()->user()?->isSuperAdmin();
+    }
+
+    public static function canDelete($record): bool
+    {
+        return (bool) auth()->user()?->isSuperAdmin();
+    }
+
+    /** TV yang terlihat oleh user: super admin semua tenant, owner hanya miliknya */
+    public static function perangkat(): Builder
+    {
+        return auth()->user()?->isSuperAdmin() ? PerangkatTv::withoutGlobalScopes() : PerangkatTv::query();
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return auth()->user()?->isSuperAdmin() ? 'Platform' : 'Rental';
     }
 
     public static function form(Schema $schema): Schema
@@ -113,11 +142,17 @@ class RilisApkResource extends Resource
                 IconColumn::make('aktif')->label('Ditawarkan')->boolean(),
                 TextColumn::make('terpasang')
                     ->label('TV terpasang')
-                    ->state(fn (RilisApk $r) => PerangkatTv::withoutGlobalScopes()->aktif()->where('versi_app', $r->versi_nama)->count()),
+                    ->state(fn (RilisApk $r) => self::perangkat()->aktif()->where('versi_app', $r->versi_nama)->count()),
+                TextColumn::make('catatan')->label('Catatan')->limit(60)->placeholder('-')->wrap(),
                 TextColumn::make('created_at')->label('Dirilis')->since(),
                 TextColumn::make('sha256')->label('SHA-256')->limit(16)->copyable()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([
+                Action::make('unduh')
+                    ->label('Unduh')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->action(fn (RilisApk $r) => Storage::disk(RilisApkService::DISK)->download($r->file, 'tv-agent-'.$r->versi_nama.'.apk')),
                 EditAction::make(),
                 DeleteAction::make()->after(fn (RilisApk $r) => app(RilisApkService::class)->hapusFile($r)),
             ]);

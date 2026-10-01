@@ -2,20 +2,26 @@
 
 namespace App\Filament\Resources\PerangkatTv;
 
+use App\Exceptions\BillingException;
 use App\Filament\Concerns\ButuhIzin;
 use App\Filament\Resources\PerangkatTv\Pages\ListPerangkatTv;
 use App\Models\LogTv;
 use App\Models\PerangkatTv;
+use App\Models\RilisApk;
 use App\Services\Tv\KodeDarurat;
 use App\Services\Tv\NotifikasiTv;
 use App\Services\Tv\PairingTvService;
+use App\Services\Tv\TvRemoteService;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
 use UnitEnum;
 
@@ -75,11 +81,35 @@ class PerangkatTvResource extends Resource
                 TextColumn::make('versi_app')
                     ->label('Versi app')
                     ->placeholder('-')
-                    ->description(fn (PerangkatTv $r) => $r->versi_android ? 'Android '.$r->versi_android : null),
+                    ->badge()
+                    ->color(fn (PerangkatTv $r) => self::perluUpdate($r) ? 'warning' : 'success')
+                    ->description(fn (PerangkatTv $r) => self::perluUpdate($r)
+                        ? 'Terbaru '.self::versiTerbaru()
+                        : ($r->versi_android ? 'Android '.$r->versi_android : null)),
                 TextColumn::make('ip')->label('IP')->placeholder('-')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('status')
+            ->toolbarActions([
+                BulkAction::make('pushUpdate')
+                    ->label('Push update ke TV terpilih')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->modalHeading('Push update APK')
+                    ->modalDescription(fn () => self::keteranganPush())
+                    ->schema([self::isianPaksa()])
+                    ->deselectRecordsAfterCompletion()
+                    ->action(fn (Collection $records, array $data) => self::push($records, (bool) $data['paksa'])),
+            ])
             ->recordActions([
+                Action::make('pushUpdate')
+                    ->label('Push update')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('info')
+                    ->visible(fn (PerangkatTv $r) => self::perluUpdate($r))
+                    ->modalHeading(fn (PerangkatTv $r) => 'Update '.($r->unit?->nama ?? $r->namaTampil()).' ke '.self::versiTerbaru())
+                    ->modalDescription(fn () => self::keteranganPush())
+                    ->schema([self::isianPaksa()])
+                    ->action(fn (PerangkatTv $r, array $data) => self::push([$r], (bool) $data['paksa'])),
+
                 Action::make('inputHdmi')
                     ->label(fn (PerangkatTv $r) => $r->input_hdmi_label ?: 'Input HDMI')
                     ->icon('heroicon-o-arrows-right-left')
@@ -155,6 +185,50 @@ class PerangkatTvResource extends Resource
             ])
             ->emptyStateHeading('Belum ada TV')
             ->emptyStateDescription('Buka aplikasi TV Agent di TV, lalu klik "Pasangkan TV" dan masukkan kode yang tampil di layar.');
+    }
+
+    /* ---------------- Push update APK ---------------- */
+
+    /** Versi rilis APK terbaru yang ditawarkan (null = belum ada rilis) */
+    public static function versiTerbaru(): ?string
+    {
+        return once(fn () => RilisApk::aktif()->orderByDesc('versi_kode')->value('versi_nama'));
+    }
+
+    public static function perluUpdate(PerangkatTv $r): bool
+    {
+        return $r->status === PerangkatTv::STATUS_AKTIF && self::versiTerbaru() && $r->versi_app !== self::versiTerbaru();
+    }
+
+    public static function keteranganPush(): string
+    {
+        return 'TV mengunduh APK '.self::versiTerbaru().', lalu menampilkan layar pemasangan Android — tekan "Instal" dengan remote '
+            .'(aturan keamanan Android). TV yang sedang dipakai menunggu sampai sesinya selesai, kecuali dipilih "sekarang juga". TV yang sudah terbaru dilewati.';
+    }
+
+    public static function isianPaksa(): Toggle
+    {
+        return Toggle::make('paksa')
+            ->label('Pasang sekarang juga walau TV sedang dipakai')
+            ->helperText('Layar pemasangan akan menutupi game pelanggan. Pakai hanya untuk perbaikan mendesak.')
+            ->default(false);
+    }
+
+    /** @param iterable<PerangkatTv> $perangkat */
+    public static function push(iterable $perangkat, bool $paksa): void
+    {
+        try {
+            $n = app(TvRemoteService::class)->pushUpdate($perangkat, auth()->user(), $paksa);
+        } catch (BillingException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->title($n ? "Update dikirim ke {$n} TV" : 'Semua TV sudah memakai versi terbaru')
+            ->body($n ? 'TV yang online menerima dalam beberapa detik. Kolom "Versi app" berubah setelah TV terpasang versi baru.' : null)
+            ->{$n ? 'success' : 'info'}()->send();
     }
 
     /** Label ramah untuk kunci diagnostik dari APK */

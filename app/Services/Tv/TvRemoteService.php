@@ -6,6 +6,7 @@ use App\Events\PerintahTv;
 use App\Exceptions\BillingException;
 use App\Models\LogTv;
 use App\Models\PerangkatTv;
+use App\Models\RilisApk;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
@@ -24,7 +25,31 @@ final class TvRemoteService
         'volume_senyap' => 'Senyap / bunyikan',
         'restart_aplikasi' => 'Restart aplikasi TV Agent',
         'restart_tv' => 'Restart TV',
+        // TV mengunduh rilis APK terbaru; dipasang saat TV kosong (terkunci), atau langsung untuk versi "paksa"
+        'update_aplikasi' => 'Update aplikasi (saat TV kosong)',
+        'update_aplikasi_paksa' => 'Update aplikasi sekarang',
     ];
+
+    /** Perintah update APK ke banyak TV (hanya yang versinya belum terbaru). Return jumlah TV yang dikirimi. */
+    public function pushUpdate(iterable $perangkat, User $user, bool $paksa = false): int
+    {
+        $terbaru = RilisApk::aktif()->orderByDesc('versi_kode')->value('versi_nama');
+
+        if (! $terbaru) {
+            throw new BillingException('Belum ada rilis APK yang ditawarkan.');
+        }
+
+        $n = 0;
+
+        foreach ($perangkat as $p) {
+            if ($p->status === PerangkatTv::STATUS_AKTIF && $p->versi_app !== $terbaru) {
+                $this->kirim($p, $paksa ? 'update_aplikasi_paksa' : 'update_aplikasi', $user);
+                $n++;
+            }
+        }
+
+        return $n;
+    }
 
     private const SIMPAN_DETIK = 120;
 
