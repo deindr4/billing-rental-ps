@@ -75,8 +75,12 @@ class AppServiceProvider extends ServiceProvider
         Sesi::observe(TvObserver::class);
         Unit::observe(TvObserver::class);
 
-        // Unggahan sementara Livewire: default 12 MB, APK TV Agent bisa lebih besar
-        config(['livewire.temporary_file_upload.rules' => ['required', 'file', 'max:204800']]);
+        // Unggahan sementara Livewire: bawaan 12 MB & 5 menit; APK TV Agent & file backup bisa sampai 200 MB.
+        // Batas per kolom tetap diatur di form masing-masing (wallpaper 8 MB, APK 200 MB, backup 200 MB).
+        config([
+            'livewire.temporary_file_upload.rules' => ['required', 'file', 'max:204800'],
+            'livewire.temporary_file_upload.max_upload_time' => 30,
+        ]);
 
         // Tenancy tetap aktif saat aksi Livewire (klik tombol, submit form)
         Livewire::addPersistentMiddleware([
