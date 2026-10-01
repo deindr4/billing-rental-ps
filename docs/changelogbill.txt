@@ -5,6 +5,19 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-01 (tahap 14 - installer Windows)
+-----------------------------------------------------------------------------
+Installer PC rental (panduan: docs/installer.md)
+- BillingPS-Setup-<versi>.exe: PHP 8.4, Apache 2.4.68, MariaDB 10.11, VC++ runtime, aplikasi siap pakai,
+  APK TV. Wizard: nama rental & cabang, zona waktu (WIB/WITA/WIT), akun owner + PIN, port web (bawaan 80).
+- 5 layanan Windows otomatis menyala saat PC hidup: Database, Web, Realtime TV, Antrean, Jadwal.
+- Firewall dibuka hanya untuk jaringan lokal; pintasan Desktop & menu Start (Panel Admin, Kelola layanan, log).
+- Update: jalankan installer versi baru -> backup, migrasi, trigger sync, APK baru, layanan nyala lagi.
+- Uninstall bertanya: hapus semua data atau simpan (database, foto, backup).
+- Perintah baru: php artisan pasang:awal (isi rental, cabang, owner, super admin, APK; aman diulang).
+- Zona waktu aplikasi bisa diatur lewat APP_TIMEZONE di .env (bawaan Asia/Makassar).
+
+
 2026-10-01 (malam)
 -----------------------------------------------------------------------------
 Turnamen (panduan: docs/turnamen.md)

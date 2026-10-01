@@ -26,3 +26,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .env.cloud
+
+# Installer (tahap 14): bahan unduhan, staging & hasil build
+/installer/bahan/
+/installer/staging/
+/installer/keluaran/

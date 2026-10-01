@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'Asia/Makassar',
+    // Zona waktu rental (WIB Asia/Jakarta, WITA Asia/Makassar, WIT Asia/Jayapura) — diisi installer
+    'timezone' => env('APP_TIMEZONE', 'Asia/Makassar'),
 
     'mode' => env('APP_MODE', 'local'), // local | cloud
 
