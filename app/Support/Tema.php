@@ -47,6 +47,18 @@ final class Tema
         return self::kontras(self::aksen());
     }
 
+    /** Logo aplikasi bawaan (public/logo-192.png) — dipakai bila rental belum mengunggah logo sendiri */
+    public static function logoBawaan(): string
+    {
+        return '/logo-192.png';
+    }
+
+    /** Logo rental, atau logo aplikasi bila belum diunggah */
+    public static function logoAtauBawaan(): string
+    {
+        return self::logoUrl() ?? self::logoBawaan();
+    }
+
     public static function logoUrl(): ?string
     {
         $path = Pengaturan::ambil('tema.logo');

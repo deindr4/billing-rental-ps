@@ -14,6 +14,11 @@ Dokumentasi
 - Diperbarui: docs/tv-agent-api.md (bayar_mandiri, opasitas_timer, perintah remote & update),
   docs/sinkron.md (token acak, superadmin), docs/desain/README.md (status layar TV).
 
+Logo aplikasi
+- Logo Delta Gaming Hub sebagai logo bawaan aplikasi: favicon (tab peramban), ikon layar utama HP,
+  halaman login, sidebar aplikasi kasir & panel admin. Logo rental yang diunggah di Admin -> Tampilan
+  tetap diutamakan. File: public/favicon.ico, logo.png (512, transparan), logo-192.png, apple-touch-icon.png.
+
 TV
 - Panel TV di kasir (ikon TV di kartu unit): tombol "Bypass" menjadi "Unlock" (pilih menit, PIN),
   tombol baru "Lock" (akhiri unlock & kunci lagi aplikasi TV, tanpa PIN) dan "Tutup aplikasi" (PIN).

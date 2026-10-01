@@ -25,9 +25,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Rental' }} · {{ config('app.name') }}</title>
-    @if ($logoUrl)
-        <link rel="icon" type="image/webp" href="{{ $logoUrl }}">
-    @endif
+    <x-ikon-aplikasi />
 
     @vite(['resources/css/operator.css', 'resources/js/operator.js'])
     @livewireStyles
@@ -51,13 +49,7 @@
 
         {{-- Brand --}}
         <div class="h-16 px-3 flex items-center gap-3 border-b border-line">
-            @if ($logoUrl)
-                <img src="{{ $logoUrl }}" alt="Logo" class="h-9 w-9 shrink-0 rounded-md object-contain">
-            @else
-                <div class="h-9 w-9 shrink-0 rounded-md grid place-items-center bg-accent text-accent-contrast">
-                    <x-ikon name="rental" size="20" />
-                </div>
-            @endif
+            <img src="{{ $logoUrl ?: \App\Support\Tema::logoBawaan() }}" alt="Logo" class="h-9 w-9 shrink-0 rounded-md object-contain">
             <div class="min-w-0" x-show="! ciut">
                 <div class="font-semibold leading-tight truncate">{{ $tenant?->nama ?? config('app.name') }}</div>
                 <div class="label truncate">{{ $cabangAktif?->nama ?? '-' }}</div>

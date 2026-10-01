@@ -10,9 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Booking' }}</title>
-    @if (\App\Support\Tema::logoUrl())
-        <link rel="icon" type="image/webp" href="{{ \App\Support\Tema::logoUrl() }}">
-    @endif
+    <x-ikon-aplikasi />
     @vite(['resources/css/booking.css', 'resources/js/booking.js'])
     @livewireStyles
 </head>

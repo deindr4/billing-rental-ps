@@ -30,6 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Billing Rental PS')
+            ->brandLogo(fn () => view('filament.brand'))
+            ->brandLogoHeight('2.25rem')
+            ->favicon('/favicon.ico')
             ->colors([
                 'primary' => Color::Emerald,
             ])

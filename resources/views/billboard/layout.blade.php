@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#0a1420">
     <title>{{ $title ?? 'Status rental' }}</title>
-    @if (\App\Support\Tema::logoUrl())
-        <link rel="icon" type="image/webp" href="{{ \App\Support\Tema::logoUrl() }}">
-    @endif
+    <x-ikon-aplikasi />
     @vite(['resources/css/billboard.css', 'resources/js/billboard.js'])
     @livewireStyles
 </head>

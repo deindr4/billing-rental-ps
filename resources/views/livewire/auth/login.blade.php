@@ -1,7 +1,8 @@
 <div class="min-h-screen grid place-items-center p-4">
     <div class="w-full max-w-sm">
-        <div class="mb-6">
-            <h1 class="text-xl font-semibold">Billing Rental PS</h1>
+        <div class="mb-6 text-center">
+            <img src="{{ \App\Support\Tema::logoAtauBawaan() }}" alt="Logo" class="mx-auto h-28 w-28 object-contain mb-3">
+            <h1 class="text-xl font-semibold">{{ config('app.name') }}</h1>
             <p class="text-sm text-muted">Masuk untuk melanjutkan</p>
         </div>
 
