@@ -125,6 +125,25 @@ class Pos extends Component
             ->values();
     }
 
+    /** Sesi unit tujuan yang dipilih ("Gabung ke ...") */
+    #[Computed]
+    public function sesiTujuan(): ?Sesi
+    {
+        return $this->tujuanUnitId !== '' ? $this->unitTujuan->firstWhere('unit_id', $this->tujuanUnitId) : null;
+    }
+
+    /**
+     * Isi tagihan unit tujuan saat ini (urut jam dicatat), supaya kasir bisa mencocokkan dengan pelanggan / layar TV
+     * sebelum menambah: mana yang sudah tercatat, mana yang lupa dicatat.
+     */
+    #[Computed]
+    public function tagihanTujuan(): ?Transaksi
+    {
+        $sesi = $this->sesiTujuan;
+
+        return $sesi ? Transaksi::with(['items' => fn ($q) => $q->orderBy('created_at')])->find($sesi->transaksi_id) : null;
+    }
+
     /* ---------------- Keranjang ---------------- */
 
     public function tambah(string $produkId): void
@@ -204,6 +223,11 @@ class Pos extends Component
                 $this->tujuanUnitId = '';
                 $this->dispatch('sesi-berubah');
 
+                // Sesi sudah selesai (pelanggan sedang membayar): langsung lanjut ke pembayaran
+                if ($sesi->status === Sesi::STATUS_SELESAI) {
+                    $this->dispatch('buka-pembayaran', transaksiId: $sesi->transaksi_id);
+                }
+
                 return;
             }
 
@@ -222,7 +246,7 @@ class Pos extends Component
     #[On('sesi-berubah')]
     public function segarkan(): void
     {
-        unset($this->produk, $this->isiKeranjang, $this->unitTujuan);
+        unset($this->produk, $this->isiKeranjang, $this->unitTujuan, $this->sesiTujuan, $this->tagihanTujuan);
     }
 
     public function render()

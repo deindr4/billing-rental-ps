@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-03 (POS: riwayat tagihan unit)
+-----------------------------------------------------------------------------
+- POS -> Tujuan "Gabung ke <unit>": tampil "Sudah di tagihan <unit>" berisi semua item yang sudah tercatat
+  (sewa, tambah waktu, F&B) beserta jam dicatat — sama dengan rincian di layar TV — plus tagihan sekarang
+  & "setelah ditambah". Kasir bisa mencocokkan dulu dengan pelanggan (mana yang sudah / lupa dicatat).
+- Dibuka dari Kelola Sesi -> Tambah F&B, isi tagihan langsung terlihat; di HP ada bar "Lihat tagihan <unit>"
+  walau keranjang masih kosong.
+- Unit yang sudah selesai (menunggu bayar): setelah "Tambahkan ke Tagihan" langsung masuk ke pembayaran.
+
+
 2026-10-02 (batal tambah waktu & batal sesi)
 -----------------------------------------------------------------------------
 Kasir - Kelola Sesi

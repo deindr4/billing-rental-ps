@@ -13,6 +13,52 @@
         </select>
     </div>
 
+    {{-- Isi tagihan unit tujuan (sama dengan rincian di layar TV): cocokkan dulu sebelum menambah --}}
+    @if ($tagihan = $this->tagihanTujuan)
+        @php
+            $sesiT = $this->sesiTujuan;
+            $aktifItem = $tagihan->items->filter(fn ($i) => $i->subtotal > 0 || $i->jenis === \App\Models\TransaksiItem::JENIS_PRODUK);
+        @endphp
+        <div class="rounded-md border border-line" wire:key="tagihan-{{ $tagihan->id }}-{{ $tagihan->items->count() }}">
+            <div class="px-3 py-2 border-b border-line flex items-center justify-between gap-2">
+                <span class="text-sm font-medium">Sudah di tagihan {{ $sesiT->unit->nama }}</span>
+                <span @class(['label', 'text-st-hampir' => $sesiT->status === 'selesai', 'text-st-main' => $sesiT->status !== 'selesai'])>
+                    {{ $sesiT->status === 'selesai' ? 'Menunggu bayar' : 'Sedang main' }}
+                </span>
+            </div>
+            @if ($aktifItem->isEmpty())
+                <p class="px-3 py-3 text-sm text-muted">Belum ada item.</p>
+            @else
+                <ul class="divide-y divide-line text-sm max-h-56 overflow-y-auto">
+                    @foreach ($aktifItem as $item)
+                        @php $fnb = $item->jenis === \App\Models\TransaksiItem::JENIS_PRODUK; @endphp
+                        <li class="px-3 py-1.5 flex items-start justify-between gap-2">
+                            <span class="min-w-0">
+                                <span @class(['block truncate', 'text-muted' => ! $fnb])>
+                                    {{ $item->nama }}{{ $item->qty > 1 ? ' ×'.$item->qty : '' }}
+                                </span>
+                                <span class="block text-xs text-muted num">{{ $item->created_at->format('H:i') }}</span>
+                            </span>
+                            <x-rupiah :nilai="$item->subtotal" class="shrink-0 {{ $fnb ? '' : 'text-muted' }}" />
+                        </li>
+                    @endforeach
+                </ul>
+            @endif
+            <div class="px-3 py-2 border-t border-line text-sm space-y-0.5">
+                <div class="flex justify-between">
+                    <span class="text-muted">Tagihan sekarang</span>
+                    <x-rupiah :nilai="$tagihan->total" class="font-medium" />
+                </div>
+                @if ($this->jumlahItem > 0)
+                    <div class="flex justify-between font-semibold">
+                        <span>Setelah ditambah</span>
+                        <x-rupiah :nilai="$tagihan->total + $this->total" />
+                    </div>
+                @endif
+            </div>
+        </div>
+    @endif
+
     {{-- Item --}}
     @if ($this->isiKeranjang->isEmpty())
         <p class="text-sm text-muted py-6 text-center">Keranjang kosong. Klik produk untuk menambahkan.</p>

@@ -66,12 +66,18 @@
     </aside>
 
     {{-- ============ Bar keranjang (HP) ============ --}}
-    @if ($this->jumlahItem > 0)
+    @if ($this->jumlahItem > 0 || $this->sesiTujuan)
         <div class="lg:hidden fixed inset-x-0 bottom-16 z-20 px-4" style="margin-bottom: env(safe-area-inset-bottom, 0px);">
             <button type="button" wire:click="$set('keranjangBuka', true)"
                     class="btn btn-primary w-full h-12 justify-between">
-                <span>Keranjang · <span class="num">{{ $this->jumlahItem }}</span> item</span>
-                <x-rupiah :nilai="$this->total" class="font-semibold" />
+                @if ($this->jumlahItem > 0)
+                    <span>Keranjang · <span class="num">{{ $this->jumlahItem }}</span> item</span>
+                    <x-rupiah :nilai="$this->total" class="font-semibold" />
+                @else
+                    {{-- Dari Kelola Sesi: lihat dulu isi tagihan unit --}}
+                    <span>Lihat tagihan {{ $this->sesiTujuan->unit->nama }}</span>
+                    <x-rupiah :nilai="$this->tagihanTujuan?->total ?? 0" class="font-semibold" />
+                @endif
             </button>
         </div>
     @endif
