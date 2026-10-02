@@ -6,6 +6,17 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.3 (kode 14) - 2026-10-03                                   [tag apk-0.6.3]
+-----------------------------------------------------------------------------
+- Timer melayang di atas game:
+  * Ukuran bisa diatur: Kecil / Sedang / Besar (Admin -> Pengaturan Operasional -> "Ukuran timer di TV").
+  * Kepekatan (30-100%) kini juga berlaku saat waktu hampir habis (dulu dipaksa 100%).
+  * Yang dibuat transparan hanya LATAR & garis; angka tetap pekat + bayangan tipis supaya selalu terbaca
+    di atas game yang terang. Latar 100% = benar-benar pekat.
+- Catatan: latar kuning/oranye & timer yang membesar dengan pesan "Sisa 1 menit - simpan permainan Anda"
+  adalah tampilan APK <= 0.5.1 (sudah diganti sejak 0.5.2). TV yang masih menampilkannya belum di-update.
+
+
 0.6.2 (kode 13) - 2026-10-03                                   [tag apk-0.6.2]
 -----------------------------------------------------------------------------
 - Transisi logo rental di tengah layar:

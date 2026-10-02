@@ -87,6 +87,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['struk_header'] = $struk['header'];
         $isi['struk_footer'] = $struk['footer'];
         $isi['tv_suara_aktif'] = $cabangId ? (bool) Pengaturan::ambil('tv.suara_aktif', true, $cabangId) : true;
+        $isi['tv_ukuran_timer'] = $cabangId ? (string) Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId) : 'sedang';
         $isi['tv_pengumuman'] = $cabangId ? (string) Pengaturan::ambil('tv.pengumuman', '', $cabangId) : '';
         $isi['tv_pesan_cepat'] = implode("\n", PemberitahuanTv::pesanCepat($cabangId));
         $isi['tv_aplikasi'] = StatusTvService::aplikasiDiizinkan($cabangId);
@@ -193,8 +194,14 @@ class PengaturanOperasional extends Page implements HasSchemas
                         TextInput::make('opasitas_timer')
                             ->label('Kepekatan timer di TV (%)')
                             ->helperText('Timer melayang di atas game. 100 = pekat, 40 = tembus pandang (game di belakang terlihat). '
-                                .'Saat waktu hampir habis, timer selalu tampil penuh.')
+                                .'Berlaku juga saat waktu hampir habis (angka merah). APK TV ≥ 0.6.3.')
                             ->numeric()->minValue(30)->maxValue(100)->suffix('%')->required(),
+                        Select::make('tv_ukuran_timer')
+                            ->label('Ukuran timer di TV')
+                            ->options(['kecil' => 'Kecil', 'sedang' => 'Sedang', 'besar' => 'Besar'])
+                            ->helperText('Ukuran timer melayang di pojok layar saat main. APK TV ≥ 0.6.3.')
+                            ->selectablePlaceholder(false)
+                            ->required(),
                         TextInput::make('pilih_game_menit')
                             ->label('Waktu pilih game (menit)')
                             ->helperText('TV terbuka lebih dulu, waktu sewa mulai setelahnya & tidak ditagih. Isi 0 untuk mematikan.')
@@ -367,6 +374,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         }
 
         Pengaturan::simpan('tv.suara_aktif', (bool) ($data['tv_suara_aktif'] ?? true), $cabangId);
+        Pengaturan::simpan('tv.ukuran_timer', in_array($data['tv_ukuran_timer'] ?? '', ['kecil', 'sedang', 'besar'], true) ? $data['tv_ukuran_timer'] : 'sedang', $cabangId);
         Pengaturan::simpan('server.url_lokal', StatusTvService::urlServer($data['server_lokal'] ?? null), $cabangId);
         Pengaturan::simpan('server.url_cloud', StatusTvService::urlServer($data['server_cloud'] ?? null), $cabangId);
         Pengaturan::simpan('sesi.pilih_game_otomatis', (bool) ($data['pilih_game_otomatis'] ?? true), $cabangId);

@@ -13,8 +13,8 @@ android {
         applicationId = "id.rentalps.tvagent"
         minSdk = 26          // Android TV 8.0+
         targetSdk = 34       // TV Xiaomi MiTV-MZTU0 = Android TV 14
-        versionCode = 13
-        versionName = "0.6.2"
+        versionCode = 14
+        versionName = "0.6.3"
     }
 
     buildTypes {

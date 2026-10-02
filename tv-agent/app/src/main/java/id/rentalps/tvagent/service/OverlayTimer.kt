@@ -32,7 +32,7 @@ class OverlayTimer(private val ctx: Context) {
     private var kedipSampaiMs = 0L
     private var redup = false
 
-    private val warnaNormal = Color.argb(225, 15, 28, 43)     // #0f1c2b
+    private val warnaNormal = Color.argb(255, 15, 28, 43)     // #0f1c2b; transparansi dari setelan kepekatan
     private val warnaGaris = Color.parseColor("#1E3144")
     private val warnaMerah = Color.parseColor("#F87171")
     private val warnaBiru = Color.parseColor("#38BDF8")
@@ -43,11 +43,14 @@ class OverlayTimer(private val ctx: Context) {
         typeface = Typeface.MONOSPACE
         letterSpacing = 0.12f
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f)
+        setShadowLayer(4f, 0f, 1f, Color.argb(200, 0, 0, 0))
     }
 
     private val waktu = TextView(ctx).apply {
         typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        // Bayangan: angka tetap terbaca walau latar dibuat transparan di atas game yang terang
+        setShadowLayer(6f, 0f, 2f, Color.argb(220, 0, 0, 0))
     }
 
     private val latar = GradientDrawable().apply {
@@ -157,19 +160,40 @@ class OverlayTimer(private val ctx: Context) {
             }
         }
 
-        // Ukuran tetap kecil; hampir habis = angka & garis merah (latar tetap gelap, tidak menutup game)
-        latar.setColor(warnaNormal)
-        latar.setStroke(2, if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaGaris)
+        // Ukuran dari admin (kecil/sedang/besar) & tidak pernah membesar sendiri;
+        // hampir habis = angka & garis merah, latar tetap gelap (tidak menutup game)
+        terapkanUkuran(k.status?.pengaturan?.ukuranTimer ?: "sedang")
+
+        // Kepekatan (Pengaturan → Operasional) hanya untuk LATAR & garis: game di belakang terlihat,
+        // angka tetap pekat (+ bayangan) supaya selalu terbaca. Juga berlaku saat hampir habis.
+        val opasitas = (k.status?.pengaturan?.opasitasTimer ?: 90).coerceIn(30, 100) / 100f
+        val garis = if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaGaris
+        latar.setColor(denganAlpha(warnaNormal, opasitas))
+        latar.setStroke(2, denganAlpha(garis, maxOf(opasitas, 0.6f)))
         waktu.setTextColor(if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaTeks)
         judul.setTextColor(if (hampir) warnaMerah else warnaRedup)
 
-        // Kepekatan diatur admin (Pengaturan → Operasional); hampir habis selalu pekat supaya jelas terbaca
-        val opasitas = (k.status?.pengaturan?.opasitasTimer ?: 90).coerceIn(30, 100)
-        kotak.alpha = when {
-            redup -> 0.2f
-            hampir -> 1f
-            else -> opasitas / 100f
+        // Kedip peringatan: seluruh timer meredup sesaat
+        kotak.alpha = if (redup) 0.2f else 1f
+    }
+
+    private fun denganAlpha(warna: Int, alpha: Float): Int =
+        Color.argb((Color.alpha(warna) * alpha).toInt().coerceIn(0, 255), Color.red(warna), Color.green(warna), Color.blue(warna))
+
+    private var ukuranTerpasang: String? = null
+
+    private fun terapkanUkuran(ukuran: String) {
+        if (ukuran == ukuranTerpasang) return
+        ukuranTerpasang = ukuran
+
+        val (judulSp, waktuSp, padH, padV) = when (ukuran) {
+            "kecil" -> listOf(8f, 17f, 20f, 10f)
+            "besar" -> listOf(12f, 32f, 38f, 22f)
+            else -> listOf(10f, 24f, 30f, 16f)
         }
+        judul.setTextSize(TypedValue.COMPLEX_UNIT_SP, judulSp)
+        waktu.setTextSize(TypedValue.COMPLEX_UNIT_SP, waktuSp)
+        kotak.setPadding(padH.toInt(), padV.toInt(), padH.toInt(), (padV + 2).toInt())
     }
 
     private fun parameter(): WindowManager.LayoutParams {

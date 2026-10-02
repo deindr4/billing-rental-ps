@@ -5,6 +5,14 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-03 (APK 0.6.3 - ukuran & kepekatan timer TV)
+-----------------------------------------------------------------------------
+- Admin -> Pengaturan Operasional: "Ukuran timer di TV" (Kecil / Sedang / Besar). "Kepekatan timer" kini
+  berlaku juga saat waktu hampir habis & hanya mengatur latar (angka tetap jelas). API TV: pengaturan.ukuran_timer.
+- PENTING: rilis APK di Admin -> Rilis APK berhenti di 0.5.1, jadi TV yang update lewat server masih memakai
+  tampilan lama (latar kuning, timer membesar). Unggah rilis terbaru (0.6.3) lalu Push update ke semua TV.
+
+
 2026-10-03 (APK 0.6.2 - transisi logo)
 -----------------------------------------------------------------------------
 - APK TV 0.6.2: logo rental tampil di tengah saat mulai main (sebelum pindah ke HDMI) & saat selesai main

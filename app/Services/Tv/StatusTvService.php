@@ -283,6 +283,8 @@ final class StatusTvService
             'transparansi_lock' => (int) Pengaturan::ambil('tv.transparansi_lock', 85, $cabangId),
             // Kepekatan timer melayang (%); TV memakai 100% saat waktu hampir habis / banner peringatan
             'opasitas_timer' => max(30, min(100, (int) Pengaturan::ambil('tv.opasitas_timer', 90, $cabangId))),
+            // Ukuran timer melayang di atas game: kecil | sedang | besar (APK >= 0.6.3)
+            'ukuran_timer' => in_array($u = Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId), ['kecil', 'sedang', 'besar'], true) ? $u : 'sedang',
             'durasi_bypass_menit' => $this->durasiBypass($perangkat, $unit),
             'bypass_maks_menit' => $this->bypassMaks($cabangId),
             'bypass_pilihan' => $this->pilihanBypass($perangkat, $unit),
