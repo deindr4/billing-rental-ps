@@ -74,6 +74,9 @@ memakai zona cabang), `pengumuman` (teks berjalan), `pengaturan.suara_aktif`, da
 }
 ```
 
+`realtime` bernilai `null` bila server tidak memakai Reverb (`BROADCAST_CONNECTION` bukan `reverb`, mis. shared hosting):
+TV cukup polling.
+
 **`layar` menentukan tampilan TV** — TV tidak menghitung sendiri:
 
 | layar | Tampilan TV |

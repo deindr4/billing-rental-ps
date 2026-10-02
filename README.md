@@ -16,6 +16,7 @@ Stack: Laravel 13 · Livewire 4 · Filament 5 · Spatie Permission · Reverb · 
 | [docs/turnamen.md](docs/turnamen.md) | Format turnamen (gugur, gugur ganda, liga, grup), bundling F&B, keuangan & hadiah |
 | [docs/sinkron.md](docs/sinkron.md) | Sinkronisasi server lokal ↔ cloud, token |
 | [docs/installer.md](docs/installer.md) | Installer Windows PC rental: pasang, update, uninstall, build `.exe` |
+| [docs/hosting.md](docs/hosting.md) | Pasang server cloud di hosting cPanel / shared hosting (tanpa realtime TV) |
 | [docs/cloudpanel.md](docs/cloudpanel.md) | Langkah pasang server cloud di CloudPanel (Nginx, Cloudflare, cron, supervisor, update) |
 | [docs/server-publik.md](docs/server-publik.md) | Server cloud, Cloudflare, port, `.env` produksi, checklist publik |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |

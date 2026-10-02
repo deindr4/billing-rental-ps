@@ -140,6 +140,14 @@ class Pemeliharaan extends Page
             $db = 'tidak terhubung';
         }
 
+        // Kolom yang diam-diam ikut berubah tiap baris diperbarui (MariaDB lama, explicit_defaults_for_timestamp=OFF)
+        try {
+            $kolomAuto = collect(DB::select("SELECT CONCAT(TABLE_NAME, '.', COLUMN_NAME) k FROM information_schema.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND LOWER(EXTRA) LIKE '%on update%'"))->pluck('k');
+        } catch (Throwable) {
+            $kolomAuto = null;
+        }
+
         $bebas = @disk_free_space(base_path());
         $log = storage_path('logs/laravel.log');
 
@@ -166,6 +174,8 @@ class Pemeliharaan extends Page
             ['Mode perawatan', app()->isDownForMaintenance() ? 'Aktif' : 'Tidak', ! app()->isDownForMaintenance()],
             ['PHP · Laravel', PHP_VERSION.' · '.app()->version(), null],
             ['Database', $db, $db !== 'tidak terhubung'],
+            ['Kolom waktu otomatis', $kolomAuto === null ? '-' : ($kolomAuto->isEmpty() ? 'Tidak ada (aman)' : $kolomAuto->implode(', ')),
+                $kolomAuto === null ? null : $kolomAuto->isEmpty()],
             ['Ruang disk kosong', $bebas !== false ? number_format($bebas / 1073741824, 1, ',', '.').' GB' : '-', $bebas === false ? null : $bebas > 2 * 1073741824],
             ['Ukuran log error', is_file($log) ? number_format(filesize($log) / 1024, 0, ',', '.').' KB' : '0 KB', ! is_file($log) || filesize($log) < 20 * 1048576],
         ];

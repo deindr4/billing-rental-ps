@@ -110,6 +110,7 @@ ProxyPassReverse /app ws://127.0.0.1:8080/app
 ## Memasang server cloud (sekali)
 
 Langkah lengkap untuk CloudPanel (paket aplikasi siap unggah, Nginx, cron, supervisor): [cloudpanel.md](cloudpanel.md).
+Hosting cPanel / shared hosting (lebih murah, TV tanpa realtime): [hosting.md](hosting.md).
 Ringkasnya:
 
 ```bash

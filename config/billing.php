@@ -12,6 +12,9 @@ return [
     // Jangan "*" jika server bisa diakses langsung tanpa proxy (IP bisa dipalsukan lewat header).
     'proxy_tepercaya' => env('TRUSTED_PROXIES'),
 
+    // Shared hosting (tanpa supervisor/proses latar): antrean diproses tiap menit oleh cron schedule:run
+    'antrean_lewat_cron' => (bool) env('ANTREAN_LEWAT_CRON', false),
+
     // TV Agent: alamat Reverb yang dipakai TV di jaringan LAN.
     // Kosong = pakai host yang dipakai TV saat memanggil API (biasanya IP server).
     'tv' => [

@@ -30,3 +30,7 @@ Schedule::call(function () {
 // Sinkron lokal -> cloud tiap menit (diam jika belum diatur); cloud membersihkan antrean lama
 Schedule::command('sync jalankan --diam')->everyMinute()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
 Schedule::command('sync bersihkan')->dailyAt('03:30')->when(fn () => config('app.mode') === 'cloud');
+
+// Shared hosting (ANTREAN_LEWAT_CRON=true): tidak ada queue:work permanen -> kerjakan antrean tiap menit lalu berhenti
+Schedule::command('queue:work --stop-when-empty --max-time=50 --tries=3')->everyMinute()->withoutOverlapping(2)
+    ->when(fn () => config('billing.antrean_lewat_cron'));

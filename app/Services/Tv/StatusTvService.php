@@ -329,8 +329,13 @@ final class StatusTvService
     }
 
     /** Koneksi Reverb untuk TV. Host diambil dari alamat yang dipakai TV menghubungi server (IP LAN). */
-    private function realtime(PerangkatTv $perangkat): array
+    private function realtime(PerangkatTv $perangkat): ?array
     {
+        // Hosting tanpa Reverb (BROADCAST_CONNECTION bukan reverb): TV cukup polling, tidak mencoba websocket terus
+        if (config('broadcasting.default') !== 'reverb') {
+            return null;
+        }
+
         $koneksi = config('broadcasting.connections.reverb');
 
         return [

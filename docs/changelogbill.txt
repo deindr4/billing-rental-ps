@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (server cloud di shared hosting)
+-----------------------------------------------------------------------------
+- Panduan pasang di hosting cPanel: docs/hosting.md (tanpa terminal pun bisa, lewat cron sekali jalan).
+- ANTREAN_LEWAT_CRON=true: antrean dikerjakan cron schedule:run tiap menit (hosting tidak punya queue:work).
+- BROADCAST_CONNECTION selain reverb: API TV tidak lagi mengirim info websocket -> TV langsung polling,
+  tidak mencoba menyambung realtime terus-menerus.
+- Pemeliharaan sistem: baris baru "Kolom waktu otomatis" (deteksi kolom yang ikut berubah tiap baris
+  diperbarui di MariaDB lama).
+
+
 2026-10-01 (HTTPS cloud)
 -----------------------------------------------------------------------------
 Server cloud di balik Cloudflare (panduan: docs/server-publik.md -> HTTPS & .htaccess)

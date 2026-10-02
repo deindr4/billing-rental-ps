@@ -108,6 +108,10 @@ class TvAgentApiTest extends TestCase
     {
         $token = $this->pasangkanTv();
 
+        // Tanpa Reverb (mis. shared hosting): TV cukup polling
+        $this->withToken($token)->getJson('/api/tv/status')->assertOk()->assertJsonPath('realtime', null);
+
+        config(['broadcasting.default' => 'reverb']);
         $this->withToken($token)->getJson('/api/tv/status')
             ->assertOk()
             ->assertJsonPath('layar', 'kunci')
