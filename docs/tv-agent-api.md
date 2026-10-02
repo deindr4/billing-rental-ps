@@ -67,6 +67,7 @@ memakai zona cabang), `pengumuman` (teks berjalan), `pengaturan.suara_aktif`, da
   "pengaturan": { "posisi_timer": "kanan_atas", "peringatan_menit": 5, "transparansi_lock": 85,
                   "opasitas_timer": 90, "durasi_bypass_menit": 15 },
   "perintah": [ { "id": "uuid", "perintah": "update_aplikasi", "waktu_ms": 0 } ],
+  "running_text": null,
   "bayar_mandiri": null,
   "tema": { "nama_rental": "...", "cabang": "...", "logo_url": null, "mode": "gelap", "aksen": "#..." },
   "realtime": { "key": "...", "host": "192.168.1.10", "port": 8080, "scheme": "http",
@@ -143,6 +144,35 @@ Jalankan **sekali per `id`**, abaikan yang `waktu_ms`-nya lebih dari 2 menit lal
 | `tutup_aplikasi` | Tutup aplikasi dari kasir (dengan PIN): TV pindah ke layar Google TV & bebas dipakai sampai `kunci` atau sesi berikutnya dimulai. Heartbeat melapor `layar: "tutup"`. APK ≥ 0.5.0 |
 | `update_aplikasi` | Cek & pasang rilis APK terbaru saat TV kosong (terkunci); jika sedang dipakai, pasang begitu sesi selesai (APK ≥ 0.3.1) |
 | `update_aplikasi_paksa` | Cek & pasang rilis terbaru saat itu juga walau TV dipakai (APK ≥ 0.3.1) |
+| `pemberitahuan` | Tampilkan pesan di **tengah layar** (di atas game / layar kunci) lalu hilang sendiri. Isi di `data`: `teks` (≤150, emoji & baris baru boleh), `detik` (5/10/15/30/60), `ukuran` (`sedang`/`besar`/`jumbo`), `huruf` (`sans`/`serif`/`mono`), `tebal`. Dikirim dari kasir per unit atau semua TV cabang. APK ≥ 0.6.0 |
+
+Contoh perintah dengan isi:
+
+```json
+{ "id": "uuid", "perintah": "pemberitahuan", "waktu_ms": 0,
+  "data": { "teks": "🙏 Mohon tenang saat bermain", "detik": 10, "ukuran": "besar", "huruf": "sans", "tebal": true } }
+```
+
+### Running text (`running_text`, APK ≥ 0.6.0)
+
+Teks promo berjalan dari kasir (Rental → **Running text**), sama untuk semua TV cabang. `null` = mati / durasi habis.
+
+```json
+"running_text": {
+  "teks": "Promo begadang 6 jam Rp50.000 mulai 23:00",
+  "sampai_ms": 1759140000000,        // null = sampai dimatikan kasir
+  "sembunyi_saat_main": true,        // true = hanya tampil saat layar bukan main/jeda
+  "posisi": "bawah",                 // bawah | atas
+  "opasitas": 60,                    // kepekatan latar strip 0–100
+  "ukuran": "sedang",                // kecil | sedang | besar
+  "tebal": false,
+  "kecepatan": "sedang",             // lambat | sedang | cepat
+  "warna": "#FFFFFF"
+}
+```
+
+TV menampilkan strip selebar layar di atas layar kunci & game, mematikannya sendiri saat `sampai_ms` lewat.
+Saat strip di bawah tayang, teks `pengumuman` di kaki layar kunci tidak ikut berjalan (tidak dobel).
 
 ### Akses staf di TV (APK ≥ 0.5.0)
 

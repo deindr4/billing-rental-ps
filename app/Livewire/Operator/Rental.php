@@ -13,6 +13,8 @@ use App\Models\Unit;
 use App\Services\Aset\MaintenanceService;
 use App\Services\Billing\BillingService;
 use App\Services\Tv\TvRemoteService;
+use App\Support\RunningTextTv;
+use App\Support\Tenancy;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -34,6 +36,7 @@ class Rental extends Component
 
     /** Dipanggil saat sesi berubah (mulai, tambah waktu, selesai, bayar, dll.) */
     #[On('sesi-berubah')]
+    #[On('running-text-berubah')]
     public function segarkan(): void
     {
         // Cukup memicu render ulang
@@ -188,6 +191,7 @@ class Rental extends Component
             'tarif' => $tarif,
             'ringkasan' => $ringkasan,
             'peringatanMenit' => (int) Pengaturan::ambil('tv.peringatan_menit', 5),
+            'runningText' => RunningTextTv::tayang(RunningTextTv::ambil(app(Tenancy::class)->cabangId())),
             'serverNow' => now()->getTimestampMs(),
         ]);
     }

@@ -84,6 +84,10 @@ class Agent(private val ctx: Context) {
 
     private val _peringatan = MutableSharedFlow<Peringatan>(extraBufferCapacity = 4)
     val peringatan: SharedFlow<Peringatan> = _peringatan.asSharedFlow()
+
+    /** Pemberitahuan dari kasir untuk ditampilkan di tengah layar (AgentService → OverlayPemberitahuan) */
+    private val _pemberitahuan = MutableSharedFlow<id.rentalps.tvagent.data.Pemberitahuan>(extraBufferCapacity = 4)
+    val pemberitahuan: SharedFlow<id.rentalps.tvagent.data.Pemberitahuan> = _pemberitahuan.asSharedFlow()
     private val peringatanTerkirim = mutableSetOf<String>()
 
     private val sinyal = Channel<String>(Channel.CONFLATED)
@@ -350,6 +354,16 @@ class Agent(private val ctx: Context) {
             app.tutupAplikasi() // layar TV Agent pindah sendiri ke Google TV
             Remote.laporan = "aplikasi ditutup dari kasir"
             sinyalHeartbeat.trySend(Unit)
+            return
+        }
+
+        // Pemberitahuan dari kasir: tampil di tengah layar beberapa detik
+        if (p.perintah == "pemberitahuan") {
+            val isi = p.data?.let { runCatching { JsonApi.decodeFromJsonElement(id.rentalps.tvagent.data.Pemberitahuan.serializer(), it) }.getOrNull() }
+            if (isi != null && isi.teks.isNotBlank()) {
+                _pemberitahuan.tryEmit(isi)
+                Remote.laporan = "pemberitahuan ditampilkan"
+            }
             return
         }
 

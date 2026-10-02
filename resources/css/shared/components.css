@@ -142,6 +142,19 @@
     .tint-oranye { --w: var(--ikon-oranye); }
     .tint-merah { --w: var(--ikon-merah); }
 
+    /* Tombol remote TV di kartu unit: sedikit lebih kecil di HP sempit supaya 7 tombol muat satu baris */
+    .btn-remote {
+        width: 1.75rem;
+        height: 1.75rem;
+        padding: 0;
+    }
+    @media (min-width: 380px) {
+        .btn-remote {
+            width: 2rem;
+            height: 2rem;
+        }
+    }
+
     /* Titik warna kecil di depan teks tombol (mis. tab filter status) */
     .titik-w {
         width: 7px;

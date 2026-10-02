@@ -10,6 +10,7 @@ use App\Services\Publik\QrisService;
 use App\Services\Struk\StrukService;
 use App\Services\Tv\NotifikasiTv;
 use App\Services\Tv\StatusTvService;
+use App\Support\PemberitahuanTv;
 use App\Support\Tenancy;
 use BackedEnum;
 use Filament\Forms\Components\Repeater;
@@ -86,6 +87,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['struk_footer'] = $struk['footer'];
         $isi['tv_suara_aktif'] = $cabangId ? (bool) Pengaturan::ambil('tv.suara_aktif', true, $cabangId) : true;
         $isi['tv_pengumuman'] = $cabangId ? (string) Pengaturan::ambil('tv.pengumuman', '', $cabangId) : '';
+        $isi['tv_pesan_cepat'] = implode("\n", PemberitahuanTv::pesanCepat($cabangId));
         $isi['tv_aplikasi'] = StatusTvService::aplikasiDiizinkan($cabangId);
         $isi['server_lokal'] = $cabangId ? (string) Pengaturan::ambil('server.url_lokal', '', $cabangId) : '';
         $isi['server_cloud'] = $cabangId ? (string) Pengaturan::ambil('server.url_cloud', '', $cabangId) : '';
@@ -228,9 +230,15 @@ class PengaturanOperasional extends Page implements HasSchemas
                         Textarea::make('tv_pengumuman')
                             ->label('Pengumuman berjalan di layar TV')
                             ->placeholder('Turnamen FC 25 Sabtu ini! Daftar di kasir…')
-                            ->helperText('Tampil sebagai teks berjalan di bawah layar kunci & tagihan TV. Kosongkan jika tidak ada.')
+                            ->helperText('Tampil sebagai teks berjalan di bawah layar kunci & tagihan TV. Kosongkan jika tidak ada. '
+                                .'Untuk promo yang juga berjalan di atas game, pakai tombol "Running text" di halaman Rental kasir.')
                             ->rows(2)
                             ->maxLength(300)
+                            ->columnSpanFull(),
+                        Textarea::make('tv_pesan_cepat')
+                            ->label('Pesan cepat pemberitahuan TV')
+                            ->helperText('Satu pesan per baris (maks. 150 karakter, emoji boleh). Muncul sebagai pilihan di tombol Pemberitahuan kasir. Kosongkan untuk pesan bawaan.')
+                            ->rows(5)
                             ->columnSpanFull(),
                     ]),
 
@@ -357,6 +365,9 @@ class PengaturanOperasional extends Page implements HasSchemas
         Pengaturan::simpan('server.url_cloud', StatusTvService::urlServer($data['server_cloud'] ?? null), $cabangId);
         Pengaturan::simpan('sesi.pilih_game_otomatis', (bool) ($data['pilih_game_otomatis'] ?? true), $cabangId);
         Pengaturan::simpan('tv.pengumuman', trim((string) ($data['tv_pengumuman'] ?? '')), $cabangId);
+        $pesanCepat = collect(preg_split('/\R/u', (string) ($data['tv_pesan_cepat'] ?? '')))
+            ->map(fn ($p) => mb_substr(trim($p), 0, PemberitahuanTv::MAKS_TEKS))->filter()->unique()->take(20)->values()->all();
+        Pengaturan::simpan('tv.pesan_cepat', $pesanCepat, $cabangId);
 
         // QRIS
         Pengaturan::simpan('qris.payload', trim((string) ($data['qris_payload'] ?? '')), $cabangId);

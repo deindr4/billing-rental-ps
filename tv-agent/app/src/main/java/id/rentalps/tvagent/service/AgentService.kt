@@ -39,6 +39,8 @@ import kotlinx.coroutines.launch
 class AgentService : Service() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private lateinit var overlay: OverlayTimer
+    private lateinit var pemberitahuan: OverlayPemberitahuan
+    private lateinit var runningText: OverlayRunningText
 
     private val agent: Agent get() = (application as AgentApp).agent
 
@@ -47,7 +49,20 @@ class AgentService : Service() {
         mulaiLatarDepan()
 
         overlay = OverlayTimer(this)
+        pemberitahuan = OverlayPemberitahuan(this)
+        runningText = OverlayRunningText(this)
         agent.mulai()
+
+        // Pemberitahuan kasir di tengah layar
+        scope.launch {
+            agent.pemberitahuan.collect { p -> pemberitahuan.tampilkan(p, agent.keadaan.value.status?.tema?.aksen) }
+        }
+
+        // Running text promo: ikut status (teks, durasi, sembunyi saat main)
+        runningText.mulai()
+        scope.launch {
+            agent.keadaan.collect { runningText.perbarui(it) }
+        }
 
         scope.launch {
             agent.keadaan
@@ -116,6 +131,8 @@ class AgentService : Service() {
 
     override fun onDestroy() {
         overlay.sembunyikan()
+        pemberitahuan.tutupSegera()
+        runningText.hentikan()
         scope.cancel()
         super.onDestroy()
     }

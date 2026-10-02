@@ -5,8 +5,24 @@
             <div class="label">Rental station</div>
             <h1 class="text-xl font-semibold tracking-tight">Matriks Unit</h1>
         </div>
-        <input type="search" wire:model.live.debounce.300ms="cari"
-               class="input sm:w-64" placeholder="Cari unit...">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            {{-- Pesan ke semua TV & running text promo --}}
+            <button type="button" wire:click="$dispatch('buka-pemberitahuan')" title="Pemberitahuan ke semua TV"
+                    class="btn btn-tint tint-pink h-9 px-3 text-sm">
+                <x-ikon name="pengumuman" size="16" /> <span class="hidden min-[420px]:inline">Pemberitahuan</span>
+            </button>
+            <button type="button" wire:click="$dispatch('buka-running-text')" title="Running text di TV"
+                    @class(['btn h-9 px-3 text-sm', 'btn-tint tint-hijau' => $runningText, 'btn-tint tint-teal' => ! $runningText])>
+                @if ($runningText)
+                    <span class="titik-w" style="--w: var(--ikon-hijau)"></span>
+                @else
+                    <x-ikon name="teks-jalan" size="16" />
+                @endif
+                <span class="hidden min-[420px]:inline">Running text{{ $runningText ? ' · ON' : '' }}</span>
+            </button>
+            <input type="search" wire:model.live.debounce.300ms="cari"
+                   class="input flex-1 sm:w-64 sm:flex-none" placeholder="Cari unit...">
+        </div>
     </div>
 
     {{-- Filter status --}}
@@ -130,5 +146,7 @@
     <livewire:operator.mulai-sesi />
     <livewire:operator.kelola-sesi />
     <livewire:operator.kelola-tv />
+    <livewire:operator.kirim-pemberitahuan />
+    <livewire:operator.kelola-running-text />
     <livewire:operator.pembayaran />
 </div>

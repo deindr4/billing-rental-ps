@@ -155,15 +155,13 @@
             $layarMati = $tv->layar_hidup === false;
             $bisaReboot = (bool) ($tv->diagnostik['device_owner'] ?? false);
         @endphp
-        {{-- Dikelompokkan: daya | volume | bypass & restart (jarak antar kelompok lebih lebar) --}}
-        <div class="px-3 py-2.5 border-t border-line flex items-center gap-1.5 min-[380px]:gap-2">
-            <span class="label mr-auto">TV</span>
-
+        {{-- Dikelompokkan: daya | volume | pemberitahuan, bypass & restart (jarak antar kelompok lebih lebar) --}}
+        <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-1.5 min-[380px]:gap-2">
             @if ($bisaRemote)
                 @if ($layarMati)
                     <button type="button" title="Nyalakan layar TV"
                             wire:click="perintahTv('{{ $unit->id }}', 'layar_nyala')"
-                            class="btn btn-ikon h-8 w-8 text-st-kosong">
+                            class="btn btn-remote text-st-kosong">
                         <x-ikon name="daya" size="16" />
                     </button>
                 @else
@@ -171,31 +169,37 @@
                                       title="Matikan layar {{ $unit->nama }}?"
                                       text="TV masuk mode standby. Nyalakan lagi dari tombol yang sama atau remote TV."
                                       confirm-text="Matikan"
-                                      class="btn-ikon h-8 w-8 text-ik-oranye" title="Matikan layar TV">
+                                      class="btn-remote text-ik-oranye" title="Matikan layar TV">
                         <x-ikon name="daya" size="16" />
                     </x-confirm-button>
                 @endif
             @endif
 
             <button type="button" title="Volume turun" wire:click="perintahTv('{{ $unit->id }}', 'volume_turun')"
-                    @class(['btn btn-ikon h-8 w-8 text-ik-biru', 'ml-1 min-[380px]:ml-2' => $bisaRemote])>
+                    @class(['btn btn-remote text-ik-biru', 'ml-1 min-[380px]:ml-2' => $bisaRemote])>
                 <x-ikon name="vol-turun" size="16" />
             </button>
-            <span class="num text-xs w-9 text-center {{ $tv->senyap ? 'text-danger' : 'text-muted' }}" title="Volume TV">
+            <span class="num text-xs w-8 text-center {{ $tv->senyap ? 'text-danger' : 'text-muted' }}" title="Volume TV">
                 {{ $tv->senyap ? 'MUTE' : ($tv->volume !== null ? $tv->volume.'%' : '–') }}
             </span>
             <button type="button" title="Volume naik" wire:click="perintahTv('{{ $unit->id }}', 'volume_naik')"
-                    class="btn btn-ikon h-8 w-8 text-ik-biru">
+                    class="btn btn-remote text-ik-biru">
                 <x-ikon name="vol-naik" size="16" />
             </button>
             <button type="button" title="Senyap / bunyikan" wire:click="perintahTv('{{ $unit->id }}', 'volume_senyap')"
-                    @class(['btn btn-ikon h-8 w-8', 'text-danger bg-danger/15' => $tv->senyap, 'text-ik-kuning' => ! $tv->senyap])>
+                    @class(['btn btn-remote', 'text-danger bg-danger/15' => $tv->senyap, 'text-ik-kuning' => ! $tv->senyap])>
                 <x-ikon name="senyap" size="16" />
+            </button>
+
+            <button type="button" title="Pemberitahuan ke layar TV"
+                    wire:click="$dispatch('buka-pemberitahuan', { unitId: '{{ $unit->id }}' })"
+                    class="btn btn-remote text-ik-pink ml-1 min-[380px]:ml-2">
+                <x-ikon name="pengumuman" size="16" />
             </button>
 
             <button type="button" title="Bypass (pilih durasi & PIN)"
                     wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
-                    @class(['btn btn-ikon h-8 w-8 ml-1 min-[380px]:ml-2', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
+                    @class(['btn btn-remote', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
                 <x-ikon name="gembok-buka" size="16" />
             </button>
 
@@ -204,7 +208,7 @@
                                   title="Restart {{ $unit->nama }}?"
                                   :text="$bisaReboot ? 'TV akan dinyalakan ulang (±1 menit).' : 'TV ini tidak mengizinkan restart penuh; aplikasi TV Agent yang akan dimulai ulang.'"
                                   confirm-text="Restart"
-                                  class="btn-ikon h-8 w-8 text-ik-teal" title="Restart TV">
+                                  class="btn-remote text-ik-teal" title="Restart TV">
                     <x-ikon name="restart" size="16" />
                 </x-confirm-button>
             @endif

@@ -3,6 +3,7 @@ package id.rentalps.tvagent.data
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 
 /** Kontrak lengkap ada di docs/tv-agent-api.md (repo billing). */
 
@@ -41,6 +42,8 @@ data class StatusTv(
     val tema: Tema,
     /** Teks berjalan di kaki layar (Admin → Operasional) */
     val pengumuman: String? = null,
+    /** Running text promo dari kasir, melayang di atas layar kunci & game (null = mati) */
+    @SerialName("running_text") val runningText: RunningText? = null,
     /** Alamat server lokal & cloud untuk failover */
     val server: InfoServer? = null,
     /** Perintah remote yang belum kedaluwarsa (cadangan jika websocket putus) */
@@ -87,6 +90,40 @@ data class PerintahRemote(
     val id: String,
     val perintah: String,
     @SerialName("waktu_ms") val waktuMs: Long = 0,
+    /** Isi tambahan perintah (mis. pemberitahuan: teks, detik, ukuran, huruf, tebal) */
+    val data: JsonObject? = null,
+)
+
+/** Pemberitahuan di tengah layar TV (perintah remote "pemberitahuan") */
+@Serializable
+data class Pemberitahuan(
+    val teks: String,
+    val detik: Int = 10,
+    /** sedang | besar | jumbo */
+    val ukuran: String = "besar",
+    /** sans | serif | mono */
+    val huruf: String = "sans",
+    val tebal: Boolean = true,
+)
+
+@Serializable
+data class RunningText(
+    val teks: String,
+    /** null = sampai dimatikan kasir */
+    @SerialName("sampai_ms") val sampaiMs: Long? = null,
+    /** Disembunyikan saat unit sedang dimainkan (layar main / jeda) */
+    @SerialName("sembunyi_saat_main") val sembunyiSaatMain: Boolean = true,
+    /** atas | bawah */
+    val posisi: String = "bawah",
+    /** Kepekatan latar strip 0–100 */
+    val opasitas: Int = 60,
+    /** kecil | sedang | besar */
+    val ukuran: String = "sedang",
+    val tebal: Boolean = false,
+    /** lambat | sedang | cepat */
+    val kecepatan: String = "sedang",
+    /** #RRGGBB */
+    val warna: String = "#FFFFFF",
 )
 
 @Serializable

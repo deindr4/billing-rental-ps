@@ -8,6 +8,7 @@ use App\Models\LogTv;
 use App\Models\PerangkatTv;
 use App\Models\RilisApk;
 use App\Models\User;
+use App\Support\PemberitahuanTv;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -32,10 +33,12 @@ final class TvRemoteService
         // TV mengunduh rilis APK terbaru; dipasang saat TV kosong (terkunci), atau langsung untuk versi "paksa"
         'update_aplikasi' => 'Update aplikasi (saat TV kosong)',
         'update_aplikasi_paksa' => 'Update aplikasi sekarang',
+        // Pemberitahuan di tengah layar (isi di "data": teks, detik, ukuran, huruf, tebal). APK >= 0.6.0
+        'pemberitahuan' => 'Pemberitahuan',
     ];
 
     /** Perintah yang hanya boleh dikirim lewat jalurnya sendiri (PIN di panel TV / admin), bukan remote kartu unit */
-    public const PERINTAH_KHUSUS = ['tutup_aplikasi', 'update_aplikasi', 'update_aplikasi_paksa'];
+    public const PERINTAH_KHUSUS = ['tutup_aplikasi', 'update_aplikasi', 'update_aplikasi_paksa', 'pemberitahuan'];
 
     /** Perintah update APK ke banyak TV (hanya yang versinya belum terbaru). Return jumlah TV yang dikirimi. */
     public function pushUpdate(iterable $perangkat, User $user, bool $paksa = false): int
@@ -60,7 +63,24 @@ final class TvRemoteService
 
     private const SIMPAN_DETIK = 120;
 
-    public function kirim(PerangkatTv $perangkat, string $perintah, User $user): array
+    /** Pemberitahuan di tengah layar ke satu / banyak TV. Return jumlah TV yang dikirimi. */
+    public function pemberitahuan(iterable $perangkat, array $isi, User $user): int
+    {
+        $isi = PemberitahuanTv::rapikan($isi);
+        $n = 0;
+
+        foreach ($perangkat as $p) {
+            if ($p->status === PerangkatTv::STATUS_AKTIF) {
+                $this->kirim($p, 'pemberitahuan', $user, $isi);
+                $n++;
+            }
+        }
+
+        return $n;
+    }
+
+    /** @param array|null $isi data tambahan perintah (mis. isi pemberitahuan) */
+    public function kirim(PerangkatTv $perangkat, string $perintah, User $user, ?array $isi = null): array
     {
         if (! isset(self::PERINTAH[$perintah])) {
             throw new BillingException('Perintah TV tidak dikenal.');
@@ -71,6 +91,10 @@ final class TvRemoteService
         }
 
         $data = ['id' => (string) Str::uuid(), 'perintah' => $perintah, 'waktu_ms' => now()->getTimestampMs()];
+
+        if ($isi !== null) {
+            $data['data'] = $isi;
+        }
 
         $kunci = self::kunci($perangkat->id);
         $antre = collect(Cache::get($kunci, []))
@@ -86,7 +110,11 @@ final class TvRemoteService
 
         // Volume tidak dicatat (terlalu sering); aksi daya & restart dicatat
         if (! str_starts_with($perintah, 'volume_')) {
-            LogTv::catat($perangkat, 'perintah', ['perintah' => $perintah, 'label' => self::PERINTAH[$perintah]], $user);
+            LogTv::catat($perangkat, 'perintah', array_filter([
+                'perintah' => $perintah,
+                'label' => self::PERINTAH[$perintah],
+                'teks' => $isi['teks'] ?? null,
+            ]), $user);
         }
 
         return $data;

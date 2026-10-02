@@ -6,6 +6,18 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.0 (kode 11) - 2026-10-02                                   [tag apk-0.6.0]
+-----------------------------------------------------------------------------
+- Pemberitahuan dari kasir di TENGAH layar (di atas game & layar kunci): kotak navy bergaris aksen, teks + emoji,
+  ukuran Sedang/Besar/Jumbo, huruf Biasa/Klasik/Mono, tebal/biasa, tampil 5–60 detik lalu memudar sendiri.
+  Tidak bisa difokus -> stik PS & remote tetap jalan.
+- Running text promo: strip selebar layar (atas/bawah), teks bergeser terus; warna, ukuran, tebal, kecepatan
+  & kepekatan latar mengikuti setelan kasir. Mati sendiri saat durasinya habis; bisa otomatis disembunyikan
+  saat unit sedang dimainkan. Saat strip di bawah tayang, teks INFO di kaki layar kunci tidak ikut berjalan.
+- Kotak pemberitahuan & strip running text tampil pekat penuh (tanpa batas 80% Android 12+ untuk jendela melayang).
+- Butuh server billing versi 2026-10-02 (perintah "pemberitahuan" & field "running_text").
+
+
 0.5.2 (kode 10) - 2026-10-02                                   [tag apk-0.5.2]
 -----------------------------------------------------------------------------
 Timer melayang di atas permainan (pojok layar) tidak lagi mengganggu pemain:

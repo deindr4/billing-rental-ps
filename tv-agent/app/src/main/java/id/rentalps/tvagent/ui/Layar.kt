@@ -743,13 +743,22 @@ private fun BarKoneksi(k: Keadaan) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Pengumuman(s: StatusTv?, koneksi: Keadaan? = null) {
-    val teks = s?.pengumuman
-    if (teks.isNullOrBlank() && koneksi == null) return
+    // Running text kasir sedang melayang di bawah: teks INFO tidak ikut berjalan (tidak dobel)
+    // & kaki layar diberi ruang supaya tidak tertutup strip
+    val rt = s?.runningText
+    val runningDiBawah = rt != null && rt.posisi != "atas" && (rt.sampaiMs == null || Jam.sekarang() < rt.sampaiMs)
+    val teks = s?.pengumuman.takeUnless { runningDiBawah }
+    val ruangBawah = if (runningDiBawah) 44.dp else 0.dp
+    if (teks.isNullOrBlank() && koneksi == null) {
+        Spacer(Modifier.height(ruangBawah))
+        return
+    }
 
     val aksen = LocalAksen.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
+            .padding(bottom = ruangBawah)
             .fillMaxWidth()
             .padding(top = 10.dp)
             .heightIn(min = 30.dp)

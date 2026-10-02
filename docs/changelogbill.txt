@@ -5,6 +5,22 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (pemberitahuan TV & running text - APK 0.6.0)
+-----------------------------------------------------------------------------
+Kasir - Rental
+- Tombol megafon (pink) di baris remote tiap kartu unit + tombol "Pemberitahuan" di kepala halaman (semua TV):
+  pilih pesan cepat (mis. "🙏 Mohon tenang saat bermain") atau ketik sendiri + emoji, lama tampil 5-60 detik,
+  ukuran, jenis huruf, tebal; pratinjau seperti di TV. Tampil di tengah layar TV lalu hilang sendiri.
+- Tombol "Running text" di kepala halaman: teks promo berjalan di semua TV cabang, tayang 15 mnt - 8 jam atau
+  sampai dimatikan, "sembunyikan saat unit sedang dimainkan" (bawaan aktif), posisi atas/bawah, kecepatan,
+  ukuran & tebal, warna teks, kepekatan latar 0-100%. Tombol menyala hijau "ON" selama tayang.
+- Keduanya cukup izin kelola rental (kasir bisa), dicatat di log aktivitas & riwayat TV.
+- Baris remote kartu unit: label "TV" dihapus, tombol sedikit lebih kecil di HP sempit supaya 7 tombol muat.
+Admin -> Pengaturan Operasional
+- "Pesan cepat pemberitahuan TV": daftar pesan pilihan (satu per baris), kosong = pesan bawaan.
+API TV: perintah "pemberitahuan" (isi di "data") & field "running_text" (docs/tv-agent-api.md).
+
+
 2026-10-02 (APK 0.5.2 - timer TV tidak mengganggu)
 -----------------------------------------------------------------------------
 - APK TV 0.5.2: peringatan sisa waktu tanpa banner besar; timer merah + berkedip + beep (lihat docs/changelog.txt).

@@ -15,6 +15,7 @@ use App\Services\Billing\BillingService;
 use App\Services\Gateway\BayarMandiriService;
 use App\Services\Gateway\PengaturanGateway;
 use App\Services\Publik\QrisService;
+use App\Support\RunningTextTv;
 use App\Support\Tema;
 use Illuminate\Support\Facades\Storage;
 
@@ -83,6 +84,8 @@ final class StatusTvService
                 'zona_label' => self::ZONA_LABEL[$zona] ?? '',
             ],
             'pengumuman' => trim((string) Pengaturan::ambil('tv.pengumuman', '', $perangkat->cabang_id)) ?: null,
+            // Running text promo dari kasir (APK >= 0.6.0), tampil di atas layar kunci & game; null = mati / habis
+            'running_text' => RunningTextTv::untukApi($perangkat->cabang_id),
             // Alamat server untuk failover TV: lokal (utama, LAN) & cloud (cadangan). Diatur di Admin → Operasional.
             'server' => [
                 'lokal' => self::urlServer(Pengaturan::ambil('server.url_lokal', null, $perangkat->cabang_id)),
