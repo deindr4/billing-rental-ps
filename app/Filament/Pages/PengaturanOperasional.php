@@ -185,12 +185,12 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->numeric()->minValue(0)->maxValue(10)->required(),
                         TextInput::make('peringatan_menit')
                             ->label('Peringatan sisa waktu (menit)')
-                            ->helperText('Timer berwarna kuning & TV memberi peringatan.')
+                            ->helperText('Di bawah batas ini timer di TV berubah merah; tepat di batas & sisa 1 menit timer berkedip + bunyi. Kartu kasir berwarna kuning.')
                             ->numeric()->minValue(1)->maxValue(30)->required(),
                         TextInput::make('opasitas_timer')
                             ->label('Kepekatan timer di TV (%)')
                             ->helperText('Timer melayang di atas game. 100 = pekat, 40 = tembus pandang (game di belakang terlihat). '
-                                .'Saat waktu hampir habis & peringatan, timer selalu tampil penuh.')
+                                .'Saat waktu hampir habis, timer selalu tampil penuh.')
                             ->numeric()->minValue(30)->maxValue(100)->suffix('%')->required(),
                         TextInput::make('pilih_game_menit')
                             ->label('Waktu pilih game (menit)')

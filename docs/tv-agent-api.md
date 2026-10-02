@@ -100,7 +100,11 @@ supaya "sudah main" di TV sama dengan durasi yang ditagih.
 Saat sisa paket mencapai 0, TV langsung mengunci sendiri tanpa menunggu server.
 
 **`pengaturan.opasitas_timer`** (30–100, APK ≥ 0.4.2): kepekatan timer melayang di atas game.
-TV memakai 100% saat sisa waktu ≤ `peringatan_menit` dan saat banner peringatan tampil.
+TV memakai 100% saat sisa waktu ≤ `peringatan_menit`.
+
+**Peringatan sisa waktu** (APK ≥ 0.5.2): saat sisa ≤ `peringatan_menit` timer di pojok berubah merah (ukuran tetap kecil);
+tepat di `peringatan_menit` & 1 menit timer berkedip 6 detik + bunyi beep (bila `suara_aktif`). Tidak ada banner
+di tengah / membesar menutupi permainan.
 
 ### Bayar mandiri (`bayar_mandiri`, APK ≥ 0.2.0)
 

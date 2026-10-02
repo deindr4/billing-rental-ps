@@ -6,6 +6,18 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.5.2 (kode 10) - 2026-10-02                                   [tag apk-0.5.2]
+-----------------------------------------------------------------------------
+Timer melayang di atas permainan (pojok layar) tidak lagi mengganggu pemain:
+- Banner besar dihapus (dulu membesar ±10 detik dengan pesan & latar kuning di awal main,
+  sisa 5 menit & sisa 1 menit).
+- Sisa waktu <= menit peringatan (bawaan 5): angka, judul & garis timer berubah MERAH, latar tetap gelap,
+  ukuran tetap kecil, selalu pekat.
+- Tepat sisa 5 menit & sisa 1 menit: timer berkedip di pojok selama 6 detik + bunyi beep
+  (2x di sisa 5 menit, 3x di sisa 1 menit; ikut setelan suara TV di Admin -> Pengaturan Operasional).
+- Awal main: cukup bunyi singkat, tanpa tampilan tambahan.
+
+
 0.5.1 (kode 9) - 2026-10-01                                    [tag apk-0.5.1]
 -----------------------------------------------------------------------------
 - Ikon & banner aplikasi memakai logo Delta Gaming Hub (sebelumnya ikon gambar sederhana).

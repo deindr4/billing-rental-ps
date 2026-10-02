@@ -10,7 +10,6 @@ import android.os.Looper
 import android.provider.Settings
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -20,7 +19,9 @@ import id.rentalps.tvagent.core.Keadaan
 /**
  * Timer kecil yang melayang di atas tampilan PS (HDMI), gaya desain Stitch.
  * Tidak bisa difokus/diklik, jadi tidak mengganggu stik PS maupun remote.
- * Saat peringatan, membesar sebentar menjadi banner berisi pesan. Butuh izin "tampil di atas aplikasi lain".
+ * Peringatan tidak pernah membesar / menutup permainan: cukup angka merah (sisa ≤ menit peringatan)
+ * dan berkedip sebentar di pojok (+ bunyi dari [id.rentalps.tvagent.core.Suara]).
+ * Butuh izin "tampil di atas aplikasi lain".
  */
 class OverlayTimer(private val ctx: Context) {
     private val wm = ctx.getSystemService(Context.WINDOW_SERVICE) as WindowManager
@@ -28,13 +29,15 @@ class OverlayTimer(private val ctx: Context) {
 
     private var tampil = false
     private var keadaan: Keadaan? = null
-    private var bannerSampaiMs = 0L
+    private var kedipSampaiMs = 0L
+    private var redup = false
 
     private val warnaNormal = Color.argb(225, 15, 28, 43)     // #0f1c2b
     private val warnaGaris = Color.parseColor("#1E3144")
-    private val warnaKuning = Color.parseColor("#FBBF24")
-    private val warnaGelap = Color.parseColor("#0A1420")
+    private val warnaMerah = Color.parseColor("#F87171")
     private val warnaBiru = Color.parseColor("#38BDF8")
+    private val warnaTeks = Color.parseColor("#E6EDF5")
+    private val warnaRedup = Color.parseColor("#7F90A6")
 
     private val judul = TextView(ctx).apply {
         typeface = Typeface.MONOSPACE
@@ -45,12 +48,6 @@ class OverlayTimer(private val ctx: Context) {
     private val waktu = TextView(ctx).apply {
         typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD)
         setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
-    }
-
-    private val pesan = TextView(ctx).apply {
-        setTextSize(TypedValue.COMPLEX_UNIT_SP, 15f)
-        visibility = View.GONE
-        maxWidth = 900
     }
 
     private val latar = GradientDrawable().apply {
@@ -64,13 +61,26 @@ class OverlayTimer(private val ctx: Context) {
         setPadding(30, 16, 30, 18)
         addView(judul)
         addView(waktu)
-        addView(pesan)
     }
 
     private val detik = object : Runnable {
         override fun run() {
             gambar()
             handler.postDelayed(this, 1_000)
+        }
+    }
+
+    /** Kedip: timer bergantian pekat / redup tiap 0,4 detik sampai [kedipSampaiMs] */
+    private val kedipan = object : Runnable {
+        override fun run() {
+            if (System.currentTimeMillis() >= kedipSampaiMs) {
+                redup = false
+                gambar()
+                return
+            }
+            redup = !redup
+            gambar()
+            handler.postDelayed(this, 400)
         }
     }
 
@@ -95,18 +105,20 @@ class OverlayTimer(private val ctx: Context) {
 
     fun sembunyikan() {
         handler.removeCallbacks(detik)
-        bannerSampaiMs = 0
+        handler.removeCallbacks(kedipan)
+        kedipSampaiMs = 0
+        redup = false
         if (!tampil) return
 
         runCatching { wm.removeView(kotak) }
         tampil = false
     }
 
-    /** Membesar selama [detik] dengan pesan peringatan */
-    fun banner(teks: String, detik: Int = 10) {
-        pesan.text = teks
-        bannerSampaiMs = System.currentTimeMillis() + detik * 1000L
-        gambar()
+    /** Berkedip di pojok selama [detik] — pengganti banner besar supaya permainan tidak tertutup */
+    fun kedip(detik: Int = 6) {
+        kedipSampaiMs = System.currentTimeMillis() + detik * 1000L
+        handler.removeCallbacks(kedipan)
+        handler.post(kedipan)
     }
 
     private fun gambar() {
@@ -145,21 +157,19 @@ class OverlayTimer(private val ctx: Context) {
             }
         }
 
-        val modeBanner = System.currentTimeMillis() < bannerSampaiMs
-        pesan.visibility = if (modeBanner) View.VISIBLE else View.GONE
-        waktu.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (modeBanner) 44f else 24f)
-        judul.setTextSize(TypedValue.COMPLEX_UNIT_SP, if (modeBanner) 13f else 10f)
+        // Ukuran tetap kecil; hampir habis = angka & garis merah (latar tetap gelap, tidak menutup game)
+        latar.setColor(warnaNormal)
+        latar.setStroke(2, if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaGaris)
+        waktu.setTextColor(if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaTeks)
+        judul.setTextColor(if (hampir) warnaMerah else warnaRedup)
 
-        val teksUtama = if (hampir) warnaGelap else Color.parseColor("#E6EDF5")
-        latar.setColor(if (hampir) warnaKuning else warnaNormal)
-        latar.setStroke(2, if (hampir) warnaKuning else if (pilihGame) warnaBiru else warnaGaris)
-        waktu.setTextColor(if (pilihGame) warnaBiru else teksUtama)
-        pesan.setTextColor(teksUtama)
-        judul.setTextColor(if (hampir) warnaGelap else Color.parseColor("#7F90A6"))
-
-        // Kepekatan diatur admin (Pengaturan → Operasional); peringatan selalu pekat supaya jelas terbaca
+        // Kepekatan diatur admin (Pengaturan → Operasional); hampir habis selalu pekat supaya jelas terbaca
         val opasitas = (k.status?.pengaturan?.opasitasTimer ?: 90).coerceIn(30, 100)
-        kotak.alpha = if (hampir || modeBanner) 1f else opasitas / 100f
+        kotak.alpha = when {
+            redup -> 0.2f
+            hampir -> 1f
+            else -> opasitas / 100f
+        }
     }
 
     private fun parameter(): WindowManager.LayoutParams {

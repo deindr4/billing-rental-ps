@@ -95,13 +95,12 @@ class AgentService : Service() {
                 }
         }
 
-        // Peringatan sisa waktu: bunyi + banner besar sebentar
+        // Peringatan sisa waktu: bunyi + timer di pojok berkedip (tanpa banner di layar, permainan tidak terganggu)
         scope.launch {
             agent.peringatan.collect { p ->
                 when (p.jenis) {
-                    Peringatan.Jenis.MULAI -> overlay.banner("Waktu bermain dimulai — selamat bermain!", 8)
-                    Peringatan.Jenis.SISA -> overlay.banner("Sisa ${p.menit} menit — hubungi kasir untuk tambah waktu")
-                    Peringatan.Jenis.SATU_MENIT -> overlay.banner("Sisa 1 menit — simpan permainan Anda")
+                    Peringatan.Jenis.MULAI -> Unit // cukup bunyi singkat
+                    Peringatan.Jenis.SISA, Peringatan.Jenis.SATU_MENIT -> overlay.kedip(6)
                     Peringatan.Jenis.HABIS -> Unit // layar kunci "waktu habis" tampil sendiri
                 }
                 if (p.bunyi) {
