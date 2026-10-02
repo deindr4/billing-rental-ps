@@ -44,7 +44,11 @@ final class PinService
         foreach ($kandidat as $user) {
             if (Hash::check($pin, $user->pin)) {
                 if (! $user->can($izin)) {
-                    throw new BillingException("{$user->name} tidak punya izin untuk menyetujui aksi ini.");
+                    // Ikut dihitung & tanpa nama: jangan jadi cara menebak PIN milik siapa
+                    RateLimiter::hit($kunci, self::BLOKIR_DETIK);
+                    Audit::catat('pin_gagal', "PIN tanpa izin untuk {$izin}", null, ['izin' => $izin], tenantId: $tenantId);
+
+                    throw new BillingException('PIN ini tidak punya izin untuk menyetujui aksi ini.');
                 }
 
                 RateLimiter::clear($kunci);

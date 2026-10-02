@@ -5,6 +5,19 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (keamanan - hasil pentest, laporan: docs/pentest-2026-10-02.md)
+-----------------------------------------------------------------------------
+- [TINGGI] Sinkron: token satu rental tidak bisa lagi membuat super admin, menimpa akun super admin,
+  atau menimpa data rental lain. Kolom is_super_admin tidak bisa diisi massal.
+- Restore backup hanya memulihkan gambar; skrip (.php dll.) di folder /storage ditolak web server
+  (public/.htaccess, httpd.conf installer, contoh Nginx di docs).
+- PIN tanpa izin tidak lagi menyebut nama pemiliknya & ikut dihitung sebagai percobaan.
+- Login: tambahan batas 20 gagal / 10 menit per IP. Cek booking publik: 10 percobaan / 10 menit.
+- Header: Content-Security-Policy ringan, X-Powered-By dihapus; Apache installer: ServerTokens Prod, TRACE mati.
+- Perbaikan kanal broadcast pengguna (UUID dibandingkan sebagai teks).
+- Wajib sebelum publik: ganti password akun bawaan (lihat checklist di laporan pentest).
+
+
 2026-10-02 (1 TV beberapa konsol / HDMI - APK 0.6.1)
 -----------------------------------------------------------------------------
 - Admin -> Perangkat TV -> tombol HDMI: beri nama konsol tiap HDMI yang dilaporkan TV (HDMI 1 = PS3, HDMI 2 = PS4,

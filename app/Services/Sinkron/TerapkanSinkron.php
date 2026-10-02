@@ -21,6 +21,15 @@ use Throwable;
  */
 final class TerapkanSinkron
 {
+    /**
+     * Kolom yang tidak pernah diterima lewat sinkron (keamanan): pemegang token sinkron satu tenant
+     * tidak boleh menjadikan penggunanya super admin platform. Super admin hanya dibuat lewat
+     * `php artisan superadmin` / installer di server itu sendiri.
+     */
+    private const KOLOM_TERLINDUNG = [
+        'users' => ['is_super_admin'],
+    ];
+
     private array $kolomCache = [];
 
     /** @return array{diterapkan:int, dilewati:int, ditolak:array<int,string>} */
@@ -92,16 +101,32 @@ final class TerapkanSinkron
             return 'ditolak';
         }
 
-        // Hanya kolom yang ada di server ini (versi aplikasi bisa beda sedikit)
-        $data = array_intersect_key($data, array_flip($this->kolom($tabel)));
+        // Hanya kolom yang ada di server ini (versi aplikasi bisa beda sedikit), tanpa kolom terlindung
+        $data = array_diff_key(
+            array_intersect_key($data, array_flip($this->kolom($tabel))),
+            array_flip(self::KOLOM_TERLINDUNG[$tabel] ?? []),
+        );
+
+        // Super admin di server ini (tanpa tenant) tidak bisa ditimpa / diambil alih lewat sinkron
+        if ($tabel === 'users' && DB::table('users')->where('id', $id)->where('is_super_admin', true)->exists()) {
+            return 'ditolak';
+        }
 
         if (in_array($tabel, DaftarTabel::HANYA_TAMBAH, true)) {
             return DB::table($tabel)->insertOrIgnore($data) > 0 ? 'ok' : 'lewat';
         }
 
-        $lama = DB::table($tabel)->where('id', $id)->first(['id', ...(isset($data['updated_at']) ? ['updated_at'] : [])]);
+        $punyaTenant = in_array('tenant_id', $this->kolom($tabel), true);
+        $lama = DB::table($tabel)->where('id', $id)->first([
+            'id', ...(isset($data['updated_at']) ? ['updated_at'] : []), ...($punyaTenant ? ['tenant_id'] : []),
+        ]);
 
         if ($lama) {
+            // Baris yang sudah ada milik tenant lain tidak boleh ditimpa (id sama dari pengirim tenant lain)
+            if ($tenantWajib !== null && $tabel !== 'tenants' && $punyaTenant && $lama->tenant_id !== $tenantWajib) {
+                return 'ditolak';
+            }
+
             // Data di server ini lebih baru: jangan ditimpa
             if (isset($data['updated_at'], $lama->updated_at) && strcmp((string) $lama->updated_at, (string) $data['updated_at']) > 0) {
                 return 'lewat';
@@ -134,7 +159,7 @@ final class TerapkanSinkron
             return 'lewat';
         }
 
-        if (! $this->tenantCocok($tabel, (array) $lama, $tenantWajib)) {
+        if (! $this->tenantCocok($tabel, (array) $lama, $tenantWajib) || ($tabel === 'users' && ! empty($lama->is_super_admin))) {
             return 'ditolak';
         }
 

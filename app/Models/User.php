@@ -33,7 +33,7 @@ class User extends Authenticatable implements FilamentUser
         'email',
         'phone',
         'password',
-        'is_super_admin',
+        // is_super_admin sengaja TIDAK fillable: hanya lewat forceFill (php artisan superadmin / installer)
         'is_active',
         'last_login_at',
     ];

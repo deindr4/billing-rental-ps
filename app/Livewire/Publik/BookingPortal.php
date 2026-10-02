@@ -223,10 +223,20 @@ class BookingPortal extends Component
             'cekKode.required' => 'Isi kode booking.', 'cekTelepon.required' => 'Isi nomor WhatsApp.',
         ]);
 
+        // Cegah menebak kode booking beruntun: 10 percobaan salah per 10 menit per IP
+        $kunci = 'cek-booking:'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($kunci, 10)) {
+            $this->addError('cekKode', 'Terlalu banyak percobaan. Coba lagi dalam '.ceil(RateLimiter::availableIn($kunci) / 60).' menit.');
+
+            return;
+        }
+
         $b = Booking::query()->where('kode', strtoupper(trim($this->cekKode)))
             ->where('telepon', Member::normalisasiTelepon($this->cekTelepon))->first();
 
         if (! $b) {
+            RateLimiter::hit($kunci, 600);
             $this->addError('cekKode', 'Booking tidak ditemukan. Periksa kode & nomor WhatsApp.');
 
             return;

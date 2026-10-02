@@ -27,9 +27,8 @@ class DatabaseSeeder extends Seeder
                 'tenant_id' => null,
                 'name' => 'Super Admin',
                 'password' => Hash::make('password'),
-                'is_super_admin' => true,
             ]
-        );
+        )->forceFill(['is_super_admin' => true])->save(); // is_super_admin tidak fillable
 
         // Tenant pertama
         $tenant = Tenant::firstOrCreate(

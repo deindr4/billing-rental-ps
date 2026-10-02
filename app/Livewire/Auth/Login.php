@@ -30,14 +30,17 @@ class Login extends Component
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        // Batasi 5 percobaan per menit per akun + IP
+        // Batasi 5 percobaan per menit per akun + IP, dan 20 gagal per 10 menit per IP (menebak banyak akun)
         $key = 'login:'.Str::lower($this->login).'|'.request()->ip();
+        $keyIp = 'login-ip:'.request()->ip();
 
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $detik = RateLimiter::availableIn($key);
-            $this->addError('login', "Terlalu banyak percobaan. Coba lagi dalam {$detik} detik.");
+        foreach ([[$key, 5], [$keyIp, 20]] as [$k, $maks]) {
+            if (RateLimiter::tooManyAttempts($k, $maks)) {
+                $detik = RateLimiter::availableIn($k);
+                $this->addError('login', "Terlalu banyak percobaan. Coba lagi dalam {$detik} detik.");
 
-            return;
+                return;
+            }
         }
 
         $field = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
@@ -50,6 +53,7 @@ class Login extends Component
 
         if (! $berhasil) {
             RateLimiter::hit($key, 60);
+            RateLimiter::hit($keyIp, 600);
             $this->addError('login', 'Email/username atau password salah.');
 
             return;

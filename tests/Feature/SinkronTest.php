@@ -97,6 +97,54 @@ class SinkronTest extends TestCase
         $this->assertGreaterThan(1, count($this->withToken($token)->getJson('/api/sync/tarik?setelah=0&semua=1')->json('perubahan')));
     }
 
+    /** Pentest: token sinkron satu tenant tidak bisa membuat super admin / menimpa data tenant lain / super admin */
+    public function test_token_sinkron_tidak_bisa_eskalasi_super_admin_atau_menimpa_tenant_lain(): void
+    {
+        config(['app.mode' => 'cloud']);
+        $tenant = $this->cabang->tenant_id;
+        [, $token] = ServerSinkron::buat('Rental uji', $tenant);
+
+        $owner = (array) DB::table('users')->where('email', 'owner@billing.test')->first();
+        $superAdmin = DB::table('users')->where('email', 'admin@billing.test')->first();
+
+        // Pengguna tenant lain (korban)
+        $tenantLain = (string) Str::uuid7();
+        DB::table('tenants')->insert(['id' => $tenantLain, 'kode' => 'LAIN', 'nama' => 'Rental Lain', 'status' => 'aktif', 'created_at' => now(), 'updated_at' => now()]);
+        $korbanId = (string) Str::uuid7();
+        DB::table('users')->insert(array_merge($owner, [
+            'id' => $korbanId, 'tenant_id' => $tenantLain, 'email' => 'korban@lain.test', 'username' => 'korban', 'password' => 'hash-asli',
+        ]));
+
+        $baris = fn (array $ubah) => array_merge($owner, ['updated_at' => now()->addMinute()->toDateTimeString()], $ubah);
+        $penyusupId = (string) Str::uuid7();
+
+        $this->withToken($token)->postJson('/api/sync/dorong', [
+            'tenant_id' => $tenant,
+            'perubahan' => [
+                // 1. Pengguna baru di tenant sendiri yang mengaku super admin
+                ['tabel' => 'users', 'aksi' => 'upsert', 'id' => $penyusupId, 'data' => $baris([
+                    'id' => $penyusupId, 'email' => 'penyusup@x.test', 'username' => 'penyusup', 'is_super_admin' => 1,
+                ])],
+                // 2. Menimpa pengguna tenant lain (id sama, tenant diganti ke tenant sendiri)
+                ['tabel' => 'users', 'aksi' => 'upsert', 'id' => $korbanId, 'data' => $baris([
+                    'id' => $korbanId, 'email' => 'korban@lain.test', 'username' => 'korban', 'password' => 'hash-penyusup',
+                ])],
+                // 3. Mengambil alih akun super admin
+                ['tabel' => 'users', 'aksi' => 'upsert', 'id' => $superAdmin->id, 'data' => $baris([
+                    'id' => $superAdmin->id, 'email' => 'admin@billing.test', 'username' => 'su', 'password' => 'hash-penyusup',
+                ])],
+                // 4. Menghapus super admin
+                ['tabel' => 'users', 'aksi' => 'hapus', 'id' => $superAdmin->id],
+            ],
+        ])->assertOk();
+
+        $this->assertFalse((bool) DB::table('users')->where('id', $penyusupId)->value('is_super_admin'));
+        $this->assertSame(['tenant_id' => $tenantLain, 'password' => 'hash-asli'],
+            (array) DB::table('users')->where('id', $korbanId)->first(['tenant_id', 'password']));
+        $this->assertSame($superAdmin->password, DB::table('users')->where('id', $superAdmin->id)->value('password'));
+        $this->assertTrue((bool) DB::table('users')->where('id', $superAdmin->id)->value('is_super_admin'));
+    }
+
     public function test_token_baru_tidak_bisa_mengambil_alih_tenant_yang_sudah_ada(): void
     {
         config(['app.mode' => 'cloud']);

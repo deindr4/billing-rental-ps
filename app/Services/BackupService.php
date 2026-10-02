@@ -182,13 +182,23 @@ final class BackupService
             for ($i = 0; $i < $zip->numFiles; $i++) {
                 $n = $zip->getNameIndex($i);
 
-                if (str_starts_with($n, 'uploads/') && ! str_ends_with($n, '/')) {
+                // Hanya gambar unggahan (logo, wallpaper, foto nota/aset) di jalur wajar: file lain (mis. .php)
+                // di folder publik bisa dijalankan web server -> ditolak.
+                if (str_starts_with($n, 'uploads/') && self::unggahanAman(substr($n, 8))) {
                     $publik->put(substr($n, 8), $zip->getFromIndex($i));
                 }
             }
         }
 
         $zip->close();
+    }
+
+    /** Jalur file unggahan dari backup yang boleh dipulihkan ke disk publik */
+    public static function unggahanAman(string $jalur): bool
+    {
+        // folder/folder/nama.webp — tanpa "..", tanpa titik di awal nama, ekstensi gambar saja
+        return (bool) preg_match('#^(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-][A-Za-z0-9_.-]*\.(?:webp|png|jpe?g|gif)$#i', $jalur)
+            && ! str_contains($jalur, '..');
     }
 
     /**

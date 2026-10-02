@@ -17,6 +17,14 @@ class HeaderKeamanan
         $res->headers->set('X-Content-Type-Options', 'nosniff');
         $res->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $res->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+        // CSP ringan yang aman untuk Livewire/Alpine: larang plugin, <base> asing & disisipkan di situs lain
+        $res->headers->set('Content-Security-Policy', "object-src 'none'; base-uri 'self'; frame-ancestors 'self'");
+
+        // Jangan umumkan versi PHP (hosting / PHP bawaan yang expose_php=On)
+        if (! headers_sent()) {
+            header_remove('X-Powered-By');
+        }
+        $res->headers->remove('X-Powered-By');
 
         // HSTS hanya lewat https (server LAN http tidak terpengaruh)
         if ($request->isSecure()) {

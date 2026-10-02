@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Folder unggahan (/storage -> storage/app/public) hanya berisi gambar: jangan pernah menjalankan skrip di sana
+    RewriteRule ^storage/.*\.(php\d?|phtml|phar|pht|cgi|pl|sh)$ - [F,L,NC]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

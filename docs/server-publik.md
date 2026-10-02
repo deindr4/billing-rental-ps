@@ -81,6 +81,8 @@ server {
     client_max_body_size 200M;
 
     location / { try_files $uri $uri/ /index.php?$query_string; }
+    # Folder unggahan: jangan jalankan skrip (harus di atas location ~ \.php$)
+    location ~* ^/storage/.*\.(php\d?|phtml|phar|pht)$ { deny all; }
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_pass unix:/run/php/php8.4-fpm.sock;

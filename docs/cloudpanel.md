@@ -139,6 +139,11 @@ Site → **Vhost** → di dalam blok `server { ... }` (sebelum `location ~ \.php
 ```nginx
 client_max_body_size 256M;
 
+# Folder unggahan hanya berisi gambar: jangan pernah menjalankan skrip di sana (taruh SEBELUM location ~ \.php$)
+location ~* ^/storage/.*\.(php\d?|phtml|phar|pht)$ {
+    deny all;
+}
+
 location /app {
     proxy_pass http://127.0.0.1:8080;
     proxy_http_version 1.1;
