@@ -3,6 +3,7 @@
 namespace App\Livewire\Auth;
 
 use App\Models\User;
+use App\Support\BatasLogin;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
@@ -30,17 +31,21 @@ class Login extends Component
             'password.required' => 'Password wajib diisi.',
         ]);
 
-        // Batasi 5 percobaan per menit per akun + IP, dan 20 gagal per 10 menit per IP (menebak banyak akun)
+        // IP publik: 3x gagal -> diblokir 15 menit (localhost & LAN dikecualikan, lihat BatasLogin)
+        if ($detik = BatasLogin::sisaBlokir(request())) {
+            $this->addError('login', BatasLogin::pesan($detik));
+
+            return;
+        }
+
+        // Semua jaringan (termasuk Wi-Fi rental): 5 percobaan per menit per akun + IP
         $key = 'login:'.Str::lower($this->login).'|'.request()->ip();
-        $keyIp = 'login-ip:'.request()->ip();
 
-        foreach ([[$key, 5], [$keyIp, 20]] as [$k, $maks]) {
-            if (RateLimiter::tooManyAttempts($k, $maks)) {
-                $detik = RateLimiter::availableIn($k);
-                $this->addError('login', "Terlalu banyak percobaan. Coba lagi dalam {$detik} detik.");
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $detik = RateLimiter::availableIn($key);
+            $this->addError('login', "Terlalu banyak percobaan. Coba lagi dalam {$detik} detik.");
 
-                return;
-            }
+            return;
         }
 
         $field = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'username';
@@ -53,13 +58,16 @@ class Login extends Component
 
         if (! $berhasil) {
             RateLimiter::hit($key, 60);
-            RateLimiter::hit($keyIp, 600);
-            $this->addError('login', 'Email/username atau password salah.');
+            BatasLogin::gagal(request());
+
+            $detik = BatasLogin::sisaBlokir(request());
+            $this->addError('login', $detik ? BatasLogin::pesan($detik) : 'Email/username atau password salah.');
 
             return;
         }
 
         RateLimiter::clear($key);
+        BatasLogin::berhasil(request());
         session()->regenerate();
 
         /** @var User $user */

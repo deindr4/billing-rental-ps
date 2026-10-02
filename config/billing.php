@@ -12,6 +12,9 @@ return [
     // Jangan "*" jika server bisa diakses langsung tanpa proxy (IP bisa dipalsukan lewat header).
     'proxy_tepercaya' => env('TRUSTED_PROXIES'),
 
+    // Login gagal 3x per IP -> blokir 15 menit. true = localhost & IP LAN (Wi-Fi rental) dikecualikan.
+    'login_bebas_lokal' => (bool) env('LOGIN_BEBAS_LOKAL', true),
+
     // Shared hosting (tanpa supervisor/proses latar): antrean diproses tiap menit oleh cron schedule:run
     'antrean_lewat_cron' => (bool) env('ANTREAN_LEWAT_CRON', false),
 

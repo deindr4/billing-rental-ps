@@ -3,7 +3,10 @@
 namespace Tests\Feature;
 
 use App\Exceptions\BillingException;
+use App\Filament\Pages\Auth\Login as LoginAdmin;
 use App\Livewire\Auth\Login;
+use App\Support\BatasLogin;
+use Illuminate\Http\Request;
 use App\Models\Cabang;
 use App\Models\Tenant;
 use App\Models\User;
@@ -79,16 +82,86 @@ class KeamananTest extends TestCase
         app(PinService::class)->setujui('4321', 'transaksi.batal', $tenant->id);
     }
 
-    public function test_login_dibatasi_per_ip_walau_berganti_akun(): void
+    private function dariIp(string $ip, array $header = []): void
     {
-        // 20 percobaan salah ke akun berbeda-beda dari satu IP
-        for ($i = 0; $i < 20; $i++) {
+        $server = ['REMOTE_ADDR' => $ip];
+        foreach ($header as $k => $v) {
+            $server['HTTP_'.strtoupper(str_replace('-', '_', $k))] = $v;
+        }
+        $this->app->instance('request', Request::create('/login', 'POST', [], [], [], $server));
+    }
+
+    public function test_ip_lokal_dan_lan_dikenali(): void
+    {
+        $lokal = function (string $ip, array $h = []): bool {
+            $this->dariIp($ip, $h);
+
+            return BatasLogin::ipLokal(request());
+        };
+
+        foreach (['127.0.0.1', '::1', '192.168.1.20', '10.5.0.9', '172.20.1.1'] as $ip) {
+            $this->assertTrue($lokal($ip), $ip);
+        }
+        foreach (['203.0.113.5', '8.8.8.8', '172.32.0.1', '2001:db8::1'] as $ip) {
+            $this->assertFalse($lokal($ip), $ip);
+        }
+
+        // Di balik Cloudflare/Nginx tanpa TRUSTED_PROXIES: semua tampak 127.0.0.1 -> TIDAK dianggap lokal
+        $this->assertFalse($lokal('127.0.0.1', ['X-Forwarded-For' => '198.51.100.7']));
+        $this->assertFalse($lokal('127.0.0.1', ['CF-Connecting-IP' => '198.51.100.7']));
+    }
+
+    /**
+     * Request uji Livewire selalu dari 127.0.0.1: pengecualian lokal dimatikan supaya
+     * diperlakukan seperti pengunjung internet.
+     */
+    private function sepertiInternet(): void
+    {
+        config(['billing.login_bebas_lokal' => false]);
+    }
+
+    public function test_ip_publik_diblokir_setelah_3_gagal_lintas_akun(): void
+    {
+        $this->sepertiInternet();
+
+        for ($i = 0; $i < 3; $i++) {
             Livewire::test(Login::class)->set('login', "tebak{$i}@x.test")->set('password', 'salah')->call('masuk');
         }
 
-        // Akun berikutnya (bahkan dengan password benar) ikut tertahan sementara
+        // Percobaan ke-4, walau password benar: diblokir ±15 menit
         Livewire::test(Login::class)->set('login', 'owner@billing.test')->set('password', 'password')->call('masuk')
-            ->assertHasErrors('login');
+            ->assertHasErrors('login')->assertSee('Terlalu banyak percobaan login gagal')->assertSee('15 menit');
+        $this->assertGuest();
+
+        // Pengecualian lokal aktif lagi -> dari localhost / LAN tetap bisa masuk
+        config(['billing.login_bebas_lokal' => true]);
+        Livewire::test(Login::class)->set('login', 'owner@billing.test')->set('password', 'password')->call('masuk')
+            ->assertHasNoErrors();
+        $this->assertAuthenticated();
+    }
+
+    public function test_localhost_tidak_kena_batas_3x(): void
+    {
+        for ($i = 0; $i < 4; $i++) {
+            Livewire::test(Login::class)->set('login', "salah{$i}@x.test")->set('password', 'salah')->call('masuk')
+                ->assertSee('password salah');
+        }
+
+        Livewire::test(Login::class)->set('login', 'owner@billing.test')->set('password', 'password')->call('masuk')
+            ->assertHasNoErrors();
+        $this->assertAuthenticated();
+    }
+
+    public function test_login_panel_admin_juga_diblokir_3x(): void
+    {
+        $this->sepertiInternet();
+
+        for ($i = 0; $i < 3; $i++) {
+            Livewire::test(LoginAdmin::class)->set('data.email', 'owner@billing.test')->set('data.password', 'salah')->call('authenticate');
+        }
+
+        Livewire::test(LoginAdmin::class)->set('data.email', 'owner@billing.test')->set('data.password', 'password')->call('authenticate')
+            ->assertNotified();
         $this->assertGuest();
     }
 }
