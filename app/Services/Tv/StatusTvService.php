@@ -149,6 +149,15 @@ final class StatusTvService
 
     public const ZONA_LABEL = ['Asia/Jakarta' => 'WIB', 'Asia/Makassar' => 'WITA', 'Asia/Jayapura' => 'WIT'];
 
+    /** Warna angka timer TV saat waktu masih banyak. Merah tidak tersedia: khusus tanda waktu hampir habis. */
+    public const WARNA_TIMER = [
+        'putih' => '#E6EDF5',
+        'hijau' => '#4ADE80',
+        'biru' => '#38BDF8',
+        'tosca' => '#2DD4BF',
+        'kuning' => '#FACC15',
+    ];
+
     /** URL file publik memakai host yang dipakai TV (APP_URL bisa "localhost" yang tidak terjangkau dari TV) */
     private function urlPublik(?string $path): ?string
     {
@@ -285,6 +294,8 @@ final class StatusTvService
             'opasitas_timer' => max(30, min(100, (int) Pengaturan::ambil('tv.opasitas_timer', 90, $cabangId))),
             // Ukuran timer melayang di atas game: kecil | sedang | besar (APK >= 0.6.3)
             'ukuran_timer' => in_array($u = Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId), ['kecil', 'sedang', 'besar'], true) ? $u : 'sedang',
+            // Warna angka timer saat waktu masih banyak (hampir habis tetap merah) (APK >= 0.6.4)
+            'warna_timer' => self::WARNA_TIMER[Pengaturan::ambil('tv.warna_timer', 'putih', $cabangId)] ?? self::WARNA_TIMER['putih'],
             'durasi_bypass_menit' => $this->durasiBypass($perangkat, $unit),
             'bypass_maks_menit' => $this->bypassMaks($cabangId),
             'bypass_pilihan' => $this->pilihanBypass($perangkat, $unit),

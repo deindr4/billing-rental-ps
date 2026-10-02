@@ -88,6 +88,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['struk_footer'] = $struk['footer'];
         $isi['tv_suara_aktif'] = $cabangId ? (bool) Pengaturan::ambil('tv.suara_aktif', true, $cabangId) : true;
         $isi['tv_ukuran_timer'] = $cabangId ? (string) Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId) : 'sedang';
+        $isi['tv_warna_timer'] = $cabangId ? (string) Pengaturan::ambil('tv.warna_timer', 'putih', $cabangId) : 'putih';
         $isi['tv_pengumuman'] = $cabangId ? (string) Pengaturan::ambil('tv.pengumuman', '', $cabangId) : '';
         $isi['tv_pesan_cepat'] = implode("\n", PemberitahuanTv::pesanCepat($cabangId));
         $isi['tv_aplikasi'] = StatusTvService::aplikasiDiizinkan($cabangId);
@@ -200,6 +201,12 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->label('Ukuran timer di TV')
                             ->options(['kecil' => 'Kecil', 'sedang' => 'Sedang', 'besar' => 'Besar'])
                             ->helperText('Ukuran timer melayang di pojok layar saat main. APK TV ≥ 0.6.3.')
+                            ->selectablePlaceholder(false)
+                            ->required(),
+                        Select::make('tv_warna_timer')
+                            ->label('Warna angka timer di TV')
+                            ->options(['putih' => 'Putih', 'hijau' => 'Hijau', 'biru' => 'Biru', 'tosca' => 'Tosca', 'kuning' => 'Kuning'])
+                            ->helperText('Warna saat waktu masih banyak. Di bawah batas "Peringatan sisa waktu" angka selalu berubah merah. APK TV ≥ 0.6.4.')
                             ->selectablePlaceholder(false)
                             ->required(),
                         TextInput::make('pilih_game_menit')
@@ -375,6 +382,7 @@ class PengaturanOperasional extends Page implements HasSchemas
 
         Pengaturan::simpan('tv.suara_aktif', (bool) ($data['tv_suara_aktif'] ?? true), $cabangId);
         Pengaturan::simpan('tv.ukuran_timer', in_array($data['tv_ukuran_timer'] ?? '', ['kecil', 'sedang', 'besar'], true) ? $data['tv_ukuran_timer'] : 'sedang', $cabangId);
+        Pengaturan::simpan('tv.warna_timer', isset(StatusTvService::WARNA_TIMER[$data['tv_warna_timer'] ?? '']) ? $data['tv_warna_timer'] : 'putih', $cabangId);
         Pengaturan::simpan('server.url_lokal', StatusTvService::urlServer($data['server_lokal'] ?? null), $cabangId);
         Pengaturan::simpan('server.url_cloud', StatusTvService::urlServer($data['server_cloud'] ?? null), $cabangId);
         Pengaturan::simpan('sesi.pilih_game_otomatis', (bool) ($data['pilih_game_otomatis'] ?? true), $cabangId);

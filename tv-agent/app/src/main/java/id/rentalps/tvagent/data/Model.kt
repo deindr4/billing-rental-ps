@@ -198,6 +198,8 @@ data class Pengaturan(
     @SerialName("opasitas_timer") val opasitasTimer: Int = 90,
     /** Ukuran timer melayang: kecil | sedang | besar */
     @SerialName("ukuran_timer") val ukuranTimer: String = "sedang",
+    /** Warna angka timer saat waktu masih banyak (#RRGGBB); hampir habis selalu merah */
+    @SerialName("warna_timer") val warnaTimer: String? = null,
     @SerialName("durasi_bypass_menit") val durasiBypassMenit: Int = 15,
     @SerialName("bypass_maks_menit") val bypassMaksMenit: Int = 120,
     @SerialName("bypass_pilihan") val bypassPilihan: List<Int> = listOf(15, 30, 60),

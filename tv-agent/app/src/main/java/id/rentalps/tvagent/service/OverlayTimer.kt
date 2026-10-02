@@ -170,7 +170,9 @@ class OverlayTimer(private val ctx: Context) {
         val garis = if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaGaris
         latar.setColor(denganAlpha(warnaNormal, opasitas))
         latar.setStroke(2, denganAlpha(garis, maxOf(opasitas, 0.6f)))
-        waktu.setTextColor(if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaTeks)
+        // Warna normal dari admin (putih/hijau/biru/...); hampir habis selalu merah, waktu pilih game biru
+        val warnaNormalTeks = runCatching { Color.parseColor(k.status?.pengaturan?.warnaTimer ?: "") }.getOrDefault(warnaTeks)
+        waktu.setTextColor(if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaNormalTeks)
         judul.setTextColor(if (hampir) warnaMerah else warnaRedup)
 
         // Kedip peringatan: seluruh timer meredup sesaat

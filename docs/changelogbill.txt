@@ -5,6 +5,12 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-03 (APK 0.6.4 - warna timer TV)
+-----------------------------------------------------------------------------
+- Admin -> Pengaturan Operasional: "Warna angka timer di TV" (Putih / Hijau / Biru / Tosca / Kuning) untuk saat
+  waktu masih banyak; di bawah batas peringatan selalu merah. API TV: pengaturan.warna_timer (#RRGGBB).
+
+
 2026-10-03 (APK 0.6.3 - ukuran & kepekatan timer TV)
 -----------------------------------------------------------------------------
 - Admin -> Pengaturan Operasional: "Ukuran timer di TV" (Kecil / Sedang / Besar). "Kepekatan timer" kini

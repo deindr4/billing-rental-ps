@@ -6,6 +6,13 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.4 (kode 15) - 2026-10-03                                   [tag apk-0.6.4]
+-----------------------------------------------------------------------------
+- Warna angka timer saat waktu masih banyak bisa dipilih di Admin -> Pengaturan Operasional ->
+  "Warna angka timer di TV": Putih (bawaan) / Hijau / Biru / Tosca / Kuning.
+  Di bawah batas "Peringatan sisa waktu" (bawaan 5 menit) angka selalu berubah MERAH. Waktu pilih game tetap biru.
+
+
 0.6.3 (kode 14) - 2026-10-03                                   [tag apk-0.6.3]
 -----------------------------------------------------------------------------
 - Timer melayang di atas game:

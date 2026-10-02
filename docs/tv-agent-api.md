@@ -106,6 +106,9 @@ APK ≥ 0.6.3: hanya latar & garis yang transparan (angka tetap pekat), berlaku 
 
 **`pengaturan.ukuran_timer`** (`kecil` | `sedang` | `besar`, APK ≥ 0.6.3): ukuran timer melayang.
 
+**`pengaturan.warna_timer`** (`#RRGGBB`, APK ≥ 0.6.4): warna angka timer saat waktu masih banyak
+(putih/hijau/biru/tosca/kuning dari admin). Sisa ≤ `peringatan_menit` selalu merah; waktu pilih game biru.
+
 **Peringatan sisa waktu** (APK ≥ 0.5.2): saat sisa ≤ `peringatan_menit` timer di pojok berubah merah (ukuran tetap kecil);
 tepat di `peringatan_menit` & 1 menit timer berkedip 6 detik + bunyi beep (bila `suara_aktif`). Tidak ada banner
 di tengah / membesar menutupi permainan.
