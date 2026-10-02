@@ -83,8 +83,8 @@
                     @can('member.topup')
                         <button type="button" wire:click="bukaTopUp" class="btn btn-primary h-10 px-4" @disabled(! $m->is_active)>Top up saldo</button>
                     @endcan
-                    <button type="button" wire:click="bukaKoreksi" class="btn h-10 px-4">Koreksi</button>
-                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $m->telepon) }}" target="_blank" class="btn h-10 px-4">WhatsApp</a>
+                    <button type="button" wire:click="bukaKoreksi" class="btn btn-tint tint-kuning h-10 px-4">Koreksi</button>
+                    <a href="https://wa.me/{{ preg_replace('/^0/', '62', $m->telepon) }}" target="_blank" class="btn btn-tint tint-hijau h-10 px-4">WhatsApp</a>
                 </div>
 
                 {{-- Riwayat --}}

@@ -121,12 +121,12 @@
             <x-slot:footer>
                 @if ($this->bolehCetak())
                     <div class="grid grid-cols-3 gap-2 mb-2">
-                        <button type="button" class="btn text-sm"
+                        <button type="button" class="btn btn-tint tint-teal text-sm"
                                 wire:click="$dispatch('buka-pratinjau-struk', { transaksiId: '{{ $trx->id }}' })">
                             Cetak struk
                         </button>
-                        <a href="{{ route('struk.nota', $trx->id) }}" target="_blank" class="btn text-sm">Nota A4</a>
-                        <button type="button" wire:click="$toggle('formWa')" @class(['btn text-sm', 'btn-primary' => $formWa])>Kirim WA</button>
+                        <a href="{{ route('struk.nota', $trx->id) }}" target="_blank" class="btn btn-tint tint-biru text-sm">Nota A4</a>
+                        <button type="button" wire:click="$toggle('formWa')" @class(['btn text-sm', 'btn-primary' => $formWa, 'btn-tint tint-hijau' => ! $formWa])>Kirim WA</button>
                     </div>
 
                     @if ($formWa)

@@ -17,6 +17,14 @@ Kasir
 - Kartu unit terisi: tombol "Pelanggan siap" hijau lembut, "Kelola Sesi" biru lembut (latar tipis + garis berwarna),
   ikon Tambah waktu kuning & F&B oranye. Tombol remote TV lebih renggang & dikelompokkan
   (daya | volume | bypass & restart), tetap muat di HP 360 px.
+- Semua tombol kasir diwarnai menurut fungsi, dengan cahaya neon tipis pada tombol berwarna:
+  utama (simpan/bayar/mulai) = warna aksen solid; Selesai/hapus = merah solid;
+  tambah waktu kuning, F&B oranye, pause/ubah/konfirmasi/jadwalkan biru, pindah unit & saldo/poin/stamp
+  member indigo, bonus waktu pink, cetak/laporan/foto/halaman publik teal, WhatsApp/CSV/modal masuk hijau,
+  prive & Lock oranye, koreksi & kode darurat kuning, lepas aset & tutup aplikasi TV merah.
+  Tombol netral (kembali, batal, halaman, hari ini) tetap polos.
+- Tab filter status unit diberi titik warna sesuai status (Ready hijau, Terisi biru, Menunggu bayar kuning,
+  Maintenance oranye). Ikon Tutup Kas kuning & Ganti Cabang biru di menu akun.
 
 
 2026-10-02 (server cloud di shared hosting)

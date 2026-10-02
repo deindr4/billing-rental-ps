@@ -99,7 +99,7 @@
                                     {{ $a->unit?->nama ? $a->unit->nama.' · ' : '' }}{{ $a->servisBerikutnya()->isPast() ? 'Terlambat sejak' : 'Jatuh tempo' }} {{ $a->servisBerikutnya()->translatedFormat('d M') }}
                                 </div>
                             </div>
-                            <button type="button" wire:click="tambah(null, '{{ $a->id }}')" class="btn h-8 px-3 text-xs shrink-0">Jadwalkan</button>
+                            <button type="button" wire:click="tambah(null, '{{ $a->id }}')" class="btn btn-tint tint-biru h-8 px-3 text-xs shrink-0">Jadwalkan</button>
                         </li>
                     @empty
                         <li class="p-5 text-sm text-muted text-center">Tidak ada servis yang jatuh tempo. Atur interval servis di menu Aset.</li>

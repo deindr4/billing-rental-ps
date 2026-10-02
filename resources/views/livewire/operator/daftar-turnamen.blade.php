@@ -61,9 +61,9 @@
                     @endif
 
                     <div class="flex flex-wrap gap-2">
-                        <a href="{{ route('turnamen.publik', $t->slug) }}" target="_blank" class="btn h-9 px-3 text-sm">Halaman publik ↗</a>
+                        <a href="{{ route('turnamen.publik', $t->slug) }}" target="_blank" class="btn btn-tint tint-teal h-9 px-3 text-sm">Halaman publik ↗</a>
                         @if (in_array($t->status, ['pendaftaran', 'draft'], true))
-                            <button type="button" wire:click="ubah" class="btn h-9 px-3 text-sm">Ubah</button>
+                            <button type="button" wire:click="ubah" class="btn btn-tint tint-biru h-9 px-3 text-sm">Ubah</button>
                             <x-confirm-button action="mulaiTurnamen" title="Tutup pendaftaran & buat bagan?"
                                               text="Peserta yang belum bayar tidak ikut. Urutan diacak (kecuali yang diberi nomor unggulan)."
                                               class="btn-primary h-9 px-3 text-sm">Mulai & buat bagan</x-confirm-button>

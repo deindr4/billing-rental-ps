@@ -19,8 +19,8 @@
                             @click="navigator.clipboard.writeText(@js($url)).then(() => { tersalin = true; setTimeout(() => tersalin = false, 2000) })">
                         <span x-text="tersalin ? 'Tersalin ✓' : 'Salin link'"></span>
                     </button>
-                    <a href="https://wa.me/?text={{ urlencode('Cek unit kosong & sisa waktu main sekarang: '.$url) }}" target="_blank" class="btn h-10 px-4">Bagikan ke WhatsApp</a>
-                    <a href="{{ $url }}" target="_blank" class="btn h-10 px-4">Buka ↗</a>
+                    <a href="https://wa.me/?text={{ urlencode('Cek unit kosong & sisa waktu main sekarang: '.$url) }}" target="_blank" class="btn btn-tint tint-hijau h-10 px-4">Bagikan ke WhatsApp</a>
+                    <a href="{{ $url }}" target="_blank" class="btn btn-tint tint-teal h-10 px-4">Buka ↗</a>
                 </div>
             </div>
 

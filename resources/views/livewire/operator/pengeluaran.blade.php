@@ -155,7 +155,7 @@
                                 <x-rupiah :nilai="-$p->jumlah" class="font-semibold text-danger" />
                                 <div class="flex justify-end gap-1 mt-2">
                                     @if ($p->fotoUrl())
-                                        <a href="{{ $p->fotoUrl() }}" target="_blank" class="btn h-7 px-2 text-xs">Foto</a>
+                                        <a href="{{ $p->fotoUrl() }}" target="_blank" class="btn btn-tint tint-teal h-7 px-2 text-xs">Foto</a>
                                     @endif
                                     @unless ($p->isDibatalkan())
                                         <x-confirm-button action="batalkan"

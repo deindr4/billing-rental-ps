@@ -27,7 +27,7 @@
             <x-slot:footer>
                 <div class="grid grid-cols-3 gap-2">
                     <button type="button" class="btn" @click="buka = false">Tutup</button>
-                    <a href="{{ route('struk.nota', $this->transaksi->id) }}" target="_blank" class="btn">Nota A4</a>
+                    <a href="{{ route('struk.nota', $this->transaksi->id) }}" target="_blank" class="btn btn-tint tint-biru">Nota A4</a>
                     <a href="{{ route('struk.thermal', $this->transaksi->id) }}" class="btn btn-primary">Cetak</a>
                 </div>
             </x-slot:footer>

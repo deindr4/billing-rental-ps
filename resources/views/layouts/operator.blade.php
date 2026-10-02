@@ -114,12 +114,12 @@
                      class="surface absolute bottom-full left-0 mb-2 w-56 p-1 shadow-xl z-40">
                     @if ($shiftAktif)
                         <a href="{{ route('shift.tutup') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
-                            <x-ikon name="kas" size="16" /> Tutup Kas
+                            <x-ikon name="kas" size="16" class="text-ik-kuning" /> Tutup Kas
                         </a>
                     @endif
                     @if ($bisaGantiCabang)
                         <a href="{{ route('pilih-cabang') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
-                            <x-ikon name="cabang" size="16" /> Ganti Cabang
+                            <x-ikon name="cabang" size="16" class="text-ik-biru" /> Ganti Cabang
                         </a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
@@ -260,12 +260,12 @@
                 @endif
                 @if ($shiftAktif)
                     <a href="{{ route('shift.tutup') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="kas" size="18" /> Tutup Kas
+                        <x-ikon name="kas" size="18" class="text-ik-kuning" /> Tutup Kas
                     </a>
                 @endif
                 @if ($bisaGantiCabang)
                     <a href="{{ route('pilih-cabang') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="cabang" size="18" /> Ganti Cabang
+                        <x-ikon name="cabang" size="18" class="text-ik-biru" /> Ganti Cabang
                     </a>
                 @endif
                 <form method="POST" action="{{ route('logout') }}">

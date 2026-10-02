@@ -92,6 +92,20 @@
         color: #fff;
         font-weight: 600;
     }
+    /* Cahaya neon tipis: hanya tombol berwarna, tidak untuk tombol netral */
+    .btn-primary {
+        box-shadow: 0 0 14px -5px var(--accent);
+    }
+    .btn-primary:hover {
+        box-shadow: 0 0 18px -4px var(--accent);
+    }
+    .btn-danger {
+        box-shadow: 0 0 14px -5px var(--danger);
+    }
+    .btn-danger:hover {
+        filter: brightness(1.06);
+        box-shadow: 0 0 18px -4px var(--danger);
+    }
     .btn-ghost {
         background: transparent;
         border-color: transparent;
@@ -111,16 +125,32 @@
         border-color: color-mix(in srgb, var(--w) 40%, var(--border));
         color: var(--w);
         font-weight: 600;
+        box-shadow: 0 0 12px -7px var(--w);
     }
     .btn-tint:hover {
         background: color-mix(in srgb, var(--w) 20%, var(--surface-2));
         border-color: color-mix(in srgb, var(--w) 60%, var(--border));
+        box-shadow: 0 0 16px -6px var(--w);
     }
     .tint-biru { --w: var(--ikon-biru); }
     .tint-hijau { --w: var(--ikon-hijau); }
+    .tint-teal { --w: var(--ikon-teal); }
+    .tint-indigo { --w: var(--ikon-indigo); }
+    .tint-ungu { --w: var(--ikon-ungu); }
+    .tint-pink { --w: var(--ikon-pink); }
     .tint-kuning { --w: var(--ikon-kuning); }
     .tint-oranye { --w: var(--ikon-oranye); }
-    .tint-teal { --w: var(--ikon-teal); }
+    .tint-merah { --w: var(--ikon-merah); }
+
+    /* Titik warna kecil di depan teks tombol (mis. tab filter status) */
+    .titik-w {
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background: var(--w);
+        box-shadow: 0 0 6px var(--w);
+        flex-shrink: 0;
+    }
 
     /* Input */
     .input {

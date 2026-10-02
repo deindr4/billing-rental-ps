@@ -100,7 +100,7 @@
                                               text="Butuh PIN supervisor/owner."
                                               confirm-text="Perpanjang"
                                               pin
-                                              class="w-full">
+                                              class="btn-tint tint-hijau w-full">
                                 Perpanjang
                             </x-confirm-button>
                         @else
@@ -109,21 +109,21 @@
                                               text="TV terbuka tanpa sesi (Google TV, YouTube, HDMI, tes, servis), lalu terkunci otomatis setelah waktunya habis. Butuh PIN supervisor/owner."
                                               confirm-text="Unlock"
                                               pin
-                                              class="w-full">
-                                Unlock
+                                              class="btn-tint tint-hijau w-full">
+                                <x-ikon name="gembok-buka" size="16" /> Unlock
                             </x-confirm-button>
                         @endif
 
                         {{-- Lock: akhiri unlock & paksa aplikasi TV tampil + terkunci lagi (juga setelah aplikasi ditutup) --}}
-                        <button type="button" wire:click="kunci" wire:loading.attr="disabled" class="btn">Lock</button>
+                        <button type="button" wire:click="kunci" wire:loading.attr="disabled" class="btn btn-tint tint-oranye">Lock</button>
 
                         <x-confirm-button action="tutupAplikasi"
                                           title="Tutup aplikasi TV?"
                                           text="TV Agent berhenti menjaga layar: TV bebas dipakai (layar Google TV) sampai Anda menekan Lock atau sesi berikutnya dimulai. Butuh PIN supervisor/owner."
                                           confirm-text="Tutup aplikasi"
                                           pin
-                                          class="w-full">
-                            Tutup aplikasi
+                                          class="btn-tint tint-merah w-full">
+                            <x-ikon name="tutup" size="16" /> Tutup aplikasi
                         </x-confirm-button>
 
                         <x-confirm-button action="lihatKodeDarurat"
@@ -131,7 +131,7 @@
                                           text="Untuk membuka TV saat jaringan putus. Butuh PIN supervisor/owner."
                                           confirm-text="Tampilkan"
                                           pin
-                                          class="w-full">
+                                          class="btn-tint tint-kuning w-full">
                             Kode darurat
                         </x-confirm-button>
                     </div>

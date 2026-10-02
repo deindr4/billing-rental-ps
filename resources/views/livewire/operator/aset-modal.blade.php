@@ -10,8 +10,8 @@
             <h1 class="text-xl font-semibold tracking-tight">Manajemen Aset & Modal</h1>
         </div>
         <div class="flex flex-wrap gap-2">
-            <a href="{{ route('aset.laporan', 'pdf') }}" target="_blank" class="btn h-10 px-3 text-sm">Laporan PDF</a>
-            <a href="{{ route('aset.laporan', 'csv') }}" class="btn h-10 px-3 text-sm">Excel (CSV)</a>
+            <a href="{{ route('aset.laporan', 'pdf') }}" target="_blank" class="btn btn-tint tint-teal h-10 px-3 text-sm">Laporan PDF</a>
+            <a href="{{ route('aset.laporan', 'csv') }}" class="btn btn-tint tint-hijau h-10 px-3 text-sm">Excel (CSV)</a>
             @if ($this->bisa('aset.kelola'))
                 <button type="button" wire:click="tambah" class="btn btn-primary h-10 px-4">
                     <x-ikon name="plus" size="16" /> Tambah aset
@@ -146,9 +146,9 @@
                     @if ($this->bisa('aset.kelola'))
                         <div class="flex justify-end gap-1">
                             @if ($a->status !== 'dilepas')
-                                <button type="button" wire:click="bukaLepas('{{ $a->id }}')" class="btn h-7 px-2 text-xs">Lepas</button>
+                                <button type="button" wire:click="bukaLepas('{{ $a->id }}')" class="btn btn-tint tint-merah h-7 px-2 text-xs">Lepas</button>
                             @endif
-                            <button type="button" wire:click="ubah('{{ $a->id }}')" class="btn h-7 px-2 text-xs">Ubah</button>
+                            <button type="button" wire:click="ubah('{{ $a->id }}')" class="btn btn-tint tint-biru h-7 px-2 text-xs">Ubah</button>
                         </div>
                     @endif
                 </div>
@@ -197,8 +197,8 @@
 
             @if ($this->bisa('modal.kelola'))
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" wire:click="bukaModal('modal')" class="btn h-10">+ Modal masuk</button>
-                    <button type="button" wire:click="bukaModal('prive')" class="btn h-10">- Prive owner</button>
+                    <button type="button" wire:click="bukaModal('modal')" class="btn btn-tint tint-hijau h-10">+ Modal masuk</button>
+                    <button type="button" wire:click="bukaModal('prive')" class="btn btn-tint tint-oranye h-10">- Prive owner</button>
                 </div>
             @endif
         </section>

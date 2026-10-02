@@ -94,7 +94,7 @@
                             <x-confirm-button action="tidakDatang" :params="[$b->id]" title="Tandai tidak datang?" class="h-8 px-2 text-xs">Tidak datang</x-confirm-button>
                         @endif
                         @if ($b->status === 'menunggu')
-                            <button type="button" wire:click="konfirmasi('{{ $b->id }}')" class="btn h-8 px-3 text-xs">Konfirmasi</button>
+                            <button type="button" wire:click="konfirmasi('{{ $b->id }}')" class="btn btn-tint tint-biru h-8 px-3 text-xs">Konfirmasi</button>
                         @endif
                         @if ($b->mulai_pada->isToday() || $b->mulai_pada->lt(now()->addHour()))
                             <button type="button" wire:click="checkin('{{ $b->id }}')" class="btn btn-primary h-8 px-3 text-xs">Datang · mulai</button>

@@ -18,6 +18,13 @@
             'menunggu_bayar' => 'Menunggu Bayar',
             'servis' => 'Maintenance',
         ];
+        // Warna titik = warna status unit di kartu
+        $warnaTab = [
+            'kosong' => 'var(--status-kosong)',
+            'main' => 'var(--status-main)',
+            'menunggu_bayar' => 'var(--status-hampir-habis)',
+            'servis' => 'var(--status-servis)',
+        ];
     @endphp
     <div class="flex gap-1.5 overflow-x-auto pb-1 mb-4">
         @foreach ($tab as $kunci => $teks)
@@ -27,6 +34,9 @@
                         'btn-primary' => $filterStatus === $kunci,
                         'text-muted' => $filterStatus !== $kunci,
                     ])>
+                @if (isset($warnaTab[$kunci]) && $filterStatus !== $kunci)
+                    <span class="titik-w" style="--w: {{ $warnaTab[$kunci] }}"></span>
+                @endif
                 {{ $teks }} <span class="opacity-70">({{ $ringkasan[$kunci] }})</span>
             </button>
         @endforeach

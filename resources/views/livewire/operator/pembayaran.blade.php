@@ -48,12 +48,12 @@
 
                         <div class="flex flex-wrap gap-2">
                             @if ($m->saldo > 0 && $this->sisa > 0)
-                                <button type="button" wire:click="pakaiSaldo" class="btn h-9 px-3 text-sm">
+                                <button type="button" wire:click="pakaiSaldo" class="btn btn-tint tint-indigo h-9 px-3 text-sm">
                                     Bayar pakai saldo
                                 </button>
                             @endif
                             @if ($aturan->targetStamp() > 0 && $aturan->hadiahStampMenit() > 0 && $m->stamp >= $aturan->targetStamp() && $trx->unit_id && $this->sisa > 0)
-                                <button type="button" wire:click="tukarStamp" wire:loading.attr="disabled" class="btn h-9 px-3 text-sm">
+                                <button type="button" wire:click="tukarStamp" wire:loading.attr="disabled" class="btn btn-tint tint-indigo h-9 px-3 text-sm">
                                     Tukar {{ $aturan->targetStamp() }} stamp · gratis {{ \App\Models\Sesi::formatDurasi($aturan->hadiahStampMenit() * 60) }}
                                 </button>
                             @endif
@@ -64,7 +64,7 @@
                                 <div class="flex gap-2">
                                     <input type="number" inputmode="numeric" min="{{ $aturan->minTukarPoin() }}" max="{{ $m->poin }}"
                                            wire:model="poinDitukar" class="input num flex-1" placeholder="Tukar poin (maks {{ $m->poin }})">
-                                    <button type="button" wire:click="tukarPoin" wire:loading.attr="disabled" class="btn h-10 px-4 text-sm">Tukar</button>
+                                    <button type="button" wire:click="tukarPoin" wire:loading.attr="disabled" class="btn btn-tint tint-indigo h-10 px-4 text-sm">Tukar</button>
                                 </div>
                                 <p class="text-xs text-muted mt-1">1 poin = <x-rupiah :nilai="$aturan->nilaiPoin()" />, minimal {{ $aturan->minTukarPoin() }} poin.</p>
                                 @error('poinDitukar') <p class="text-sm text-danger mt-1">{{ $message }}</p> @enderror

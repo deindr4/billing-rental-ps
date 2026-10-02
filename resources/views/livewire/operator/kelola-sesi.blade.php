@@ -90,25 +90,31 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     @if ($sesi->isPaket())
-                        <button type="button" wire:click="kePanel('tambah')" class="btn">Tambah Waktu</button>
+                        <button type="button" wire:click="kePanel('tambah')" class="btn btn-tint tint-kuning">
+                            <x-ikon name="jam" size="16" /> Tambah Waktu
+                        </button>
                     @endif
 
                     <a href="{{ route('pos', ['unit' => $sesi->unit_id]) }}" wire:navigate
-                       @class(['btn', 'col-span-2' => ! $sesi->isPaket()])>Tambah F&amp;B</a>
+                       @class(['btn btn-tint tint-oranye', 'col-span-2' => ! $sesi->isPaket()])>
+                        <x-ikon name="fnb" size="16" /> Tambah F&amp;B
+                    </a>
 
                     @if ($sesi->status === 'berjalan')
-                        <button type="button" wire:click="pause" wire:loading.attr="disabled" class="btn">Pause</button>
+                        <button type="button" wire:click="pause" wire:loading.attr="disabled" class="btn btn-tint tint-biru">Pause</button>
                     @else
-                        <button type="button" wire:click="resume" wire:loading.attr="disabled" class="btn btn-primary">Lanjutkan</button>
+                        <button type="button" wire:click="resume" wire:loading.attr="disabled" class="btn btn-primary">
+                            <x-ikon name="play" size="16" /> Lanjutkan
+                        </button>
                     @endif
 
-                    <button type="button" wire:click="kePanel('pindah')" class="btn">Pindah Unit</button>
+                    <button type="button" wire:click="kePanel('pindah')" class="btn btn-tint tint-indigo">Pindah Unit</button>
 
                     {{-- Kompensasi PS restart / hang: menit diketik operator --}}
-                    <button type="button" wire:click="kePanel('bonus')" class="btn">Bonus Waktu</button>
+                    <button type="button" wire:click="kePanel('bonus')" class="btn btn-tint tint-pink">Bonus Waktu</button>
 
                     {{-- Struk / tagihan sementara (open bill: termasuk perkiraan sewa berjalan) --}}
-                    <button type="button" class="btn"
+                    <button type="button" class="btn btn-tint tint-teal"
                             wire:click="$dispatch('buka-pratinjau-struk', { transaksiId: '{{ $trx->id }}' })">Cetak Struk</button>
 
                     <x-confirm-button action="selesai"
