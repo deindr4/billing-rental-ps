@@ -170,31 +170,31 @@
                                       title="Matikan layar {{ $unit->nama }}?"
                                       text="TV masuk mode standby. Nyalakan lagi dari tombol yang sama atau remote TV."
                                       confirm-text="Matikan"
-                                      class="btn-ikon h-8 w-8 text-muted" title="Matikan layar TV">
+                                      class="btn-ikon h-8 w-8 text-ik-oranye" title="Matikan layar TV">
                         <x-ikon name="daya" size="16" />
                     </x-confirm-button>
                 @endif
             @endif
 
             <button type="button" title="Volume turun" wire:click="perintahTv('{{ $unit->id }}', 'volume_turun')"
-                    class="btn btn-ikon h-8 w-8 text-muted">
+                    class="btn btn-ikon h-8 w-8 text-ik-biru">
                 <x-ikon name="vol-turun" size="16" />
             </button>
             <span class="num text-xs w-9 text-center {{ $tv->senyap ? 'text-danger' : 'text-muted' }}" title="Volume TV">
                 {{ $tv->senyap ? 'MUTE' : ($tv->volume !== null ? $tv->volume.'%' : '–') }}
             </span>
             <button type="button" title="Volume naik" wire:click="perintahTv('{{ $unit->id }}', 'volume_naik')"
-                    class="btn btn-ikon h-8 w-8 text-muted">
+                    class="btn btn-ikon h-8 w-8 text-ik-biru">
                 <x-ikon name="vol-naik" size="16" />
             </button>
             <button type="button" title="Senyap / bunyikan" wire:click="perintahTv('{{ $unit->id }}', 'volume_senyap')"
-                    @class(['btn btn-ikon h-8 w-8', 'text-danger' => $tv->senyap, 'text-muted' => ! $tv->senyap])>
+                    @class(['btn btn-ikon h-8 w-8', 'text-danger bg-danger/15' => $tv->senyap, 'text-ik-kuning' => ! $tv->senyap])>
                 <x-ikon name="senyap" size="16" />
             </button>
 
             <button type="button" title="Bypass (pilih durasi & PIN)"
                     wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
-                    @class(['btn btn-ikon h-8 w-8', 'text-st-main' => $tv->sedangBypass(), 'text-muted' => ! $tv->sedangBypass()])>
+                    @class(['btn btn-ikon h-8 w-8', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
                 <x-ikon name="gembok-buka" size="16" />
             </button>
 
@@ -203,7 +203,7 @@
                                   title="Restart {{ $unit->nama }}?"
                                   :text="$bisaReboot ? 'TV akan dinyalakan ulang (±1 menit).' : 'TV ini tidak mengizinkan restart penuh; aplikasi TV Agent yang akan dimulai ulang.'"
                                   confirm-text="Restart"
-                                  class="btn-ikon h-8 w-8 text-muted" title="Restart TV">
+                                  class="btn-ikon h-8 w-8 text-ik-teal" title="Restart TV">
                     <x-ikon name="restart" size="16" />
                 </x-confirm-button>
             @endif

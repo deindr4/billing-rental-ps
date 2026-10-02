@@ -5,6 +5,17 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (ikon berwarna)
+-----------------------------------------------------------------------------
+Kasir
+- Ikon menu samping (desktop), navigasi bawah & menu Lainnya (HP) kini berwarna per menu supaya mudah dibedakan:
+  Rental biru, POS oranye, Jadwal ungu, Billboard pink, Turnamen kuning, Pembayaran online hijau, Transaksi teal,
+  Member indigo, Stok teal, Pengeluaran merah, Maintenance oranye, Aset hijau, Laporan biru, Panel Admin indigo.
+- Tombol remote TV di kartu unit berwarna: daya oranye, volume biru, senyap kuning (merah + latar saat senyap),
+  bypass ungu (biru + latar saat bypass aktif), restart teal.
+- Warna menyesuaikan mode gelap/terang.
+
+
 2026-10-02 (server cloud di shared hosting)
 -----------------------------------------------------------------------------
 - Panduan pasang di hosting cPanel: docs/hosting.md (tanpa terminal pun bisa, lewat cron sekali jalan).

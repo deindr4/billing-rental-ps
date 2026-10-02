@@ -10,6 +10,7 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 | Latar | Navy gelap `#0a1420`, panel `#0f1c2b` / `#152537`, garis tipis `#1e3144` |
 | Aksen | Mint `#4ade80` (bisa diganti di Admin → Tampilan) — tombol utama, angka uang positif, status siap |
 | Status unit | Siap mint · Terisi/open bill biru `#38bdf8` · Segera habis kuning `#fbbf24` · Maintenance oranye `#fb923c` · Offline/bahaya merah `#f87171` |
+| Ikon menu & tombol remote TV | Berwarna per fungsi (permintaan user, tambahan dari Stitch) — token `--ikon-*` / kelas `text-ik-*` (biru, hijau, teal, ungu, indigo, pink, kuning, oranye, merah; versi terang lebih gelap). Warna menu diatur di `App\Support\MenuOperator` (`warna`). Remote TV: daya oranye, volume biru, senyap kuning (aktif merah), bypass ungu (aktif biru), restart teal |
 | Label | Huruf **kapital kecil, mono, renggang** (`SISA WAKTU RENTAL`, `TOTAL OMSET SHIFT 1`) warna redup |
 | Angka | **Mono besar** untuk timer, uang, kode (`00:24:12`, `Rp 1.450.000`) |
 | Kartu | Sudut kecil (6–10px), garis tepi tipis, kepala kartu = judul + chip status di kanan |

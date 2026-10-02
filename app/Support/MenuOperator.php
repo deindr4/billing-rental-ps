@@ -10,26 +10,30 @@ use Illuminate\Support\Facades\Route;
  */
 final class MenuOperator
 {
-    /** @return array<string, array<int, array{route:string, label:string, ikon:string, izin:string}>> */
+    /**
+     * warna = kelas warna ikon (token --ikon-* di tokens.css), supaya menu mudah dibedakan sekilas.
+     *
+     * @return array<string, array<int, array{route:string, label:string, ikon:string, warna:string, izin:string}>>
+     */
     public static function daftar(): array
     {
         return [
             'Kasir' => [
-                ['route' => 'rental', 'label' => 'Rental', 'ikon' => 'rental', 'izin' => 'rental.kelola'],
-                ['route' => 'pos', 'label' => 'POS & F&B', 'ikon' => 'pos', 'izin' => 'pos.jual'],
-                ['route' => 'jadwal', 'label' => 'Jadwal & Booking', 'ikon' => 'jadwal', 'izin' => 'rental.kelola'],
-                ['route' => 'lounge', 'label' => 'Billboard', 'ikon' => 'lounge', 'izin' => 'rental.kelola'],
-                ['route' => 'turnamen', 'label' => 'Turnamen', 'ikon' => 'turnamen', 'izin' => 'turnamen.kelola'],
-                ['route' => 'pembayaran-online', 'label' => 'Pembayaran online', 'ikon' => 'bayar', 'izin' => 'pembayaran.terima'],
-                ['route' => 'transaksi', 'label' => 'Transaksi', 'ikon' => 'transaksi', 'izin' => 'transaksi.lihat'],
-                ['route' => 'member', 'label' => 'Member', 'ikon' => 'member', 'izin' => 'member.kelola'],
+                ['route' => 'rental', 'label' => 'Rental', 'ikon' => 'rental', 'warna' => 'text-ik-biru', 'izin' => 'rental.kelola'],
+                ['route' => 'pos', 'label' => 'POS & F&B', 'ikon' => 'pos', 'warna' => 'text-ik-oranye', 'izin' => 'pos.jual'],
+                ['route' => 'jadwal', 'label' => 'Jadwal & Booking', 'ikon' => 'jadwal', 'warna' => 'text-ik-ungu', 'izin' => 'rental.kelola'],
+                ['route' => 'lounge', 'label' => 'Billboard', 'ikon' => 'lounge', 'warna' => 'text-ik-pink', 'izin' => 'rental.kelola'],
+                ['route' => 'turnamen', 'label' => 'Turnamen', 'ikon' => 'turnamen', 'warna' => 'text-ik-kuning', 'izin' => 'turnamen.kelola'],
+                ['route' => 'pembayaran-online', 'label' => 'Pembayaran online', 'ikon' => 'bayar', 'warna' => 'text-ik-hijau', 'izin' => 'pembayaran.terima'],
+                ['route' => 'transaksi', 'label' => 'Transaksi', 'ikon' => 'transaksi', 'warna' => 'text-ik-teal', 'izin' => 'transaksi.lihat'],
+                ['route' => 'member', 'label' => 'Member', 'ikon' => 'member', 'warna' => 'text-ik-indigo', 'izin' => 'member.kelola'],
             ],
             'Operasional' => [
-                ['route' => 'stok', 'label' => 'Stok', 'ikon' => 'stok', 'izin' => 'stok.lihat'],
-                ['route' => 'pengeluaran', 'label' => 'Pengeluaran', 'ikon' => 'kas', 'izin' => 'pengeluaran.catat'],
-                ['route' => 'maintenance', 'label' => 'Maintenance', 'ikon' => 'maintenance', 'izin' => 'maintenance.kelola'],
-                ['route' => 'aset', 'label' => 'Aset & Modal', 'ikon' => 'aset', 'izin' => 'aset.lihat'],
-                ['route' => 'laporan', 'label' => 'Laporan', 'ikon' => 'laporan', 'izin' => 'laporan.lihat'],
+                ['route' => 'stok', 'label' => 'Stok', 'ikon' => 'stok', 'warna' => 'text-ik-teal', 'izin' => 'stok.lihat'],
+                ['route' => 'pengeluaran', 'label' => 'Pengeluaran', 'ikon' => 'kas', 'warna' => 'text-ik-merah', 'izin' => 'pengeluaran.catat'],
+                ['route' => 'maintenance', 'label' => 'Maintenance', 'ikon' => 'maintenance', 'warna' => 'text-ik-oranye', 'izin' => 'maintenance.kelola'],
+                ['route' => 'aset', 'label' => 'Aset & Modal', 'ikon' => 'aset', 'warna' => 'text-ik-hijau', 'izin' => 'aset.lihat'],
+                ['route' => 'laporan', 'label' => 'Laporan', 'ikon' => 'laporan', 'warna' => 'text-ik-biru', 'izin' => 'laporan.lihat'],
             ],
         ];
     }

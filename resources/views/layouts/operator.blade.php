@@ -73,7 +73,7 @@
                         @if ($item['aktif'])
                             <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-accent"></span>
                         @endif
-                        <x-ikon :name="$item['ikon']" size="18" class="shrink-0 {{ $item['aktif'] ? 'text-accent' : '' }}" />
+                        <x-ikon :name="$item['ikon']" size="18" class="shrink-0 {{ $item['warna'] }}" />
                         <span class="truncate" x-show="! ciut">{{ $item['label'] }}</span>
                     </a>
                 @endforeach
@@ -86,7 +86,7 @@
                 <a href="{{ url('/admin') }}" title="Panel Admin"
                    class="flex items-center gap-3 h-10 px-3 rounded-md text-sm text-muted hover:text-fg hover:bg-surface-2"
                    :class="ciut && 'justify-center px-0'">
-                    <x-ikon name="admin" size="18" class="shrink-0" />
+                    <x-ikon name="admin" size="18" class="shrink-0 text-ik-indigo" />
                     <span class="truncate" x-show="! ciut">Panel Admin</span>
                 </a>
             @endif
@@ -200,7 +200,7 @@
                    'text-accent' => $item['aktif'],
                    'text-muted' => ! $item['aktif'],
                ])>
-                <x-ikon :name="$item['ikon']" size="20" />
+                <x-ikon :name="$item['ikon']" size="20" class="{{ $item['warna'] }}" />
                 {{ $item['label'] }}
             </a>
         @endforeach
@@ -244,7 +244,7 @@
                                'kartu flex flex-col items-center gap-1.5 py-3 text-xs text-center',
                                'text-accent border-accent' => $item['aktif'],
                            ])>
-                            <x-ikon :name="$item['ikon']" size="20" />
+                            <x-ikon :name="$item['ikon']" size="20" class="{{ $item['warna'] }}" />
                             {{ $item['label'] }}
                         </a>
                     @endforeach
@@ -255,7 +255,7 @@
             <div class="kartu divide-y divide-line">
                 @if ($bisaAdmin)
                     <a href="{{ url('/admin') }}" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="admin" size="18" /> Panel Admin
+                        <x-ikon name="admin" size="18" class="text-ik-indigo" /> Panel Admin
                     </a>
                 @endif
                 @if ($shiftAktif)
