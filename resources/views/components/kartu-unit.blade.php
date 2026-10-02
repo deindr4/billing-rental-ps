@@ -155,7 +155,8 @@
             $layarMati = $tv->layar_hidup === false;
             $bisaReboot = (bool) ($tv->diagnostik['device_owner'] ?? false);
         @endphp
-        <div class="px-3 py-2 border-t border-line flex items-center gap-1.5">
+        {{-- Dikelompokkan: daya | volume | bypass & restart (jarak antar kelompok lebih lebar) --}}
+        <div class="px-3 py-2.5 border-t border-line flex items-center gap-1.5 min-[380px]:gap-2">
             <span class="label mr-auto">TV</span>
 
             @if ($bisaRemote)
@@ -177,7 +178,7 @@
             @endif
 
             <button type="button" title="Volume turun" wire:click="perintahTv('{{ $unit->id }}', 'volume_turun')"
-                    class="btn btn-ikon h-8 w-8 text-ik-biru">
+                    @class(['btn btn-ikon h-8 w-8 text-ik-biru', 'ml-1 min-[380px]:ml-2' => $bisaRemote])>
                 <x-ikon name="vol-turun" size="16" />
             </button>
             <span class="num text-xs w-9 text-center {{ $tv->senyap ? 'text-danger' : 'text-muted' }}" title="Volume TV">
@@ -194,7 +195,7 @@
 
             <button type="button" title="Bypass (pilih durasi & PIN)"
                     wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
-                    @class(['btn btn-ikon h-8 w-8', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
+                    @class(['btn btn-ikon h-8 w-8 ml-1 min-[380px]:ml-2', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
                 <x-ikon name="gembok-buka" size="16" />
             </button>
 

@@ -63,7 +63,7 @@
                         @case('pause')
                             @if ($sesi?->sedangPilihGame())
                                 <button type="button" wire:click="mulaiSekarang('{{ $sesi->id }}')"
-                                        class="btn w-full mb-2 text-sm">
+                                        class="btn btn-tint tint-hijau w-full mb-2 text-sm">
                                     <x-ikon name="play" size="14" /> Pelanggan siap · mulai waktu sekarang
                                 </button>
                             @endif
@@ -71,17 +71,17 @@
                                 @if ($sesi?->mode === 'paket')
                                     <button type="button" title="Tambah waktu"
                                             wire:click="$dispatch('buka-kelola-sesi', { unitId: '{{ $unit->id }}', panel: 'tambah' })"
-                                            class="btn btn-ikon text-muted">
+                                            class="btn btn-ikon text-ik-kuning">
                                         <x-ikon name="jam" size="18" />
                                     </button>
                                 @endif
                                 <a href="{{ route('pos', ['unit' => $unit->id]) }}" wire:navigate title="Tambah F&B"
-                                   class="btn btn-ikon text-muted">
+                                   class="btn btn-ikon text-ik-oranye">
                                     <x-ikon name="fnb" size="18" />
                                 </a>
                                 <button type="button"
                                         wire:click="$dispatch('buka-kelola-sesi', { unitId: '{{ $unit->id }}' })"
-                                        class="btn flex-1">
+                                        class="btn btn-tint tint-biru flex-1">
                                     <x-ikon name="kelola" size="16" /> Kelola Sesi
                                 </button>
                             </div>

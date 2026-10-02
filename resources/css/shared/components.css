@@ -104,6 +104,23 @@
         width: 2.25rem;
         padding: 0;
     }
+    /* Tombol berwarna lembut: latar tipis + garis & teks berwarna (warna dari kelas tint-*) */
+    .btn-tint {
+        --w: var(--accent);
+        background: color-mix(in srgb, var(--w) 12%, var(--surface-2));
+        border-color: color-mix(in srgb, var(--w) 40%, var(--border));
+        color: var(--w);
+        font-weight: 600;
+    }
+    .btn-tint:hover {
+        background: color-mix(in srgb, var(--w) 20%, var(--surface-2));
+        border-color: color-mix(in srgb, var(--w) 60%, var(--border));
+    }
+    .tint-biru { --w: var(--ikon-biru); }
+    .tint-hijau { --w: var(--ikon-hijau); }
+    .tint-kuning { --w: var(--ikon-kuning); }
+    .tint-oranye { --w: var(--ikon-oranye); }
+    .tint-teal { --w: var(--ikon-teal); }
 
     /* Input */
     .input {

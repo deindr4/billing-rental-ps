@@ -14,6 +14,9 @@ Kasir
 - Tombol remote TV di kartu unit berwarna: daya oranye, volume biru, senyap kuning (merah + latar saat senyap),
   bypass ungu (biru + latar saat bypass aktif), restart teal.
 - Warna menyesuaikan mode gelap/terang.
+- Kartu unit terisi: tombol "Pelanggan siap" hijau lembut, "Kelola Sesi" biru lembut (latar tipis + garis berwarna),
+  ikon Tambah waktu kuning & F&B oranye. Tombol remote TV lebih renggang & dikelompokkan
+  (daya | volume | bypass & restart), tetap muat di HP 360 px.
 
 
 2026-10-02 (server cloud di shared hosting)
