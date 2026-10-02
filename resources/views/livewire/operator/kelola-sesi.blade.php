@@ -88,6 +88,40 @@
                     </div>
                 </div>
 
+                {{-- Tambah waktu yang bisa dibatalkan (salah pencet) --}}
+                @if ($this->riwayatTambah->isNotEmpty())
+                    <div class="rounded-md border border-line mb-4">
+                        <div class="px-3 py-2 border-b border-line text-sm font-medium flex items-center justify-between gap-2">
+                            <span>Tambah waktu</span>
+                            <span class="text-xs text-muted font-normal">Salah pencet? Batalkan di sini</span>
+                        </div>
+                        <ul class="divide-y divide-line text-sm">
+                            @foreach ($this->riwayatTambah as $r)
+                                <li wire:key="tw-{{ $r['id'] }}" class="px-3 py-2 flex items-center justify-between gap-3">
+                                    <span class="min-w-0">
+                                        <span class="block">
+                                            +{{ $r['menit'] >= 60 && $r['menit'] % 60 === 0 ? ($r['menit'] / 60).' jam' : $r['menit'].' menit' }}
+                                            · {{ $r['gratis'] ? 'gratis' : '' }}@if (! $r['gratis'])<x-rupiah :nilai="$r['harga']" />@endif
+                                        </span>
+                                        <span class="block text-xs text-muted">
+                                            {{ $r['waktu']->format('H:i') }}{{ $r['oleh'] ? ' · '.$r['oleh'] : '' }}{{ $r['sebelum'] ? ' · sebelumnya selesai '.$r['sebelum'] : '' }}
+                                        </span>
+                                    </span>
+                                    <x-confirm-button action="batalTambahWaktu" :params="[$r['id']]"
+                                                      title="Batalkan tambah {{ $r['menit'] }} menit?"
+                                                      text="Jam selesai dimundurkan {{ $r['menit'] }} menit & biayanya dihapus dari tagihan. TV langsung menyesuaikan.{{ $r['butuhPin'] ? ' Butuh PIN supervisor/owner.' : '' }}"
+                                                      confirm-text="Ya, batalkan"
+                                                      reason
+                                                      :pin="$r['butuhPin']"
+                                                      class="btn-tint tint-merah h-8 px-3 text-xs shrink-0">
+                                        Batalkan
+                                    </x-confirm-button>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-2 gap-2">
                     @if ($sesi->isPaket())
                         <button type="button" wire:click="kePanel('tambah')" class="btn btn-tint tint-kuning">
@@ -125,6 +159,24 @@
                                       class="w-full col-span-2">
                         Selesai
                     </x-confirm-button>
+
+                    {{-- Tidak jadi main: tagihan batal Rp0, unit kosong lagi, TV terkunci --}}
+                    <x-confirm-button action="batalSesi"
+                                      title="Batalkan sesi {{ $sesi->unit->nama }}?"
+                                      :text="'Tidak ditagih: tagihan '.$trx->nomor.' dibatalkan, F&B dikembalikan ke stok, unit kosong lagi & TV langsung terkunci.'
+                                          .($this->batalSesiButuhPin ? ' Butuh PIN supervisor/owner.' : '')"
+                                      confirm-text="Ya, batalkan sesi"
+                                      danger
+                                      reason
+                                      :pin="$this->batalSesiButuhPin"
+                                      class="btn-tint tint-merah w-full col-span-2 h-9 text-sm">
+                        Batalkan sesi (tidak jadi main)
+                    </x-confirm-button>
+                    @if (! $this->batalSesiButuhPin && ! auth()->user()->can('transaksi.batal'))
+                        <p class="col-span-2 text-xs text-muted text-center -mt-1">
+                            Tanpa PIN s.d. {{ $sesi->created_at->copy()->addMinutes($this->menitTanpaPin)->format('H:i') }} (sesi Anda, belum ada pembayaran)
+                        </p>
+                    @endif
                 </div>
 
             {{-- ================= PANEL TAMBAH WAKTU ================= --}}

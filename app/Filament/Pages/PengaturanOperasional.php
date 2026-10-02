@@ -57,6 +57,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         'tv.peringatan_menit' => ['peringatan_menit', 5],
         'tv.opasitas_timer' => ['opasitas_timer', 90],
         'sesi.pilih_game_menit' => ['pilih_game_menit', 5],
+        'sesi.batal_tanpa_pin_menit' => ['batal_tanpa_pin', 5],
         'tv.durasi_bypass_menit' => ['durasi_bypass', 15],
         'tv.bypass_maks_menit' => ['bypass_maks', 120],
     ];
@@ -202,6 +203,11 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->label('Tercentang otomatis saat mulai sesi')
                             ->helperText('Kasir tetap bisa mematikannya per sesi.')
                             ->inline(false),
+                        TextInput::make('batal_tanpa_pin')
+                            ->label('Batal tanpa PIN (menit)')
+                            ->helperText('Kasir boleh membatalkan tambah waktu / sesi yang ia buat sendiri tanpa PIN selama sekian menit '
+                                .'(salah pencet, tidak jadi main). Sesudahnya butuh PIN supervisor/owner. Isi 0 = selalu PIN.')
+                            ->numeric()->minValue(0)->maxValue(30)->suffix('menit')->required(),
                         TextInput::make('durasi_bypass')
                             ->label('Durasi bypass default (menit)')
                             ->helperText('Bisa diganti per unit di Admin → Unit.')

@@ -4,12 +4,15 @@ namespace App\Livewire\Operator;
 
 use App\Exceptions\BillingException;
 use App\Livewire\Concerns\WithAlert;
+use App\Models\Pengaturan;
 use App\Models\Sesi;
+use App\Models\SesiLog;
 use App\Models\Transaksi;
 use App\Models\Unit;
 use App\Services\Billing\BillingService;
 use App\Services\PinService;
 use App\Support\Tenancy;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
@@ -56,6 +59,9 @@ class KelolaSesi extends Component
     public string $alasanPindah = '';
 
     public bool $unitLamaServis = false;
+
+    // Batal sesi (tidak jadi main)
+    public const ALASAN_BATAL_SESI = ['Tidak jadi main', 'Salah unit', 'Salah paket / durasi', 'Pelanggan pindah unit lain'];
 
     #[On('buka-kelola-sesi')]
     public function bukaUntuk(string $unitId, string $panel = 'utama'): void
@@ -279,6 +285,130 @@ class KelolaSesi extends Component
         }
     }
 
+    /* ---------------- Batal tambah waktu & batal sesi ---------------- */
+
+    /** Menit setelah aksi di mana pembuatnya boleh membatalkan tanpa PIN (salah pencet) */
+    #[Computed]
+    public function menitTanpaPin(): int
+    {
+        return max(0, (int) Pengaturan::ambil('sesi.batal_tanpa_pin_menit', 5));
+    }
+
+    /** Pembuat aksi, masih dalam batas menit -> tanpa PIN; pemilik izin batal transaksi -> tanpa PIN */
+    private function bolehTanpaPin(?string $pembuatId, Carbon $waktu): bool
+    {
+        return auth()->user()->can('transaksi.batal')
+            || ($pembuatId === auth()->id() && $waktu->gte(now()->subMinutes($this->menitTanpaPin)));
+    }
+
+    /**
+     * Tambah waktu yang masih bisa dibatalkan (terbaru dulu).
+     *
+     * @return Collection<int, array{id:string, menit:int, harga:int, gratis:bool, oleh:?string, waktu:Carbon, sebelum:?string, butuhPin:bool}>
+     */
+    #[Computed]
+    public function riwayatTambah(): Collection
+    {
+        if (! $this->sesi?->isPaket()) {
+            return collect();
+        }
+
+        $batal = $this->billing()->tambahWaktuDibatalkan($this->sesi->id);
+
+        return SesiLog::with('user:id,name')->where('sesi_id', $this->sesi->id)->where('jenis', 'tambah_waktu')
+            ->whereNotIn('id', $batal)->latest()->get()
+            ->map(fn (SesiLog $l) => [
+                'id' => $l->id,
+                'menit' => (int) ($l->data['menit'] ?? 0),
+                'harga' => (int) ($l->data['harga'] ?? 0),
+                'gratis' => (bool) ($l->data['gratis'] ?? false),
+                'oleh' => $l->user?->name,
+                'waktu' => $l->created_at,
+                'sebelum' => isset($l->data['berakhir_sebelum']) ? Carbon::parse($l->data['berakhir_sebelum'])->format('H:i') : null,
+                'butuhPin' => ! $this->bolehTanpaPin($l->user_id, $l->created_at),
+            ]);
+    }
+
+    /** Dipanggil dari tombol konfirmasi: $konfirmasi['reason'], ['pin'] (bila perlu) */
+    public function batalTambahWaktu(string $logId, array $konfirmasi = []): void
+    {
+        $riwayat = $this->riwayatTambah->firstWhere('id', $logId);
+
+        if (! $riwayat) {
+            $this->error('Tambah waktu ini sudah tidak bisa dibatalkan');
+
+            return;
+        }
+
+        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: 'Salah input';
+
+        if ($riwayat['butuhPin']) {
+            try {
+                $penyetuju = app(PinService::class)->setujui($konfirmasi['pin'] ?? null, 'transaksi.batal', app(Tenancy::class)->tenantId());
+            } catch (BillingException $e) {
+                $this->alert('Ditolak', $e->getMessage(), 'error');
+
+                return;
+            }
+
+            $alasan .= " (disetujui {$penyetuju->name})";
+        }
+
+        $this->jalankan(
+            fn () => $this->billing()->batalTambahWaktu($this->sesi, $logId, auth()->user(), $alasan),
+            "Tambah waktu {$riwayat['menit']} menit dibatalkan"
+        );
+    }
+
+    /** Batal sesi tanpa PIN: yang memulai, masih dalam batas menit, & belum ada pembayaran */
+    #[Computed]
+    public function batalSesiButuhPin(): bool
+    {
+        $sesi = $this->sesi;
+
+        return ! $sesi
+            || $sesi->transaksi->totalDibayar() > 0
+            || ! $this->bolehTanpaPin($sesi->user_id, $sesi->created_at);
+    }
+
+    /** Dipanggil dari tombol konfirmasi: $konfirmasi['reason'], ['pin'] (bila perlu) */
+    public function batalSesi(array $konfirmasi = []): void
+    {
+        if (! $this->sesi) {
+            return;
+        }
+
+        $alasan = trim((string) ($konfirmasi['reason'] ?? ''));
+
+        if (mb_strlen($alasan) < 5) {
+            $this->alert('Alasan wajib diisi', 'Tulis alasan pembatalan (minimal 5 karakter), mis. "Tidak jadi main".', 'error');
+
+            return;
+        }
+
+        if ($this->batalSesiButuhPin) {
+            try {
+                $penyetuju = app(PinService::class)->setujui($konfirmasi['pin'] ?? null, 'transaksi.batal', app(Tenancy::class)->tenantId());
+            } catch (BillingException $e) {
+                $this->alert('Ditolak', $e->getMessage(), 'error');
+
+                return;
+            }
+
+            if ($penyetuju->id !== auth()->id()) {
+                $alasan .= " (disetujui {$penyetuju->name})";
+            }
+        }
+
+        $unit = $this->sesi->unit->nama;
+
+        $this->jalankan(
+            fn () => $this->billing()->batalSesi($this->sesi, auth()->user(), $alasan),
+            "Sesi {$unit} dibatalkan, unit kosong & TV terkunci",
+            tutup: true
+        );
+    }
+
     /* ---------------- Helper ---------------- */
 
     private function jalankan(callable $aksi, string $pesan, bool $tutup = false): bool
@@ -313,7 +443,7 @@ class KelolaSesi extends Component
 
     private function segarkanData(): void
     {
-        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah, $this->estimasiSewa);
+        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah, $this->estimasiSewa, $this->riwayatTambah, $this->batalSesiButuhPin);
     }
 
     private function billing(): BillingService

@@ -5,6 +5,26 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (batal tambah waktu & batal sesi)
+-----------------------------------------------------------------------------
+Kasir - Kelola Sesi
+- Daftar "Tambah waktu" + tombol Batalkan (salah pencet, mis. harusnya 30 menit tertekan 1 jam): jam selesai
+  dimundurkan sebanyak menit yang ditambahkan, biayanya jadi Rp0 "(dibatalkan)" + alasan di tagihan.
+  Jam selesai sebelum & sesudah tiap tambah waktu kini dicatat di log sesi. Dihitung dari jam selesai saat ini,
+  jadi tetap benar walau sempat pause / ada tambah waktu lain. Ditolak bila waktunya sudah mulai terpakai
+  atau biayanya sudah dibayar (pakai batal transaksi supaya uang tercatat kembali).
+- Tombol "Batalkan sesi (tidak jadi main)": tagihan dibatalkan (Rp0), F&B kembali ke stok, saldo/poin member
+  dikembalikan, unit kosong lagi, TV langsung terkunci. Alasan wajib.
+- Tanpa PIN bila: dibuat oleh kasir itu sendiri, <= 5 menit lalu (Admin -> Pengaturan Operasional ->
+  "Batal tanpa PIN"), dan (untuk batal sesi) belum ada pembayaran. Selain itu PIN supervisor/owner.
+  Owner/supervisor (izin batal transaksi) selalu tanpa PIN. Semua tercatat di log aktivitas.
+- APK TV tidak perlu update: TV mengikuti jam selesai baru & layar kunci dari server secara realtime
+  (diuji di emulator APK 0.6.1).
+Keamanan
+- Judul notifikasi/konfirmasi (SweetAlert) kini teks biasa: sebelumnya dirender sebagai HTML sehingga nama
+  pelanggan/booking dari portal publik bisa menyisipkan skrip di layar kasir (XSS tersimpan).
+
+
 2026-10-02 (batas login 3x)
 -----------------------------------------------------------------------------
 - Login kasir & panel admin: gagal 3x dari IP publik -> IP diblokir 15 menit (berlaku lintas akun).

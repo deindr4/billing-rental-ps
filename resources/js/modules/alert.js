@@ -37,7 +37,8 @@ export async function toast({ icon = 'success', title = '', timer = 2500 } = {})
         toast: true,
         position: 'top-end',
         icon,
-        title,
+        // titleText = teks biasa (title SweetAlert dirender sebagai HTML; pesan bisa memuat nama pelanggan / booking publik)
+        titleText: title,
         timer,
         timerProgressBar: true,
         showConfirmButton: false,
@@ -53,7 +54,7 @@ export async function alert({ icon = 'info', title = '', text = '' } = {}) {
 
     return Swal.fire({
         icon,
-        title,
+        titleText: title, // teks biasa, bukan HTML
         text,
         confirmButtonText: 'OK',
         buttonsStyling: false,
@@ -89,7 +90,7 @@ export async function confirm({
 
     const result = await Swal.fire({
         icon,
-        title,
+        titleText: title, // teks biasa (judul memuat nama unit dsb.)
         html,
         showCancelButton: true,
         reverseButtons: true,
@@ -137,7 +138,7 @@ export async function loading(title = 'Memproses...') {
     const Swal = await loadSwal();
 
     Swal.fire({
-        title,
+        titleText: title,
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,

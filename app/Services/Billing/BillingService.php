@@ -229,6 +229,8 @@ final class BillingService
             $unit = Unit::withoutGlobalScopes()->findOrFail($sesi->unit_id);
             $harga = $gratis ? 0 : ($harga ?? intdiv($this->tarifPerJam($unit) * $menit + 59, 60));
 
+            // Jam berakhir sebelum ditambah dicatat di log: dasar pembatalan & jejak audit
+            $sebelum = $sesi->berakhir_pada->copy();
             $dasar = $dariSekarang && $sesi->berakhir_pada->isPast() ? now() : $sesi->berakhir_pada->copy();
             $sesi->berakhir_pada = $dasar->addMinutes($menit);
             $sesi->durasi_menit = (int) $sesi->durasi_menit + $menit;
@@ -238,7 +240,7 @@ final class BillingService
             $transaksi = Transaksi::withoutGlobalScopes()->findOrFail($sesi->transaksi_id);
             $nama = "Tambah waktu {$menit} menit".($gratis ? ' (gratis)' : '');
 
-            $this->tambahItem($transaksi, TransaksiItem::JENIS_TAMBAH_WAKTU, $nama, $harga, null, $gratis ? "Alasan: {$alasan}" : null);
+            $item = $this->tambahItem($transaksi, TransaksiItem::JENIS_TAMBAH_WAKTU, $nama, $harga, null, $gratis ? "Alasan: {$alasan}" : null);
             $transaksi->hitungUlang();
 
             if ($transaksi->isLunas() && $transaksi->sisaTagihan() > 0) {
@@ -255,10 +257,131 @@ final class BillingService
                 'harga' => $harga,
                 'gratis' => $gratis,
                 'alasan' => $alasan,
+                'item_id' => $item->id,
+                'berakhir_sebelum' => $sebelum->toIso8601String(),
+                'berakhir_sesudah' => $sesi->berakhir_pada->toIso8601String(),
             ], $user);
 
             return $sesi;
         });
+    }
+
+    /* ================= BATAL TAMBAH WAKTU (salah pencet) ================= */
+
+    /**
+     * Membatalkan satu tambah waktu: jam berakhir dimundurkan sebanyak menit yang ditambahkan, biayanya jadi Rp0.
+     *
+     * Dihitung RELATIF dari jam berakhir sekarang (bukan menyalin "berakhir_sebelum"), supaya tetap benar bila
+     * sesudahnya ada pause/resume (jam berakhir bergeser) atau tambah waktu lain. Bila tidak ada perubahan lain,
+     * hasilnya sama persis dengan jam berakhir sebelum ditambah (dicatat di log untuk dicek).
+     * Ditolak bila waktu tambahan itu sudah mulai terpakai atau biayanya sudah dibayar.
+     */
+    public function batalTambahWaktu(Sesi $sesi, string $logId, User $user, string $alasan): Sesi
+    {
+        if (mb_strlen(trim($alasan)) < 3) {
+            throw new BillingException('Alasan pembatalan wajib diisi.');
+        }
+
+        return DB::transaction(function () use ($sesi, $logId, $user, $alasan) {
+            $sesi = $this->kunciSesi($sesi->id);
+            $this->pastikanAktif($sesi);
+
+            if (! $sesi->isPaket() || ! $sesi->berakhir_pada) {
+                throw new BillingException('Hanya sesi paket / durasi yang punya tambah waktu.');
+            }
+
+            $log = SesiLog::withoutGlobalScopes()->where('sesi_id', $sesi->id)->where('jenis', 'tambah_waktu')->find($logId)
+                ?? throw new BillingException('Riwayat tambah waktu tidak ditemukan.');
+
+            if (in_array($log->id, $this->tambahWaktuDibatalkan($sesi->id), true)) {
+                throw new BillingException('Tambah waktu ini sudah dibatalkan.');
+            }
+
+            $menit = (int) ($log->data['menit'] ?? 0);
+            $sebelum = $sesi->berakhir_pada->copy();
+            $baru = $sebelum->copy()->subMinutes($menit);
+
+            // Saat dijeda, waktu berhenti di jam jeda; selain itu acuannya sekarang
+            $acuan = $sesi->dijeda_pada ?? now();
+
+            if ($baru->lte($acuan)) {
+                throw new BillingException("Waktu tambahan {$menit} menit sudah mulai terpakai, tidak bisa dibatalkan. Selesaikan sesi seperti biasa.");
+            }
+
+            $sesi->berakhir_pada = $baru;
+            $sesi->durasi_menit = max(0, (int) $sesi->durasi_menit - $menit);
+            $sesi->versi_tagihan = $sesi->versi_tagihan + 1;
+            $sesi->save();
+
+            // Item tagihan tidak dihapus (dilindungi database): dinolkan & diberi keterangan
+            $transaksi = Transaksi::withoutGlobalScopes()->whereKey($sesi->transaksi_id)->lockForUpdate()->firstOrFail();
+            $item = $this->itemTambahWaktu($transaksi, $log);
+            $harga = (int) ($item?->subtotal ?? 0);
+
+            if ($item) {
+                $item->update([
+                    'nama' => $item->nama.' (dibatalkan)',
+                    'harga_satuan' => 0,
+                    'subtotal' => 0,
+                    'catatan' => trim(($item->catatan ? $item->catatan.' | ' : '').'Dibatalkan: '.trim($alasan)),
+                ]);
+            }
+
+            $transaksi->hitungUlang();
+
+            if ($transaksi->totalDibayar() > $transaksi->total) {
+                throw new BillingException('Biaya tambah waktu ini sudah dibayar. Batalkan lewat menu Transaksi supaya uangnya tercatat dikembalikan.');
+            }
+
+            $this->log($sesi, 'batal_tambah_waktu', [
+                'log_id' => $log->id,
+                'menit' => $menit,
+                'harga' => $harga,
+                'alasan' => trim($alasan),
+                'berakhir_sebelum' => $sebelum->toIso8601String(),
+                'berakhir_sesudah' => $baru->toIso8601String(),
+            ], $user);
+
+            Audit::catat('batal_tambah_waktu', "Batal tambah {$menit} menit di {$transaksi->nomor} (Rp ".number_format($harga, 0, ',', '.')."): {$alasan}", $transaksi, [
+                'menit' => $menit, 'harga' => $harga, 'alasan' => $alasan,
+            ], userId: $user->id);
+
+            return $sesi;
+        });
+    }
+
+    /** Id log tambah_waktu yang sudah dibatalkan pada sesi ini */
+    public function tambahWaktuDibatalkan(string $sesiId): array
+    {
+        return SesiLog::withoutGlobalScopes()->where('sesi_id', $sesiId)->where('jenis', 'batal_tambah_waktu')
+            ->get(['data'])->pluck('data.log_id')->filter()->values()->all();
+    }
+
+    /** Item tagihan milik satu tambah waktu (log lama tanpa item_id: dicocokkan dari nama & harga) */
+    private function itemTambahWaktu(Transaksi $transaksi, SesiLog $log): ?TransaksiItem
+    {
+        $q = TransaksiItem::withoutGlobalScopes()->where('transaksi_id', $transaksi->id)->where('jenis', TransaksiItem::JENIS_TAMBAH_WAKTU);
+
+        if (! empty($log->data['item_id'])) {
+            return $q->whereKey($log->data['item_id'])->first();
+        }
+
+        return $q->where('nama', 'like', 'Tambah waktu '.((int) $log->data['menit']).' menit%')
+            ->where('nama', 'not like', '%(dibatalkan)')
+            ->where('subtotal', (int) ($log->data['harga'] ?? 0))
+            ->latest()->first();
+    }
+
+    /* ================= BATAL SESI (tidak jadi main) ================= */
+
+    /** Sesi yang masih berjalan dibatalkan: tagihan batal (Rp0), unit kosong lagi, TV terkunci. */
+    public function batalSesi(Sesi $sesi, User $user, string $alasan): Transaksi
+    {
+        if (! $sesi->isAktif()) {
+            throw new BillingException('Sesi sudah selesai atau dibatalkan.');
+        }
+
+        return $this->batalkan(Transaksi::withoutGlobalScopes()->findOrFail($sesi->transaksi_id), $user, $alasan);
     }
 
     /**
