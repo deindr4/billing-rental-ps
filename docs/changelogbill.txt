@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-02 (1 TV beberapa konsol / HDMI - APK 0.6.1)
+-----------------------------------------------------------------------------
+- Admin -> Perangkat TV -> tombol HDMI: beri nama konsol tiap HDMI yang dilaporkan TV (HDMI 1 = PS3, HDMI 2 = PS4,
+  HDMI 3 = PS5, ...) + pilih HDMI yang dipakai sekarang. TV yang terbuka langsung pindah.
+- Kasir - kartu unit: chip "HDMI 3 · PS5" di bawah status TV (hanya TV dengan >1 HDMI) -> klik untuk memilih /
+  memaksa HDMI, juga di tengah sesi (pelanggan ganti konsol). Tarif tidak berubah (tetap per unit).
+- Kasir - Mulai Rental: pilihan "Konsol / HDMI di TV" bila TV punya >1 HDMI; TV langsung membuka HDMI itu.
+- Setiap pindah HDMI tercatat di riwayat TV. Butuh "php artisan migrate" (kolom perangkat_tv.hdmi_nama).
+
+
 2026-10-02 (pemberitahuan TV & running text - APK 0.6.0)
 -----------------------------------------------------------------------------
 Kasir - Rental

@@ -146,6 +146,8 @@ Jalankan **sekali per `id`**, abaikan yang `waktu_ms`-nya lebih dari 2 menit lal
 | `update_aplikasi_paksa` | Cek & pasang rilis terbaru saat itu juga walau TV dipakai (APK ≥ 0.3.1) |
 | `pemberitahuan` | Tampilkan pesan di **tengah layar** (di atas game / layar kunci) lalu hilang sendiri. Isi di `data`: `teks` (≤150, emoji & baris baru boleh), `detik` (5/10/15/30/60), `ukuran` (`sedang`/`besar`/`jumbo`), `huruf` (`sans`/`serif`/`mono`), `tebal`. Dikirim dari kasir per unit atau semua TV cabang. APK ≥ 0.6.0 |
 
+| `pindah_hdmi` | TV berisi beberapa konsol (HDMI 1 PS3, HDMI 2 PS4, …): kasir memilih HDMI. Isi di `data`: `id` (id input TV), `label` ("HDMI 3 · PS5"). TV menyimpan pilihan; bila layar sedang terbuka (`main`/`bypass`/`darurat`) langsung pindah ke input itu. Pilihan juga tersimpan di server (`pengaturan.input_hdmi`) untuk sesi berikutnya. APK ≥ 0.6.1 |
+
 Contoh perintah dengan isi:
 
 ```json

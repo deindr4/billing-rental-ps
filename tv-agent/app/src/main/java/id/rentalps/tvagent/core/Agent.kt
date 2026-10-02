@@ -31,6 +31,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import java.io.IOException
 
 /** Tahap aplikasi */
@@ -84,6 +85,10 @@ class Agent(private val ctx: Context) {
 
     private val _peringatan = MutableSharedFlow<Peringatan>(extraBufferCapacity = 4)
     val peringatan: SharedFlow<Peringatan> = _peringatan.asSharedFlow()
+
+    /** Kasir memindah HDMI saat TV terbuka: id input yang harus dibuka sekarang (dijalankan AgentService) */
+    private val _pindahHdmi = MutableSharedFlow<String>(extraBufferCapacity = 2)
+    val pindahHdmi: SharedFlow<String> = _pindahHdmi.asSharedFlow()
 
     /** Pemberitahuan dari kasir untuk ditampilkan di tengah layar (AgentService → OverlayPemberitahuan) */
     private val _pemberitahuan = MutableSharedFlow<id.rentalps.tvagent.data.Pemberitahuan>(extraBufferCapacity = 4)
@@ -353,6 +358,19 @@ class Agent(private val ctx: Context) {
         if (p.perintah == "tutup_aplikasi") {
             app.tutupAplikasi() // layar TV Agent pindah sendiri ke Google TV
             Remote.laporan = "aplikasi ditutup dari kasir"
+            sinyalHeartbeat.trySend(Unit)
+            return
+        }
+
+        // Pindah HDMI dari kasir (TV berisi beberapa konsol): simpan pilihan; TV yang sedang terbuka langsung pindah
+        if (p.perintah == "pindah_hdmi") {
+            val id = p.data?.get("id")?.let { runCatching { it.jsonPrimitive.content }.getOrNull() }
+            if (!id.isNullOrBlank()) {
+                simpan.inputHdmi = id
+                if (_keadaan.value.layar in LAYAR_TERBUKA) _pindahHdmi.tryEmit(id)
+                Remote.laporan = "pindah HDMI: " + (p.data?.get("label")?.let { runCatching { it.jsonPrimitive.content }.getOrNull() } ?: id)
+                segarkanSekarang() // ambil status dengan input_hdmi baru
+            }
             sinyalHeartbeat.trySend(Unit)
             return
         }

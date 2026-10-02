@@ -105,6 +105,19 @@
                     </div>
                 @endif
 
+                {{-- TV berisi beberapa konsol: pilih HDMI yang dibuka (tarif tetap per unit) --}}
+                @if ($tv = $this->perangkatTv)
+                    <div>
+                        <div class="block text-sm mb-1.5">Konsol / HDMI di TV</div>
+                        <div class="flex flex-wrap gap-1.5">
+                            @foreach ($tv->pilihanHdmi() as $id => $label)
+                                <button type="button" wire:click="$set('hdmi', @js($id))"
+                                        @class(['btn h-9 px-3 text-sm', 'btn-primary' => $hdmi === $id])>{{ $label }}</button>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 {{-- Waktu pilih game: TV terbuka, waktu sewa belum berjalan --}}
                 @if ($this->pilihGameDefault > 0)
                     <label class="flex items-start gap-3 rounded-md border border-line px-3 py-2.5 cursor-pointer">

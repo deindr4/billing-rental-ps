@@ -35,10 +35,12 @@ final class TvRemoteService
         'update_aplikasi_paksa' => 'Update aplikasi sekarang',
         // Pemberitahuan di tengah layar (isi di "data": teks, detik, ukuran, huruf, tebal). APK >= 0.6.0
         'pemberitahuan' => 'Pemberitahuan',
+        // Pindah ke input HDMI lain (isi di "data": id, label); TV terkunci cukup menyimpan pilihan. APK >= 0.6.1
+        'pindah_hdmi' => 'Pindah HDMI',
     ];
 
     /** Perintah yang hanya boleh dikirim lewat jalurnya sendiri (PIN di panel TV / admin), bukan remote kartu unit */
-    public const PERINTAH_KHUSUS = ['tutup_aplikasi', 'update_aplikasi', 'update_aplikasi_paksa', 'pemberitahuan'];
+    public const PERINTAH_KHUSUS = ['tutup_aplikasi', 'update_aplikasi', 'update_aplikasi_paksa', 'pemberitahuan', 'pindah_hdmi'];
 
     /** Perintah update APK ke banyak TV (hanya yang versinya belum terbaru). Return jumlah TV yang dikirimi. */
     public function pushUpdate(iterable $perangkat, User $user, bool $paksa = false): int
@@ -108,8 +110,8 @@ final class TvRemoteService
 
         PerintahTv::dispatch($perangkat->id, $data);
 
-        // Volume tidak dicatat (terlalu sering); aksi daya & restart dicatat
-        if (! str_starts_with($perintah, 'volume_')) {
+        // Volume tidak dicatat (terlalu sering); pindah HDMI sudah dicatat sendiri (input_hdmi); aksi daya & restart dicatat
+        if (! str_starts_with($perintah, 'volume_') && $perintah !== 'pindah_hdmi') {
             LogTv::catat($perangkat, 'perintah', array_filter([
                 'perintah' => $perintah,
                 'label' => self::PERINTAH[$perintah],

@@ -53,6 +53,15 @@ class AgentService : Service() {
         runningText = OverlayRunningText(this)
         agent.mulai()
 
+        // Kasir memindah HDMI saat TV terbuka (TV berisi beberapa konsol)
+        scope.launch {
+            agent.pindahHdmi.collect { id ->
+                val berhasil = Hdmi.buka(this@AgentService, id)
+                agent.setHdmiGagal(!berhasil)
+                if (!berhasil) tampilkanLayarKunci()
+            }
+        }
+
         // Pemberitahuan kasir di tengah layar
         scope.launch {
             agent.pemberitahuan.collect { p -> pemberitahuan.tampilkan(p, agent.keadaan.value.status?.tema?.aksen) }

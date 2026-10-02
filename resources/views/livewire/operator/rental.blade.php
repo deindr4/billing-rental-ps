@@ -147,6 +147,7 @@
     <livewire:operator.kelola-sesi />
     <livewire:operator.kelola-tv />
     <livewire:operator.kirim-pemberitahuan />
+    <livewire:operator.pilih-hdmi-tv />
     <livewire:operator.kelola-running-text />
     <livewire:operator.pembayaran />
 </div>

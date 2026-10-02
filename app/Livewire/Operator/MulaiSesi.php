@@ -7,8 +7,10 @@ use App\Livewire\Concerns\PilihMember;
 use App\Livewire\Concerns\WithAlert;
 use App\Models\PaketHarga;
 use App\Models\Pengaturan;
+use App\Models\PerangkatTv;
 use App\Models\Unit;
 use App\Services\Billing\BillingService;
+use App\Services\Tv\HdmiTvService;
 use App\Services\Publik\BookingService;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -46,6 +48,9 @@ class MulaiSesi extends Component
     /** Booking yang sedang check-in (ditautkan ke sesi setelah dimulai) */
     public ?string $bookingId = null;
 
+    /** Input HDMI TV yang dibuka (TV berisi beberapa konsol); null = tetap HDMI tersimpan */
+    public ?string $hdmi = null;
+
     #[On('buka-mulai-sesi')]
     /**
      * @param  string|null  $pelanggan  nama dari antrean lounge / booking
@@ -60,13 +65,15 @@ class MulaiSesi extends Component
         $this->pilihGame = $this->pilihGameDefault > 0 && (bool) Pengaturan::ambil('sesi.pilih_game_otomatis', true);
         $this->unitId = $unitId;
 
-        unset($this->unit, $this->paketTersedia, $this->tarifPerJam);
+        unset($this->unit, $this->paketTersedia, $this->tarifPerJam, $this->perangkatTv);
 
         if (! $this->unit || ! $this->unit->isKosong()) {
             $this->error('Unit sedang tidak tersedia');
 
             return;
         }
+
+        $this->hdmi = $this->perangkatTv?->input_hdmi;
 
         $this->mode = 'durasi';
         $this->paketId = $this->paketTersedia->first()?->id;
@@ -94,6 +101,15 @@ class MulaiSesi extends Component
         return $this->unitId
             ? Unit::with(['tipeKonsol:id,kode,nama', 'kategori:id,nama'])->find($this->unitId)
             : null;
+    }
+
+    /** TV unit ini bila punya lebih dari satu HDMI (beberapa konsol di satu TV) */
+    #[Computed]
+    public function perangkatTv(): ?PerangkatTv
+    {
+        $tv = $this->unitId ? PerangkatTv::aktif()->where('unit_id', $this->unitId)->first() : null;
+
+        return $tv && count($tv->daftarInput()) > 1 ? $tv : null;
     }
 
     #[Computed]
@@ -185,6 +201,11 @@ class MulaiSesi extends Component
         ]);
 
         try {
+            // HDMI dipilih dulu supaya TV langsung membuka konsol yang benar saat sesi dimulai
+            if ($this->hdmi && ($tv = $this->perangkatTv) && $tv->input_hdmi !== $this->hdmi) {
+                app(HdmiTvService::class)->pindah($tv, $this->hdmi, auth()->user(), 'mulai_sesi');
+            }
+
             $sesi = $billing->mulai($this->unit, auth()->user(), [
                 'mode' => $this->mode,
                 'paket_harga_id' => $this->mode === 'paket' ? $this->paketId : null,

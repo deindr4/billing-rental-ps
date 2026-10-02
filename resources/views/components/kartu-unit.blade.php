@@ -48,11 +48,23 @@
                 {{ $unit->tipeKonsol?->nama ?? $unit->tipeKonsol?->kode }}{{ $unit->lokasi ? ' · '.$unit->lokasi : '' }}
             </div>
             @if ($indikatorTv)
-                <button type="button"
-                        wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
-                        class="label flex items-center gap-1.5 mt-1 hover:underline" style="color: {{ $indikatorTv[1] }};" title="{{ $indikatorTv[2] }}">
-                    <span class="dot"></span>{{ $indikatorTv[0] }}
-                </button>
+                <div class="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
+                    <button type="button"
+                            wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
+                            class="label flex items-center gap-1.5 hover:underline" style="color: {{ $indikatorTv[1] }};" title="{{ $indikatorTv[2] }}">
+                        <span class="dot"></span>{{ $indikatorTv[0] }}
+                    </button>
+                    {{-- HDMI yang dipakai (TV dengan beberapa konsol): klik untuk pindah --}}
+                    @if ($tv && count($tv->daftarInput()) > 1)
+                        <button type="button" wire:click="$dispatch('buka-pilih-hdmi', { unitId: '{{ $unit->id }}' })"
+                                class="label flex items-center gap-1 rounded px-1.5 py-0.5 hover:underline"
+                                style="color: var(--ikon-biru); background: color-mix(in srgb, var(--ikon-biru) 12%, transparent);"
+                                title="Pilih / pindah HDMI">
+                            {{ $tv->input_hdmi ? $tv->labelHdmi($tv->input_hdmi) : 'Pilih HDMI' }}
+                            <x-ikon name="chevron" size="12" />
+                        </button>
+                    @endif
+                </div>
             @endif
         </div>
         <span class="label flex items-center gap-1.5 shrink-0 pt-1" style="color: {{ $warnaStatus }};">

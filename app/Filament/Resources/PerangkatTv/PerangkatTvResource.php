@@ -8,6 +8,7 @@ use App\Filament\Resources\PerangkatTv\Pages\ListPerangkatTv;
 use App\Models\LogTv;
 use App\Models\PerangkatTv;
 use App\Models\RilisApk;
+use App\Services\Tv\HdmiTvService;
 use App\Services\Tv\KodeDarurat;
 use App\Services\Tv\NotifikasiTv;
 use App\Services\Tv\PairingTvService;
@@ -16,6 +17,7 @@ use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -116,23 +118,36 @@ class PerangkatTvResource extends Resource
                     ->color(fn (PerangkatTv $r) => $r->input_hdmi ? 'gray' : 'warning')
                     ->tooltip('HDMI tempat PS tersambung')
                     ->visible(fn (PerangkatTv $r) => $r->status === PerangkatTv::STATUS_AKTIF && $r->daftarInput() !== [])
-                    ->modalHeading('PS tersambung ke HDMI berapa?')
-                    ->modalDescription('Daftar input dilaporkan oleh TV. TV akan pindah ke input ini setiap sesi dimulai.')
-                    ->fillForm(fn (PerangkatTv $r) => ['input' => $r->input_hdmi])
+                    ->modalHeading('HDMI & konsol di TV ini')
+                    ->modalDescription('Daftar input dilaporkan oleh TV. Beri nama konsol tiap HDMI (mis. PS3 / PS4 / PS5) — kasir memilih / memindah HDMI dengan nama ini. '
+                        .'"Dipakai sekarang" = HDMI yang dibuka setiap sesi dimulai; kasir bisa menggantinya dari kartu unit.')
+                    ->fillForm(fn (PerangkatTv $r) => ['input' => $r->input_hdmi] + collect(array_keys($r->daftarInput()))
+                        ->mapWithKeys(fn ($id, $i) => ["nama_{$i}" => ($r->hdmi_nama ?? [])[$id] ?? null])->all())
                     ->schema(fn (PerangkatTv $r) => [
+                        // Id input berisi titik/garis miring, jadi nama isian memakai urutan (nama_0, nama_1, ...)
+                        ...collect($r->daftarInput())->values()->map(fn ($label, $i) => TextInput::make("nama_{$i}")
+                            ->label("Konsol di {$label}")
+                            ->placeholder('Kosong / PS3 / PS4 / PS5')
+                            ->maxLength(30))->all(),
                         Radio::make('input')
-                            ->label('Input')
-                            ->options($r->daftarInput())
+                            ->label('Dipakai sekarang')
+                            ->options(fn () => $r->pilihanHdmi())
                             ->required(),
                     ])
                     ->action(function (PerangkatTv $r, array $data) {
-                        $label = $r->daftarInput()[$data['input']] ?? $data['input'];
-                        $r->update(['input_hdmi' => $data['input'], 'input_hdmi_label' => $label]);
+                        $layanan = app(HdmiTvService::class);
+                        $ids = array_keys($r->daftarInput());
+                        $layanan->namai($r, collect($ids)->mapWithKeys(fn ($id, $i) => [$id => $data["nama_{$i}"] ?? null])->all());
 
-                        LogTv::catat($r, 'input_hdmi', ['label' => $label, 'lewat' => 'admin'], auth()->user());
-                        NotifikasiTv::perangkat($r, 'input_hdmi');
+                        try {
+                            $label = $layanan->pindah($r->refresh(), $data['input'], auth()->user(), 'admin');
+                        } catch (BillingException $e) {
+                            Notification::make()->title('Gagal')->body($e->getMessage())->danger()->send();
 
-                        Notification::make()->title("Input PS: {$label}")->success()->send();
+                            return;
+                        }
+
+                        Notification::make()->title("HDMI dipakai: {$label}")->success()->send();
                     }),
 
                 Action::make('diagnostik')

@@ -6,6 +6,15 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.1 (kode 12) - 2026-10-02                                   [tag apk-0.6.1]
+-----------------------------------------------------------------------------
+- Perintah baru "pindah_hdmi" dari kasir: 1 TV dengan beberapa konsol (mis. HDMI 1 PS3, HDMI 2 PS4, HDMI 3 PS5).
+  TV langsung pindah ke HDMI yang dipilih bila sedang main / unlock; bila terkunci, pilihan disimpan dan dipakai
+  saat sesi berikutnya dimulai. Gagal pindah -> tetap di layar TV Agent dengan pilihan input (seperti sebelumnya).
+- Catatan: HDMI tidak bisa dideteksi otomatis per konsol (Android hanya tahu daftar input, bukan konsol apa yang
+  tersambung), jadi pemetaan HDMI -> konsol diatur admin.
+
+
 0.6.0 (kode 11) - 2026-10-02                                   [tag apk-0.6.0]
 -----------------------------------------------------------------------------
 - Pemberitahuan dari kasir di TENGAH layar (di atas game & layar kunci): kotak navy bergaris aksen, teks + emoji,

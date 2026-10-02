@@ -159,7 +159,7 @@ class Rental extends Component
         // TV Agent yang terpasang per unit (untuk indikator online/offline)
         $tvPerUnit = PerangkatTv::aktif()
             ->whereIn('unit_id', $semuaUnit->pluck('id'))
-            ->get(['id', 'unit_id', 'terakhir_online', 'bypass_sampai', 'status', 'volume', 'senyap', 'layar_hidup', 'diagnostik'])
+            ->get(['id', 'unit_id', 'terakhir_online', 'bypass_sampai', 'status', 'volume', 'senyap', 'layar_hidup', 'diagnostik', 'input_hdmi', 'hdmi_nama'])
             ->keyBy('unit_id');
 
         $tarif = $semuaUnit->mapWithKeys(fn (Unit $unit) => [

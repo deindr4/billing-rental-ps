@@ -37,7 +37,7 @@ class PerangkatTv extends Model
     protected $fillable = [
         'tenant_id', 'cabang_id', 'unit_id', 'android_id', 'merek', 'model', 'versi_android', 'versi_app',
         'status', 'token_hash', 'rahasia_offline', 'bypass_sampai', 'terakhir_online', 'ip', 'layar',
-        'diagnostik', 'diagnostik_pada', 'volume', 'senyap', 'layar_hidup', 'input_hdmi', 'input_hdmi_label',
+        'diagnostik', 'diagnostik_pada', 'volume', 'senyap', 'layar_hidup', 'input_hdmi', 'input_hdmi_label', 'hdmi_nama',
         'dipasangkan_pada', 'dipasangkan_oleh',
     ];
 
@@ -49,6 +49,7 @@ class PerangkatTv extends Model
             'rahasia_offline' => 'encrypted',
             'diagnostik' => 'array',
             'diagnostik_pada' => 'datetime',
+            'hdmi_nama' => 'array',
             'volume' => 'integer',
             'senyap' => 'boolean',
             'layar_hidup' => 'boolean',
@@ -103,6 +104,27 @@ class PerangkatTv extends Model
             if (preg_match('/^(.*?)(?: \[HDMI\])? = (.+)$/', (string) $baris, $m)) {
                 $hasil[trim($m[2])] = trim($m[1]);
             }
+        }
+
+        return $hasil;
+    }
+
+    /** Label input untuk kasir: "HDMI 3 · PS5" (nama konsol diatur admin), atau label TV saja */
+    public function labelHdmi(string $inputId): string
+    {
+        $label = $this->daftarInput()[$inputId] ?? $inputId;
+        $nama = trim((string) (($this->hdmi_nama ?? [])[$inputId] ?? ''));
+
+        return $nama !== '' ? "{$label} · {$nama}" : $label;
+    }
+
+    /** @return array<string, string> input id => "HDMI 1 · PS3" */
+    public function pilihanHdmi(): array
+    {
+        $hasil = [];
+
+        foreach (array_keys($this->daftarInput()) as $id) {
+            $hasil[$id] = $this->labelHdmi($id);
         }
 
         return $hasil;

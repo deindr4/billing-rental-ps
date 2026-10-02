@@ -62,6 +62,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | **TV** | | | | |
 | Remote TV (volume, layar, restart) | ✅ | ✅ | – | ✅ |
 | Pemberitahuan ke layar TV & running text promo (dicatat di log aktivitas) | ✅ | ✅ | ✅ | – |
+| Pilih / pindah HDMI TV (TV dengan beberapa konsol) | ✅ | ✅ | ✅ | – |
 | Unlock TV, Tutup aplikasi TV, akses staf di TV (Home → OK → PIN), kode darurat | PIN | PIN | – | PIN |
 | **Admin** | | | | |
 | Masuk panel admin | ✅ | ✅ | – | – |
