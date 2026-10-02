@@ -110,6 +110,14 @@ TV_WS_SCHEME=https
 TRUSTED_PROXIES=cloudflare
 ```
 
+Nilai acak `REVERB_*` (boleh beda dengan server lokal; TV menerimanya otomatis). Buat lewat SSH lalu salin:
+
+```bash
+echo "REVERB_APP_ID=$(shuf -i 100000-999999 -n 1)"
+echo "REVERB_APP_KEY=$(openssl rand -hex 10)"
+echo "REVERB_APP_SECRET=$(openssl rand -hex 16)"     # rahasia: jangan dibagikan
+```
+
 `APP_KEY` wajib sama dengan server lokal: kunci payment gateway terenkripsi dibaca kedua server.
 (File `.env` di PC rental hanya bisa dibuka Administrator — Notepad → *Run as administrator*.)
 
