@@ -73,11 +73,17 @@ class AgentService : Service() {
             agent.keadaan.collect { runningText.perbarui(it) }
         }
 
+        // collectLatest: bila layar berubah lagi di tengah transisi logo, transisi lama dibatalkan
         scope.launch {
+            var sebelum: String? = null
             agent.keadaan
                 .map { it.layar }
                 .distinctUntilChanged()
-                .collect { layar -> ubahTampilan(layar) }
+                .collectLatest { layar ->
+                    val dari = sebelum
+                    sebelum = layar
+                    ubahTampilan(layar, dari)
+                }
         }
 
         // Timer melayang ikut status terbaru (sisa waktu, posisi, peringatan)
@@ -146,21 +152,51 @@ class AgentService : Service() {
         super.onDestroy()
     }
 
-    private fun ubahTampilan(layar: String) {
+    private suspend fun ubahTampilan(layar: String, sebelum: String?) {
         Log.i(Agent.TAG, "Tampilan -> $layar")
+        val app = application as AgentApp
 
         when (layar) {
             // Bypass: tidak otomatis ke HDMI — owner memilih PS / YouTube / aplikasi lain di layar bypass
             "bypass" -> tampilkanLayarKunci()
             in Agent.LAYAR_TERBUKA -> {
                 // Sesi dimulai: aplikasi yang "ditutup" staf kembali menjaga TV, supaya saat waktu habis TV terkunci lagi
-                (application as AgentApp).kunciLagi()
+                app.kunciLagi()
+
+                // Dari layar kunci ke main: logo rental di tengah dulu, baru pindah ke HDMI.
+                // TV yang baru menyala / restart di tengah sesi (sebelum = null / memuat) langsung ke HDMI.
+                if (layar == "main" && sebelum in Agent.LAYAR_TERKUNCI) {
+                    transisi(app, "mulai", TRANSISI_MULAI_MS)
+                }
+
                 // Gagal pindah HDMI: tetap di layar TV Agent (dengan pilihan input), jangan tampilkan aplikasi lain
                 val berhasil = Hdmi.buka(this, agent.inputHdmi())
                 agent.setHdmiGagal(!berhasil)
                 if (!berhasil) tampilkanLayarKunci()
             }
-            in Agent.LAYAR_TERKUNCI -> tampilkanLayarKunci()
+            in Agent.LAYAR_TERKUNCI -> {
+                // Selesai main (waktu habis / kasir menyelesaikan / batal): logo dulu, lalu layar habis / tagihan / kunci
+                if (sebelum == "main") {
+                    transisi(app, "selesai", TRANSISI_SELESAI_MS, lalu = { tampilkanLayarKunci() })
+                } else {
+                    tampilkanLayarKunci()
+                }
+            }
+        }
+    }
+
+    /**
+     * Tampilkan layar TV Agent dengan logo di tengah selama [lama] ms.
+     * Dibatalkan (collectLatest) bila layar berubah lagi — logo selalu dihapus di finally.
+     */
+    private suspend fun transisi(app: AgentApp, jenis: String, lama: Long, lalu: () -> Unit = {}) {
+        app.transisi.value = jenis
+        try {
+            tampilkanLayarKunci()
+            delay(lama)
+            lalu()
+        } finally {
+            app.transisi.value = null
         }
     }
 
@@ -195,6 +231,10 @@ class AgentService : Service() {
 
     companion object {
         private const val KANAL = "tv_agent"
+
+        /** Lama logo tampil sebelum pindah ke HDMI / sebelum layar waktu habis */
+        private const val TRANSISI_MULAI_MS = 2_000L
+        private const val TRANSISI_SELESAI_MS = 2_500L
 
         fun jalankan(ctx: Context) {
             ContextCompat.startForegroundService(ctx, Intent(ctx, AgentService::class.java))

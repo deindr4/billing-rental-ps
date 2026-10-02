@@ -52,6 +52,12 @@ class AgentApp : Application() {
     /** Layar TV Agent (activity) diminta pindah ke layar Google TV — Android melarang membukanya dari latar belakang */
     val mintaKeLauncher = MutableStateFlow(0L)
 
+    /**
+     * Transisi logo rental di tengah layar: "mulai" (layar kunci -> HDMI PS) atau "selesai" (game -> waktu habis).
+     * null = tidak ada transisi. Diatur AgentService, digambar di atas layar mana pun (Layar.kt).
+     */
+    val transisi = MutableStateFlow<String?>(null)
+
     /** Batalkan izin keluar / status ditutup: TV Agent kembali menjaga layar (kiosk) */
     fun kunciLagi() {
         tertutup.value = false

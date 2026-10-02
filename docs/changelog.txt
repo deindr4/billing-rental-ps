@@ -6,6 +6,18 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.2 (kode 13) - 2026-10-03                                   [tag apk-0.6.2]
+-----------------------------------------------------------------------------
+- Transisi logo rental di tengah layar:
+  * Mulai main: layar kunci -> logo + "SELAMAT BERMAIN · <unit> · Membuka PlayStation…" (2 detik) -> HDMI PS.
+  * Selesai main (waktu habis, diselesaikan kasir, atau sesi dibatalkan): game -> logo + "WAKTU BERMAIN
+    SELESAI · Terima kasih sudah bermain" (2,5 detik) -> layar waktu habis / tagihan / kunci.
+- Logo = logo dari Admin -> Pengaturan Tampilan (sama dengan layar kunci & aplikasi kasir); bila belum diunggah
+  memakai logo bawaan APK. Muncul pelan (memudar + sedikit membesar), latar gelap dengan cahaya warna aksen.
+- TV yang baru menyala / restart di tengah sesi langsung ke HDMI tanpa transisi. Bila status berubah lagi di
+  tengah transisi (mis. sesi langsung dibatalkan), transisi dihentikan & mengikuti status terbaru.
+
+
 0.6.1 (kode 12) - 2026-10-02                                   [tag apk-0.6.1]
 -----------------------------------------------------------------------------
 - Perintah baru "pindah_hdmi" dari kasir: 1 TV dengan beberapa konsol (mis. HDMI 1 PS3, HDMI 2 PS4, HDMI 3 PS5).

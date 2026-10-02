@@ -129,6 +129,10 @@ fun Aplikasi(agent: Agent, keadaan: Keadaan, onBukaHdmi: () -> Unit) {
                             }
                         }
                     }
+
+                    // Transisi logo (mulai main -> HDMI, selesai main -> waktu habis) menutupi layar apa pun di bawahnya
+                    val transisi by app.transisi.collectAsState()
+                    transisi?.let { LayarTransisi(agent, keadaan, it) }
                 }
             }
         }

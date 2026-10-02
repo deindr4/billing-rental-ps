@@ -5,6 +5,13 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-03 (APK 0.6.2 - transisi logo)
+-----------------------------------------------------------------------------
+- APK TV 0.6.2: logo rental tampil di tengah saat mulai main (sebelum pindah ke HDMI) & saat selesai main
+  (sebelum layar waktu habis). Logo diambil dari Admin -> Pengaturan Tampilan -> Logo (satu logo dipakai
+  di kasir, login, layar kunci TV & transisi). Server tidak berubah. Rincian: docs/changelog.txt.
+
+
 2026-10-03 (POS: riwayat tagihan unit)
 -----------------------------------------------------------------------------
 - POS -> Tujuan "Gabung ke <unit>": tampil "Sudah di tagihan <unit>" berisi semua item yang sudah tercatat
