@@ -13,6 +13,7 @@ use App\Services\Tv\RilisApkService;
 use App\Services\Tv\StatusTvService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -45,9 +46,19 @@ class TvController extends Controller
             'senyap' => 'nullable|boolean',
             'layar_hidup' => 'nullable|boolean',
             'diagnostik' => 'nullable|array|max:40',
+            // Respon ke server (ms), -1 = tidak terjangkau, null = belum diukur / cloud tidak diatur (APK >= 0.6.5)
+            'ping_lokal_ms' => 'nullable|integer|min:-1|max:60000',
+            'ping_cloud_ms' => 'nullable|integer|min:-1|max:60000',
+            'server_dipakai' => 'nullable|in:lokal,cloud',
         ]);
 
-        $ubah = array_filter($data, fn ($v) => $v !== null && ! is_array($v)) + ['terakhir_online' => now(), 'ip' => $request->ip()];
+        $ping = ['ping_lokal_ms', 'ping_cloud_ms', 'server_dipakai'];
+        $ubah = array_filter(Arr::except($data, $ping), fn ($v) => $v !== null && ! is_array($v)) + ['terakhir_online' => now(), 'ip' => $request->ip()];
+
+        // Ping dikirim lengkap tiap heartbeat: null ikut disimpan (cloud dikosongkan = kolom kosong). APK lama tidak mengirim.
+        if ($request->has('ping_lokal_ms')) {
+            $ubah += Arr::only($data, $ping) + array_fill_keys($ping, null);
+        }
 
         // Diagnostik hanya dikirim TV saat berubah / tiap 10 menit
         if (! empty($data['diagnostik'])) {

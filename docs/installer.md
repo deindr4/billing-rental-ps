@@ -87,3 +87,11 @@ Hasil: `installer\keluaran\BillingPS-cloud-<versi>.tar.gz` (aplikasi + `vendor` 
 - Perbaiki masalahnya lalu jalankan installer lagi: langkah yang sudah berhasil (database, `.env`) tidak diulang.
 - `nssm set BillingPS-Web AppParameters gagal` (installer 2026.10.03): bug PowerShell 5.1 membuang argumen kosong.
   Sudah diperbaiki sejak build 2026.10.04 — jalankan installer baru di atas pemasangan yang gagal.
+- Tidak bisa login padahal email & password benar: akun owner dibuat di percobaan pertama, dan installer
+  versi lama tidak mengganti password saat dipasang ulang (atau installer masuk mode update tanpa wizard).
+  Reset password dari PowerShell **Administrator**:
+  ```powershell
+  cd C:\BillingPS\app
+  ..\runtime\php\php.exe artisan tinker --execute="echo App\Models\User::withoutGlobalScopes()->pluck('email')->implode(', ');"
+  ..\runtime\php\php.exe artisan tinker --execute="App\Models\User::withoutGlobalScopes()->where('email','EMAIL')->update(['password'=>bcrypt('PasswordBaru123')]);"
+  ```

@@ -125,6 +125,17 @@ class Api(private val simpan: Penyimpanan) {
         JsonApi.decodeFromString(StatusTv.serializer(), isi) to isi
     }
 
+    /** Cek ringan server cadangan (GET /api/ping, tanpa token & tanpa data sesi). Return waktu respon (ms). */
+    suspend fun ping(dasar: String): Long = withContext(Dispatchers.IO) {
+        val req = Request.Builder().url("${dasar.trimEnd('/')}/api/ping").header("Accept", "application/json").get().build()
+        val mulai = System.nanoTime()
+        http.newCall(req).execute().use { res ->
+            res.body?.string()
+            if (!res.isSuccessful) throw ApiError(res.code, "Server menjawab ${res.code}")
+        }
+        (System.nanoTime() - mulai) / 1_000_000
+    }
+
     suspend fun heartbeat(data: JsonObject) {
         kirim(permintaan("/heartbeat").post(jsonBody(data)).build())
     }

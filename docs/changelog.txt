@@ -6,7 +6,18 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
-0.6.4 (kode 15) - 2026-10-03                                   [tag apk-0.6.4]
+0.6.5 (kode 16) - 2026-10-04                                   [tag apk-0.6.5]
+-----------------------------------------------------------------------------
+- Baris info kecil di bawah timer: versi APK + respon ke server lokal (L) & cloud (C) dalam ms,
+  contoh "v0.6.5 · ●▸L 12ms · ●C 85ms". ▸ = server yang sedang dipakai. Titik hijau <= 300 ms, kuning lambat,
+  merah "putus" (tidak terjangkau). C tidak tampil bila server cloud belum diatur.
+- Ringan: respon server yang dipakai diambil dari polling status rutin (tanpa permintaan tambahan); cloud dicek
+  tiap 5 menit lewat /api/ping (sekitar 1 KB, tanpa token). Saat memakai cloud, lokal dicek tiap 2 menit (sudah ada).
+- Nilai ping ikut dikirim di heartbeat -> Admin -> Perangkat TV kolom "Respon server".
+- Bisa dimatikan: Admin -> Pengaturan Operasional -> "Info teknis di bawah timer TV" (bawaan menyala).
+
+
+0.6.4 (kode 15) - 2026-10-03                                  [tag apk-0.6.4]
 -----------------------------------------------------------------------------
 - Warna angka timer saat waktu masih banyak bisa dipilih di Admin -> Pengaturan Operasional ->
   "Warna angka timer di TV": Putih (bawaan) / Hijau / Biru / Tosca / Kuning.

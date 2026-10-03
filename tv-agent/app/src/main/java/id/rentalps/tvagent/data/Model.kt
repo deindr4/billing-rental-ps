@@ -200,6 +200,8 @@ data class Pengaturan(
     @SerialName("ukuran_timer") val ukuranTimer: String = "sedang",
     /** Warna angka timer saat waktu masih banyak (#RRGGBB); hampir habis selalu merah */
     @SerialName("warna_timer") val warnaTimer: String? = null,
+    /** Baris kecil di bawah timer: versi APK + respon ke server lokal/cloud (server lama tidak mengirim = sembunyi) */
+    @SerialName("info_teknis") val infoTeknis: Boolean = false,
     @SerialName("durasi_bypass_menit") val durasiBypassMenit: Int = 15,
     @SerialName("bypass_maks_menit") val bypassMaksMenit: Int = 120,
     @SerialName("bypass_pilihan") val bypassPilihan: List<Int> = listOf(15, 30, 60),

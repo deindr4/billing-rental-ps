@@ -38,7 +38,7 @@ class PerangkatTv extends Model
         'tenant_id', 'cabang_id', 'unit_id', 'android_id', 'merek', 'model', 'versi_android', 'versi_app',
         'status', 'token_hash', 'rahasia_offline', 'bypass_sampai', 'terakhir_online', 'ip', 'layar',
         'diagnostik', 'diagnostik_pada', 'volume', 'senyap', 'layar_hidup', 'input_hdmi', 'input_hdmi_label', 'hdmi_nama',
-        'dipasangkan_pada', 'dipasangkan_oleh',
+        'ping_lokal_ms', 'ping_cloud_ms', 'server_dipakai', 'dipasangkan_pada', 'dipasangkan_oleh',
     ];
 
     protected $hidden = ['token_hash', 'rahasia_offline'];
@@ -53,6 +53,8 @@ class PerangkatTv extends Model
             'volume' => 'integer',
             'senyap' => 'boolean',
             'layar_hidup' => 'boolean',
+            'ping_lokal_ms' => 'integer',
+            'ping_cloud_ms' => 'integer',
             'bypass_sampai' => 'datetime',
             'terakhir_online' => 'datetime',
             'dipasangkan_pada' => 'datetime',

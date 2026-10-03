@@ -34,7 +34,7 @@ Jawaban `401 { "kode": "perlu_pairing" }` → hapus token, kembali ke layar pair
 | Endpoint | Keterangan |
 |---|---|
 | `GET /status` | Status lengkap (lihat bawah). Juga mencatat TV online. |
-| `POST /heartbeat` | `{ versi_app, versi_android, layar }` — kirim tiap 30 detik & saat tampilan berubah |
+| `POST /heartbeat` | `{ versi_app, versi_android, layar, ping_lokal_ms, ping_cloud_ms, server_dipakai }` — kirim tiap 30 detik & saat tampilan berubah. Ping (APK ≥ 0.6.5): ms, `-1` = tidak terjangkau, `null` = belum diukur / cloud tidak diatur (null ikut disimpan) |
 | `POST /bypass` | `{ pin }` → buka TV tanpa sesi selama `durasi_bypass_menit`. 422 jika PIN salah/tanpa izin |
 | `POST /bypass/akhiri` | Tutup bypass lebih awal |
 | `POST /broadcasting/auth` | Otorisasi channel Reverb (lihat bagian 3) |
@@ -108,6 +108,15 @@ APK ≥ 0.6.3: hanya latar & garis yang transparan (angka tetap pekat), berlaku 
 
 **`pengaturan.warna_timer`** (`#RRGGBB`, APK ≥ 0.6.4): warna angka timer saat waktu masih banyak
 (putih/hijau/biru/tosca/kuning dari admin). Sisa ≤ `peringatan_menit` selalu merah; waktu pilih game biru.
+
+**`pengaturan.info_teknis`** (bool, bawaan `true`, APK ≥ 0.6.5): baris kecil di bawah timer
+`v0.6.5 · ●▸L 12ms · ●C 85ms` — versi APK + respon ke server lokal (L) & cloud (C); `▸` = server yang dipakai,
+titik hijau ≤ 300 ms, kuning lebih lambat, merah `putus`. C tidak tampil bila server cloud tidak diatur.
+Cara mengukur (tanpa beban tambahan berarti):
+- server yang dipakai: lama polling `GET /status` rutin (tanpa permintaan tambahan);
+- cloud saat memakai lokal: `GET /api/ping` (tanpa token, tanpa data) tiap 5 menit;
+- lokal saat memakai cloud: cek kembali-ke-lokal yang sudah ada tiap 2 menit.
+Nilai yang sama dikirim di heartbeat → Admin → Perangkat TV kolom "Respon server".
 
 **Peringatan sisa waktu** (APK ≥ 0.5.2): saat sisa ≤ `peringatan_menit` timer di pojok berubah merah (ukuran tetap kecil);
 tepat di `peringatan_menit` & 1 menit timer berkedip 6 detik + bunyi beep (bila `suara_aktif`). Tidak ada banner

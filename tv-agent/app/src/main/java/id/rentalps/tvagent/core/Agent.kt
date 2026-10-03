@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -65,6 +66,9 @@ data class Keadaan(
     val server: String = "lokal",
     /** Pindah ke HDMI gagal: tampilkan layar TV Agent + pilihan input, bukan aplikasi lain */
     val hdmiGagal: Boolean = false,
+    /** Respon ke server (ms): -1 = tidak terjangkau, null = belum diukur / cloud tidak diatur */
+    val pingLokalMs: Long? = null,
+    val pingCloudMs: Long? = null,
 )
 
 /**
@@ -204,6 +208,7 @@ class Agent(private val ctx: Context) {
         launch { loopHeartbeat() }
         launch { loopUpdate() }
         launch { loopKembaliKeLokal() }
+        launch { loopPingCloud() }
 
         while (isActive) {
             val jeda = ambilStatus()
@@ -216,8 +221,12 @@ class Agent(private val ctx: Context) {
     /** Return jeda polling berikutnya (ms) */
     private suspend fun ambilStatus(): Long {
         return try {
+            // Respon polling rutin = ping ke server yang dipakai (tanpa permintaan tambahan)
+            val mulai = System.nanoTime()
             val (status, mentah) = api.status()
+            val ms = (System.nanoTime() - mulai) / 1_000_000
             terapkanStatus(status, mentah)
+            catatPing(simpan.serverDipakai(), ms)
             gagalBeruntun = 0
             // QRIS sedang ditampilkan: cek lebih sering supaya TV terbuka beberapa detik setelah pelanggan bayar
             if (status.bayarMandiri?.tagihan != null) 4_000L else status.pollDetik.coerceIn(5, 120) * 1000L
@@ -242,6 +251,7 @@ class Agent(private val ctx: Context) {
     private suspend fun gagal(pesan: String): Long {
         gagalBeruntun++
         _keadaan.update { it.copy(offline = true, pesan = pesan) }
+        catatPing(simpan.serverDipakai(), -1)
 
         if (gagalBeruntun >= 3 && pindahServer()) {
             gagalBeruntun = 0
@@ -260,7 +270,12 @@ class Agent(private val ctx: Context) {
         }
         // TV yang dipasangkan sebelum ada failover: server yang pertama menjawab dianggap server pairing
         if (simpan.serverPairing == null) simpan.serverPairing = simpan.serverDipakai()
-        _keadaan.update { it.copy(status = status, offline = false, pesan = null, server = labelServer(simpan.serverDipakai())) }
+        _keadaan.update {
+            it.copy(
+                status = status, offline = false, pesan = null, server = labelServer(simpan.serverDipakai()),
+                pingCloudMs = if (simpan.serverCloud == null) null else it.pingCloudMs,
+            )
+        }
         realtime.pastikan(status.realtime)
         status.perintah.forEach { jalankanPerintah(it) } // cadangan jika websocket putus
 
@@ -278,11 +293,13 @@ class Agent(private val ctx: Context) {
     private fun daftarServer(): List<String> =
         listOfNotNull(simpan.serverLokal, simpan.serverCloud, simpan.serverUrl).map { it.trimEnd('/') }.distinct()
 
-    fun labelServer(url: String?): String = when {
-        url == null -> "-"
-        url == simpan.serverCloud -> "cloud"
-        url == simpan.serverLokal || url == simpan.serverUrl -> "lokal"
-        else -> "lain"
+    fun labelServer(url: String?): String {
+        val u = url?.trimEnd('/') ?: return "-"
+        return when (u) {
+            simpan.serverCloud?.trimEnd('/') -> "cloud"
+            simpan.serverLokal?.trimEnd('/'), simpan.serverUrl?.trimEnd('/') -> "lokal"
+            else -> "lain"
+        }
     }
 
     private fun bolehDicabutOleh(url: String?): Boolean {
@@ -295,13 +312,17 @@ class Agent(private val ctx: Context) {
         val aktif = simpan.serverDipakai()
         for (kandidat in daftarServer().filter { it != aktif }) {
             try {
+                val mulai = System.nanoTime()
                 val (status, mentah) = api.statusDari(kandidat)
+                val ms = (System.nanoTime() - mulai) / 1_000_000
                 Log.i(TAG, "Failover: $aktif -> $kandidat (${labelServer(kandidat)})")
                 simpan.serverAktif = kandidat
                 terapkanStatus(status, mentah)
+                catatPing(kandidat, ms)
                 return true
             } catch (e: Exception) {
                 Log.w(TAG, "Failover: $kandidat tidak bisa dipakai (${e.message})")
+                catatPing(kandidat, -1)
             }
         }
         return false
@@ -315,14 +336,47 @@ class Agent(private val ctx: Context) {
             if (simpan.serverDipakai() == lokal) continue
 
             try {
+                val mulai = System.nanoTime()
                 val (status, mentah) = api.statusDari(lokal)
+                val ms = (System.nanoTime() - mulai) / 1_000_000
                 Log.i(TAG, "Server lokal hidup lagi, kembali ke $lokal")
                 simpan.serverAktif = lokal
                 gagalBeruntun = 0
                 terapkanStatus(status, mentah)
+                catatPing(lokal, ms)
             } catch (e: Exception) {
                 // masih mati, tetap di cloud
+                catatPing(lokal, -1)
             }
+        }
+    }
+
+    /**
+     * Saat memakai server lokal: cek server cloud tiap 5 menit lewat GET /api/ping (ringan, tanpa token).
+     * Saat memakai cloud, ping cloud diukur dari polling rutin & lokal dari [loopKembaliKeLokal].
+     */
+    private suspend fun loopPingCloud() {
+        delay(15_000)
+        while (true) {
+            val cloud = simpan.serverCloud?.trimEnd('/')
+            if (cloud == null) {
+                _keadaan.update { it.copy(pingCloudMs = null) }
+            } else if (simpan.serverDipakai()?.trimEnd('/') != cloud) {
+                val ms = try { api.ping(cloud) } catch (e: Exception) { -1L }
+                catatPing(cloud, ms)
+            }
+            delay(INTERVAL_PING_CLOUD_MS)
+        }
+    }
+
+    /** Simpan respon (ms, -1 = tidak terjangkau) untuk baris info di timer & laporan heartbeat */
+    private fun catatPing(url: String?, ms: Long) {
+        if (url == null) return
+        val nilai = if (ms < 0) -1L else ms.coerceAtMost(60_000)
+        if (labelServer(url.trimEnd('/')) == "cloud") {
+            _keadaan.update { it.copy(pingCloudMs = nilai) }
+        } else {
+            _keadaan.update { it.copy(pingLokalMs = nilai) }
         }
     }
 
@@ -406,6 +460,11 @@ class Agent(private val ctx: Context) {
                     // "tutup" = aplikasi ditutup staf/kasir (TV bebas sampai Lock); ditampilkan di panel TV kasir
                     val tertutup = (ctx.applicationContext as id.rentalps.tvagent.AgentApp).tertutup.value
                     put("layar", JsonPrimitive(if (tertutup) "tutup" else _keadaan.value.layar))
+                    // Respon ke server lokal & cloud (ms, -1 = tidak terjangkau) → Admin → Perangkat TV
+                    val k = _keadaan.value
+                    put("ping_lokal_ms", k.pingLokalMs?.let { JsonPrimitive(it) } ?: JsonNull)
+                    put("ping_cloud_ms", k.pingCloudMs?.let { JsonPrimitive(it) } ?: JsonNull)
+                    put("server_dipakai", JsonPrimitive(if (k.server == "cloud") "cloud" else "lokal"))
                     runCatching {
                         put("volume", JsonPrimitive(Remote.volumePersen(ctx)))
                         put("senyap", JsonPrimitive(Remote.senyap(ctx)))
@@ -653,6 +712,9 @@ class Agent(private val ctx: Context) {
 
     companion object {
         const val TAG = "TvAgent"
+
+        /** Cek ringan server cloud (cadangan) saat memakai server lokal */
+        const val INTERVAL_PING_CLOUD_MS = 5 * 60 * 1000L
 
         /** Tampilan yang menutup layar (pelanggan tidak bisa main) */
         val LAYAR_TERKUNCI = setOf("kunci", "habis", "menunggu_bayar", "servis", "belum_ada_unit", "jeda")

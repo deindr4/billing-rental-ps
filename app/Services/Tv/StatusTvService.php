@@ -296,6 +296,8 @@ final class StatusTvService
             'ukuran_timer' => in_array($u = Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId), ['kecil', 'sedang', 'besar'], true) ? $u : 'sedang',
             // Warna angka timer saat waktu masih banyak (hampir habis tetap merah) (APK >= 0.6.4)
             'warna_timer' => self::WARNA_TIMER[Pengaturan::ambil('tv.warna_timer', 'putih', $cabangId)] ?? self::WARNA_TIMER['putih'],
+            // Baris kecil di bawah timer: versi APK + respon ke server lokal/cloud (APK >= 0.6.5)
+            'info_teknis' => (bool) Pengaturan::ambil('tv.info_teknis', true, $cabangId),
             'durasi_bypass_menit' => $this->durasiBypass($perangkat, $unit),
             'bypass_maks_menit' => $this->bypassMaks($cabangId),
             'bypass_pilihan' => $this->pilihanBypass($perangkat, $unit),

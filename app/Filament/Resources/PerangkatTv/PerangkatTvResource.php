@@ -76,6 +76,13 @@ class PerangkatTvResource extends Resource
                     ->label('Tampilan')
                     ->placeholder('-')
                     ->formatStateUsing(fn (?string $state) => $state ? str_replace('_', ' ', ucfirst($state)) : null),
+                TextColumn::make('ping')
+                    ->label('Respon server')
+                    ->placeholder('-')
+                    ->state(fn (PerangkatTv $r) => self::teksPing($r))
+                    ->color(fn (PerangkatTv $r) => self::warnaPing($r->server_dipakai === 'cloud' ? $r->ping_cloud_ms : $r->ping_lokal_ms))
+                    ->description(fn (PerangkatTv $r) => $r->server_dipakai ? 'Memakai server '.$r->server_dipakai : null)
+                    ->tooltip('Waktu respon TV ke server lokal (L) & cloud (C). Cloud dicek tiap 5 menit. APK TV ≥ 0.6.5.'),
                 TextColumn::make('terakhir_online')
                     ->label('Terakhir terlihat')
                     ->since()
@@ -213,6 +220,36 @@ class PerangkatTvResource extends Resource
     public static function perluUpdate(PerangkatTv $r): bool
     {
         return $r->status === PerangkatTv::STATUS_AKTIF && self::versiTerbaru() && $r->versi_app !== self::versiTerbaru();
+    }
+
+    /** "L 12 ms · C 85 ms" (L putus = tidak terjangkau). Kosong untuk TV offline / APK < 0.6.5 (angka lama menyesatkan). */
+    public static function teksPing(PerangkatTv $r): ?string
+    {
+        if (! $r->isOnline() || ($r->ping_lokal_ms === null && $r->ping_cloud_ms === null)) {
+            return null;
+        }
+
+        $teks = fn (?int $ms) => match (true) {
+            $ms === null => null,
+            $ms < 0 => 'putus',
+            default => $ms.' ms',
+        };
+
+        return collect(['L' => $teks($r->ping_lokal_ms), 'C' => $teks($r->ping_cloud_ms)])
+            ->filter()
+            ->map(fn ($v, $k) => "{$k} {$v}")
+            ->implode(' · ');
+    }
+
+    /** Sama dengan titik di TV: ≤ 300 ms hijau, lebih lambat kuning, tidak terjangkau merah */
+    public static function warnaPing(?int $ms): string
+    {
+        return match (true) {
+            $ms === null => 'gray',
+            $ms < 0 => 'danger',
+            $ms <= 300 => 'success',
+            default => 'warning',
+        };
     }
 
     public static function keteranganPush(): string

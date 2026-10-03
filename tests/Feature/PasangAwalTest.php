@@ -28,6 +28,8 @@ class PasangAwalTest extends TestCase
         ];
 
         $this->artisan('pasang:awal', $opsi)->assertSuccessful();
+        // Pasang ulang dengan password & PIN berbeda (percobaan pertama gagal di tengah): isian terakhir yang berlaku
+        $this->artisan('pasang:awal', ['--owner-password' => 'passwordLama1', '--pin' => '1111'] + $opsi)->assertSuccessful();
         $this->artisan('pasang:awal', $opsi)->assertSuccessful(); // ulang: tidak dobel
 
         $this->assertSame(1, Tenant::count());

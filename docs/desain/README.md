@@ -38,4 +38,6 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 
 - Nama brand di desain ("CYBER PS", "Delta"/"Cyber Lounge") hanya contoh — aplikasi memakai nama tenant & logo dari Admin → Tampilan.
 - Angka di desain adalah data contoh.
+- Tambahan di luar desain — timer melayang TV (APK 0.6.5): baris info teknis kecil & redup di bawah angka
+  (`v0.6.5 · ●L 12ms · ●C 85ms`, titik hijau/kuning/merah), bisa dimatikan di Admin → Pengaturan Operasional.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

@@ -456,6 +456,31 @@ class TvAgentApiTest extends TestCase
         $this->assertNotNull($perangkat->diagnostik_pada);
     }
 
+    public function test_heartbeat_menyimpan_ping_server_dan_info_teknis_bisa_dimatikan(): void
+    {
+        $token = $this->pasangkanTv();
+
+        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengaturan.info_teknis', true);
+
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['ping_lokal_ms' => 12, 'ping_cloud_ms' => -1, 'server_dipakai' => 'lokal'])->assertOk();
+        $tv = PerangkatTv::withoutGlobalScopes()->firstOrFail();
+        $this->assertSame([12, -1, 'lokal'], [$tv->ping_lokal_ms, $tv->ping_cloud_ms, $tv->server_dipakai]);
+        $this->assertSame('L 12 ms · C putus', PerangkatTvResource::teksPing($tv));
+
+        // Cloud dikosongkan di admin: TV mengirim null -> ikut dikosongkan
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['ping_lokal_ms' => 15, 'ping_cloud_ms' => null, 'server_dipakai' => 'lokal'])->assertOk();
+        $this->assertNull($tv->fresh()->ping_cloud_ms);
+
+        // APK lama tidak mengirim ping: nilai terakhir tetap
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['layar' => 'kunci'])->assertOk();
+        $this->assertSame(15, $tv->fresh()->ping_lokal_ms);
+
+        $this->withToken($token)->postJson('/api/tv/heartbeat', ['ping_lokal_ms' => 99999])->assertUnprocessable();
+
+        Pengaturan::simpan('tv.info_teknis', false, $tv->cabang_id);
+        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengaturan.info_teknis', false);
+    }
+
     public function test_halaman_apk_publik_mengunduh_rilis_terbaru(): void
     {
         Storage::fake('local');

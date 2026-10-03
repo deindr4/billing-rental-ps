@@ -8,11 +8,16 @@ import android.graphics.drawable.GradientDrawable
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import android.widget.LinearLayout
 import android.widget.TextView
+import id.rentalps.tvagent.BuildConfig
 import id.rentalps.tvagent.core.Jam
 import id.rentalps.tvagent.core.Keadaan
 
@@ -38,6 +43,8 @@ class OverlayTimer(private val ctx: Context) {
     private val warnaBiru = Color.parseColor("#38BDF8")
     private val warnaTeks = Color.parseColor("#E6EDF5")
     private val warnaRedup = Color.parseColor("#7F90A6")
+    private val warnaHijau = Color.parseColor("#4ADE80")
+    private val warnaKuning = Color.parseColor("#FACC15")
 
     private val judul = TextView(ctx).apply {
         typeface = Typeface.MONOSPACE
@@ -53,6 +60,14 @@ class OverlayTimer(private val ctx: Context) {
         setShadowLayer(6f, 0f, 2f, Color.argb(220, 0, 0, 0))
     }
 
+    /** Info teknis: "v0.6.5 · ●L 12ms · ●C 85ms" — kecil & redup, server yang dipakai ditandai ▸ */
+    private val info = TextView(ctx).apply {
+        typeface = Typeface.MONOSPACE
+        setTextSize(TypedValue.COMPLEX_UNIT_SP, 7f)
+        setShadowLayer(3f, 0f, 1f, Color.argb(200, 0, 0, 0))
+        visibility = View.GONE
+    }
+
     private val latar = GradientDrawable().apply {
         cornerRadius = 14f
         setStroke(2, warnaGaris)
@@ -64,6 +79,7 @@ class OverlayTimer(private val ctx: Context) {
         setPadding(30, 16, 30, 18)
         addView(judul)
         addView(waktu)
+        addView(info)
     }
 
     private val detik = object : Runnable {
@@ -175,8 +191,48 @@ class OverlayTimer(private val ctx: Context) {
         waktu.setTextColor(if (hampir) warnaMerah else if (pilihGame) warnaBiru else warnaNormalTeks)
         judul.setTextColor(if (hampir) warnaMerah else warnaRedup)
 
+        gambarInfo(k)
+
         // Kedip peringatan: seluruh timer meredup sesaat
         kotak.alpha = if (redup) 0.2f else 1f
+    }
+
+    private fun gambarInfo(k: Keadaan) {
+        if (k.status?.pengaturan?.infoTeknis != true) {
+            info.visibility = View.GONE
+            return
+        }
+        info.visibility = View.VISIBLE
+
+        val teks = SpannableStringBuilder("v${BuildConfig.VERSION_NAME}")
+        fun server(label: String, ms: Long?, dipakai: Boolean) {
+            teks.append(" · ")
+            val awal = teks.length
+            teks.append("●")
+            teks.setSpan(ForegroundColorSpan(warnaPing(ms)), awal, teks.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            teks.append(if (dipakai) "▸$label " else "$label ")
+            teks.append(
+                when {
+                    ms == null -> "…"
+                    ms < 0 -> "putus"
+                    else -> "${ms}ms"
+                }
+            )
+        }
+        server("L", k.pingLokalMs, k.server != "cloud")
+        // Cloud tidak diatur di admin: bagian C tidak ditampilkan
+        if (k.pingCloudMs != null || k.server == "cloud") server("C", k.pingCloudMs, k.server == "cloud")
+
+        info.text = teks
+        info.setTextColor(warnaRedup)
+    }
+
+    /** ≤ 300 ms hijau, lebih lambat kuning, tidak terjangkau merah (sama dengan Admin → Perangkat TV) */
+    private fun warnaPing(ms: Long?): Int = when {
+        ms == null -> warnaRedup
+        ms < 0 -> warnaMerah
+        ms <= 300 -> warnaHijau
+        else -> warnaKuning
     }
 
     private fun denganAlpha(warna: Int, alpha: Float): Int =
@@ -195,6 +251,7 @@ class OverlayTimer(private val ctx: Context) {
         }
         judul.setTextSize(TypedValue.COMPLEX_UNIT_SP, judulSp)
         waktu.setTextSize(TypedValue.COMPLEX_UNIT_SP, waktuSp)
+        info.setTextSize(TypedValue.COMPLEX_UNIT_SP, judulSp * 0.75f)
         kotak.setPadding(padH.toInt(), padV.toInt(), padH.toInt(), (padV + 2).toInt())
     }
 

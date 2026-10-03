@@ -99,6 +99,16 @@ class PasangAwal extends Command
 
             $owner = User::withoutGlobalScopes()->where('email', $email)->first();
 
+            if ($owner && ! $owner->isSuperAdmin()) {
+                // Pasang ulang di atas data lama (mis. percobaan pertama gagal di tengah): password & PIN dari wizard
+                // terakhir yang berlaku — dulu tetap password lama, owner tidak bisa login.
+                $owner->forceFill([
+                    'password' => Hash::make($password),
+                    'pin' => $pin !== '' ? Hash::make($pin) : $owner->pin,
+                    'is_active' => true,
+                ])->save();
+            }
+
             if (! $owner) {
                 $owner = new User;
                 $owner->forceFill([
