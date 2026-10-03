@@ -85,3 +85,5 @@ Hasil: `installer\keluaran\BillingPS-cloud-<versi>.tar.gz` (aplikasi + `vendor` 
 - Lihat `C:\BillingPS\logs\pasang-*.log` (password tidak ditulis ke log).
 - Port web dipakai program lain → jalankan installer lagi, pilih port lain (mis. 8000).
 - Perbaiki masalahnya lalu jalankan installer lagi: langkah yang sudah berhasil (database, `.env`) tidak diulang.
+- `nssm set BillingPS-Web AppParameters gagal` (installer 2026.10.03): bug PowerShell 5.1 membuang argumen kosong.
+  Sudah diperbaiki sejak build 2026.10.04 — jalankan installer baru di atas pemasangan yang gagal.

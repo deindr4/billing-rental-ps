@@ -124,7 +124,8 @@ function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string]
         Nssm @('remove', $Nama, 'confirm')
     }
     Nssm @('install', $Nama, $Exe)
-    Nssm @('set', $Nama, 'AppParameters', $Argumen)
+    # PowerShell 5.1 membuang argumen string kosong ke program native → nssm menolak "set ... AppParameters" tanpa nilai
+    if ($Argumen) { Nssm @('set', $Nama, 'AppParameters', $Argumen) }
     Nssm @('set', $Nama, 'AppDirectory', $Folder)
     Nssm @('set', $Nama, 'DisplayName', $Judul)
     Nssm @('set', $Nama, 'Description', 'Billing Rental PS')

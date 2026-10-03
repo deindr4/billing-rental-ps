@@ -5,6 +5,13 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (installer Windows - perbaikan)
+-----------------------------------------------------------------------------
+- Installer gagal di langkah layanan Web: "nssm set BillingPS-Web AppParameters gagal". Penyebab: PowerShell 5.1
+  membuang argumen string kosong (Apache tidak butuh parameter). Kini AppParameters hanya diisi bila ada.
+  Jalankan installer baru di atas pemasangan yang gagal (data & .env yang sudah dibuat dipakai ulang).
+
+
 2026-10-03 (APK 0.6.4 - warna timer TV)
 -----------------------------------------------------------------------------
 - Admin -> Pengaturan Operasional: "Warna angka timer di TV" (Putih / Hijau / Biru / Tosca / Kuning) untuk saat
