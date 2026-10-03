@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">TV Agent</string>
+    <string name="kunci_remote_label">TV Agent (kunci remote)</string>
+    <string name="kunci_remote_keterangan">Saat sesi main, hanya tombol Volume, Home dan OK yang diteruskan ke PlayStation. Tombol lain ditahan supaya remote TV lain tidak menggerakkan menu PS. Tidak membaca isi layar.</string>
 </resources>

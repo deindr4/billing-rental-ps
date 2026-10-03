@@ -20,7 +20,7 @@ final class TvRemoteService
 {
     public const PERINTAH = [
         'layar_mati' => 'Matikan layar TV',
-        'layar_nyala' => 'Nyalakan layar TV',
+        'layar_nyala' => 'Bangunkan TV',
         'volume_naik' => 'Volume naik',
         'volume_turun' => 'Volume turun',
         'volume_senyap' => 'Senyap / bunyikan',
@@ -65,6 +65,16 @@ final class TvRemoteService
 
     private const SIMPAN_DETIK = 120;
 
+    /** Bangunkan: TV standby baru mengambil perintah saat jaringannya aktif lagi, jadi disimpan lebih lama (APK >= 0.6.6) */
+    private const SIMPAN_BANGUN_DETIK = 600;
+
+    private static function masihBerlaku(array $p): bool
+    {
+        $detik = $p['perintah'] === 'layar_nyala' ? self::SIMPAN_BANGUN_DETIK : self::SIMPAN_DETIK;
+
+        return $p['waktu_ms'] > now()->subSeconds($detik)->getTimestampMs();
+    }
+
     /** Pemberitahuan di tengah layar ke satu / banyak TV. Return jumlah TV yang dikirimi. */
     public function pemberitahuan(iterable $perangkat, array $isi, User $user): int
     {
@@ -100,13 +110,13 @@ final class TvRemoteService
 
         $kunci = self::kunci($perangkat->id);
         $antre = collect(Cache::get($kunci, []))
-            ->filter(fn ($p) => $p['waktu_ms'] > now()->subSeconds(self::SIMPAN_DETIK)->getTimestampMs())
+            ->filter(fn ($p) => self::masihBerlaku($p))
             ->push($data)
             ->take(-10)
             ->values()
             ->all();
 
-        Cache::put($kunci, $antre, self::SIMPAN_DETIK);
+        Cache::put($kunci, $antre, self::SIMPAN_BANGUN_DETIK);
 
         PerintahTv::dispatch($perangkat->id, $data);
 
@@ -125,9 +135,7 @@ final class TvRemoteService
     /** Perintah yang belum kedaluwarsa, disertakan di GET /api/tv/status */
     public static function antrean(string $perangkatId): array
     {
-        $batas = now()->subSeconds(self::SIMPAN_DETIK)->getTimestampMs();
-
-        return array_values(array_filter(Cache::get(self::kunci($perangkatId), []), fn ($p) => $p['waktu_ms'] > $batas));
+        return array_values(array_filter(Cache::get(self::kunci($perangkatId), []), fn ($p) => self::masihBerlaku($p)));
     }
 
     private static function kunci(string $perangkatId): string

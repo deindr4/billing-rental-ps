@@ -90,6 +90,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['tv_ukuran_timer'] = $cabangId ? (string) Pengaturan::ambil('tv.ukuran_timer', 'sedang', $cabangId) : 'sedang';
         $isi['tv_warna_timer'] = $cabangId ? (string) Pengaturan::ambil('tv.warna_timer', 'putih', $cabangId) : 'putih';
         $isi['tv_info_teknis'] = $cabangId ? (bool) Pengaturan::ambil('tv.info_teknis', true, $cabangId) : true;
+        $isi['tv_kunci_remote'] = $cabangId ? (bool) Pengaturan::ambil('tv.kunci_remote', true, $cabangId) : true;
         $isi['tv_pengumuman'] = $cabangId ? (string) Pengaturan::ambil('tv.pengumuman', '', $cabangId) : '';
         $isi['tv_pesan_cepat'] = implode("\n", PemberitahuanTv::pesanCepat($cabangId));
         $isi['tv_aplikasi'] = StatusTvService::aplikasiDiizinkan($cabangId);
@@ -214,6 +215,12 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->label('Info teknis di bawah timer TV')
                             ->helperText('Baris kecil: versi APK + respon ke server lokal (L) & cloud (C) dalam ms. Hijau lancar, kuning lambat, '
                                 .'merah tidak terjangkau. Matikan jika tidak ingin terlihat pelanggan. APK TV ≥ 0.6.5.')
+                            ->inline(false),
+                        Toggle::make('tv_kunci_remote')
+                            ->label('Kunci remote saat main')
+                            ->helperText('Saat PS tampil hanya Volume, Home & OK yang diteruskan; panah, Back, angka, dll. ditahan '
+                                .'(remote TV sebelah tidak ikut menggerakkan menu PS). Butuh "Izin kunci remote" di menu staf tiap TV. '
+                                .'Tombol yang ditahan tercatat di Diagnostik. APK TV ≥ 0.6.6.')
                             ->inline(false),
                         TextInput::make('pilih_game_menit')
                             ->label('Waktu pilih game (menit)')
@@ -389,6 +396,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         Pengaturan::simpan('tv.suara_aktif', (bool) ($data['tv_suara_aktif'] ?? true), $cabangId);
         Pengaturan::simpan('tv.ukuran_timer', in_array($data['tv_ukuran_timer'] ?? '', ['kecil', 'sedang', 'besar'], true) ? $data['tv_ukuran_timer'] : 'sedang', $cabangId);
         Pengaturan::simpan('tv.info_teknis', (bool) ($data['tv_info_teknis'] ?? true), $cabangId);
+        Pengaturan::simpan('tv.kunci_remote', (bool) ($data['tv_kunci_remote'] ?? true), $cabangId);
         Pengaturan::simpan('tv.warna_timer', isset(StatusTvService::WARNA_TIMER[$data['tv_warna_timer'] ?? '']) ? $data['tv_warna_timer'] : 'putih', $cabangId);
         Pengaturan::simpan('server.url_lokal', StatusTvService::urlServer($data['server_lokal'] ?? null), $cabangId);
         Pengaturan::simpan('server.url_cloud', StatusTvService::urlServer($data['server_cloud'] ?? null), $cabangId);

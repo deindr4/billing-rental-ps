@@ -40,4 +40,6 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Angka di desain adalah data contoh.
 - Tambahan di luar desain — timer melayang TV (APK 0.6.5): baris info teknis kecil & redup di bawah angka
   (`v0.6.5 · ●L 12ms · ●C 85ms`, titik hijau/kuning/merah), bisa dimatikan di Admin → Pengaturan Operasional.
+- Tambahan di luar desain — kartu unit kasir: remote daya dua tombol terpisah, ikon matahari (`bangun`, hijau)
+  = Bangunkan TV dan ikon daya (oranye) = Matikan; TV offline/standby menampilkan "TV offline / standby" + Bangunkan.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

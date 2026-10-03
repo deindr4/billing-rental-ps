@@ -290,6 +290,22 @@ fun MenuStaf(agent: Agent, k: Keadaan, sudahPin: Boolean = false, onTutup: () ->
                             }.isSuccess
                             if (!ok) pesan = "Tidak tersedia; aktifkan lewat adb: dpm set-active-admin" to false
                         }
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        TombolTv("Izin kunci remote") {
+                            // Aksesibilitas: hanya Volume, Home & OK yang sampai ke PS saat main (service/KunciRemote.kt)
+                            if (id.rentalps.tvagent.service.KunciRemote.diizinkan(ctx)) {
+                                pesan = "Kunci remote sudah diizinkan" to true
+                                return@TombolTv
+                            }
+                            val ok = runCatching {
+                                (ctx.applicationContext as id.rentalps.tvagent.AgentApp).izinkanKeluar(60)
+                                ctx.startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+                            }.isSuccess
+                            pesan = if (ok) "Pilih \"TV Agent (kunci remote)\" lalu aktifkan" to true
+                            else "Menu Aksesibilitas tidak tersedia; aktifkan lewat adb (lihat panduan)" to false
+                        }
                         TombolTv("Kembali") { ke(Panel.Utama) }
                     }
                 }

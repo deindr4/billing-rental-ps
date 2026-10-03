@@ -298,6 +298,8 @@ final class StatusTvService
             'warna_timer' => self::WARNA_TIMER[Pengaturan::ambil('tv.warna_timer', 'putih', $cabangId)] ?? self::WARNA_TIMER['putih'],
             // Baris kecil di bawah timer: versi APK + respon ke server lokal/cloud (APK >= 0.6.5)
             'info_teknis' => (bool) Pengaturan::ambil('tv.info_teknis', true, $cabangId),
+            // Saat main hanya Volume, Home & OK yang diteruskan ke PS; butuh izin Aksesibilitas di TV (APK >= 0.6.6)
+            'kunci_remote' => (bool) Pengaturan::ambil('tv.kunci_remote', true, $cabangId),
             'durasi_bypass_menit' => $this->durasiBypass($perangkat, $unit),
             'bypass_maks_menit' => $this->bypassMaks($cabangId),
             'bypass_pilihan' => $this->pilihanBypass($perangkat, $unit),

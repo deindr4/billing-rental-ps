@@ -460,7 +460,9 @@ class TvAgentApiTest extends TestCase
     {
         $token = $this->pasangkanTv();
 
-        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengaturan.info_teknis', true);
+        $this->withToken($token)->getJson('/api/tv/status')
+            ->assertJsonPath('pengaturan.info_teknis', true)
+            ->assertJsonPath('pengaturan.kunci_remote', true);
 
         $this->withToken($token)->postJson('/api/tv/heartbeat', ['ping_lokal_ms' => 12, 'ping_cloud_ms' => -1, 'server_dipakai' => 'lokal'])->assertOk();
         $tv = PerangkatTv::withoutGlobalScopes()->firstOrFail();
@@ -478,7 +480,10 @@ class TvAgentApiTest extends TestCase
         $this->withToken($token)->postJson('/api/tv/heartbeat', ['ping_lokal_ms' => 99999])->assertUnprocessable();
 
         Pengaturan::simpan('tv.info_teknis', false, $tv->cabang_id);
-        $this->withToken($token)->getJson('/api/tv/status')->assertJsonPath('pengaturan.info_teknis', false);
+        Pengaturan::simpan('tv.kunci_remote', false, $tv->cabang_id);
+        $this->withToken($token)->getJson('/api/tv/status')
+            ->assertJsonPath('pengaturan.info_teknis', false)
+            ->assertJsonPath('pengaturan.kunci_remote', false);
     }
 
     public function test_halaman_apk_publik_mengunduh_rilis_terbaru(): void
@@ -617,6 +622,18 @@ class TvAgentApiTest extends TestCase
         $perintah = $this->withToken($token)->getJson('/api/tv/status')->json('perintah');
         $this->assertSame(['volume_naik', 'layar_mati'], array_column($perintah, 'perintah'));
         $this->assertSame(1, LogTv::withoutGlobalScopes()->where('jenis', 'perintah')->count());
+
+        // TV standby (offline): kartu unit tetap menampilkan tombol Bangunkan
+        PerangkatTv::withoutGlobalScopes()->update(['terakhir_online' => now()->subHour()]);
+        $this->actingAs($this->owner)->withSession(['cabang_id' => $cabang->id])
+            ->get(route('rental'))->assertOk()->assertSee('TV offline / standby')->assertSee('Bangunkan TV')->assertDontSee('Volume naik');
+
+        // Bangunkan disimpan 10 menit (TV standby baru mengambilnya saat jaringan aktif), perintah lain 2 menit
+        $this->aktifkanTenancy();
+        Livewire::actingAs($this->owner)->test(Rental::class)->call('perintahTv', $this->unit->id, 'layar_nyala');
+        $this->travel(5)->minutes();
+        $perintah = $this->withToken($token)->getJson('/api/tv/status')->json('perintah');
+        $this->assertSame(['layar_nyala'], array_column($perintah, 'perintah'));
     }
 
     public function test_input_hdmi_dipilih_di_tv_dan_bisa_diganti_admin(): void

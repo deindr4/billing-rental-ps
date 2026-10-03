@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (APK 0.6.6 - bangunkan TV, ukuran timer, kunci remote)
+-----------------------------------------------------------------------------
+- Kartu unit (Rental): tombol "Bangunkan TV" (matahari) & "Matikan" (daya) kini terpisah, tidak berganti-ganti.
+  TV standby/offline tetap menampilkan baris "TV offline / standby" + tombol Bangunkan (dulu baris remote hilang).
+- Perintah Bangunkan disimpan 10 menit untuk TV yang sedang standby (perintah lain tetap 2 menit).
+- Admin -> Pengaturan Operasional: "Kunci remote saat main" (bawaan menyala; butuh izin di tiap TV).
+  API TV: pengaturan.kunci_remote. Diagnostik: izin_kunci_remote, tombol_ditahan.
+
+
 2026-10-04 (APK 0.6.5 - info versi & ping di timer TV)
 -----------------------------------------------------------------------------
 - Admin -> Pengaturan Operasional: "Info teknis di bawah timer TV" (bawaan menyala). API TV: pengaturan.info_teknis.

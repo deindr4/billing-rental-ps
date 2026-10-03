@@ -386,7 +386,9 @@ class Agent(private val ctx: Context) {
         if (simpan.sudahDijalankan(p.id)) return
         simpan.tandaiDijalankan(p.id)
 
-        if (p.waktuMs > 0 && Jam.sekarang() - p.waktuMs > 120_000) return
+        // Bangunkan boleh terlambat sampai 10 menit: TV standby baru menerima perintah saat jaringannya aktif lagi
+        val batasMs = if (p.perintah == "layar_nyala") 600_000 else 120_000
+        if (p.waktuMs > 0 && Jam.sekarang() - p.waktuMs > batasMs) return
 
         val app = ctx.applicationContext as id.rentalps.tvagent.AgentApp
 

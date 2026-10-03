@@ -161,8 +161,19 @@
         @endif
     </div>
 
-    {{-- Remote TV (hanya jika TV Agent terhubung & online) --}}
-    @if ($tv && $tv->isOnline())
+    {{-- Remote TV. TV standby berhenti melapor (tampak offline): tombol Bangunkan tetap ada --}}
+    @if ($tv && ! $tv->isOnline())
+        <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-2">
+            <span class="text-xs text-muted">TV offline / standby</span>
+            @if ($bisaRemote)
+                <button type="button" title="Bangunkan TV"
+                        wire:click="perintahTv('{{ $unit->id }}', 'layar_nyala')"
+                        class="btn btn-remote text-st-kosong">
+                    <x-ikon name="bangun" size="16" />
+                </button>
+            @endif
+        </div>
+    @elseif ($tv)
         @php
             $layarMati = $tv->layar_hidup === false;
             $bisaReboot = (bool) ($tv->diagnostik['device_owner'] ?? false);
@@ -170,21 +181,19 @@
         {{-- Dikelompokkan: daya | volume | pemberitahuan, bypass & restart (jarak antar kelompok lebih lebar) --}}
         <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-1.5 min-[380px]:gap-2">
             @if ($bisaRemote)
-                @if ($layarMati)
-                    <button type="button" title="Nyalakan layar TV"
-                            wire:click="perintahTv('{{ $unit->id }}', 'layar_nyala')"
-                            class="btn btn-remote text-st-kosong">
-                        <x-ikon name="daya" size="16" />
-                    </button>
-                @else
-                    <x-confirm-button action="perintahTv" :params="[$unit->id, 'layar_mati']"
-                                      title="Matikan layar {{ $unit->nama }}?"
-                                      text="TV masuk mode standby. Nyalakan lagi dari tombol yang sama atau remote TV."
-                                      confirm-text="Matikan"
-                                      class="btn-remote text-ik-oranye" title="Matikan layar TV">
-                        <x-ikon name="daya" size="16" />
-                    </x-confirm-button>
-                @endif
+                {{-- Dua tombol terpisah (bukan satu tombol yang berganti) supaya jelas: matahari = bangunkan, daya = matikan --}}
+                <button type="button" title="Bangunkan TV"
+                        wire:click="perintahTv('{{ $unit->id }}', 'layar_nyala')"
+                        @class(['btn btn-remote', 'text-st-kosong bg-st-kosong/15' => $layarMati, 'text-st-kosong' => ! $layarMati])>
+                    <x-ikon name="bangun" size="16" />
+                </button>
+                <x-confirm-button action="perintahTv" :params="[$unit->id, 'layar_mati']"
+                                  title="Matikan layar {{ $unit->nama }}?"
+                                  text="TV masuk mode standby. Bangunkan lagi dari tombol matahari atau remote TV."
+                                  confirm-text="Matikan"
+                                  class="btn-remote text-ik-oranye" title="Matikan layar TV">
+                    <x-ikon name="daya" size="16" />
+                </x-confirm-button>
             @endif
 
             <button type="button" title="Volume turun" wire:click="perintahTv('{{ $unit->id }}', 'volume_turun')"

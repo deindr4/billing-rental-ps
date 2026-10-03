@@ -202,6 +202,8 @@ data class Pengaturan(
     @SerialName("warna_timer") val warnaTimer: String? = null,
     /** Baris kecil di bawah timer: versi APK + respon ke server lokal/cloud (server lama tidak mengirim = sembunyi) */
     @SerialName("info_teknis") val infoTeknis: Boolean = false,
+    /** Saat main hanya Volume, Home & OK yang diteruskan ke PS (butuh izin Aksesibilitas, APK >= 0.6.6) */
+    @SerialName("kunci_remote") val kunciRemote: Boolean = false,
     @SerialName("durasi_bypass_menit") val durasiBypassMenit: Int = 15,
     @SerialName("bypass_maks_menit") val bypassMaksMenit: Int = 120,
     @SerialName("bypass_pilihan") val bypassPilihan: List<Int> = listOf(15, 30, 60),

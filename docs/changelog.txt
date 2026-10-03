@@ -6,7 +6,21 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
-0.6.5 (kode 16) - 2026-10-04                                   [tag apk-0.6.5]
+0.6.6 (kode 17) - 2026-10-04                                   [tag apk-0.6.6]
+-----------------------------------------------------------------------------
+- Bangunkan TV: perintah "layar_nyala" diterima sampai 10 menit (dulu 2 menit), karena TV standby baru
+  mengambil perintah saat jaringannya aktif lagi. Kasir: tombol matahari "Bangunkan TV" di kartu unit.
+- Ukuran timer: "Sedang" kini seukuran "Kecil" lama; "Kecil" diperkecil lagi. "Besar" tetap.
+- Kunci remote saat main (baru): saat PS tampil hanya Volume, Home & OK yang diteruskan; panah, Back, angka, dll.
+  ditahan supaya remote TV sebelah (TV merek sama = kode IR sama) tidak menggerakkan menu PS lewat HDMI-CEC.
+  Butuh izin Aksesibilitas sekali per TV: Akses staf -> Pengaturan TV Agent -> "Izin kunci remote".
+  Tombol yang ditahan tercatat di Diagnostik ("Tombol remote yang ditahan saat main"): tercatat = sinyal remote;
+  PS tetap bergerak tanpa catatan = sumbernya stik PS (drift) / HDMI-CEC perangkat lain.
+  Admin -> Pengaturan Operasional -> "Kunci remote saat main" (bawaan menyala).
+  CATATAN: belum teruji dengan remote fisik (emulator tidak bisa mengirim tombol remote sungguhan).
+
+
+0.6.5 (kode 16) - 2026-10-04                                  [tag apk-0.6.5]
 -----------------------------------------------------------------------------
 - Baris info kecil di bawah timer: versi APK + respon ke server lokal (L) & cloud (C) dalam ms,
   contoh "v0.6.5 · ●▸L 12ms · ●C 85ms". ▸ = server yang sedang dipakai. Titik hijau <= 300 ms, kuning lambat,

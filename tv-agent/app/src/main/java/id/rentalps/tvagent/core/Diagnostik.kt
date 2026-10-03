@@ -40,6 +40,8 @@ object Diagnostik {
             put("device_admin", JsonPrimitive(Remote.deviceAdmin(ctx)))
             put("device_owner", JsonPrimitive(Remote.deviceOwner(ctx)))
             Remote.laporan?.let { put("remote_terakhir", JsonPrimitive(it)) }
+            put("izin_kunci_remote", JsonPrimitive(id.rentalps.tvagent.service.KunciRemote.diizinkan(ctx)))
+            id.rentalps.tvagent.service.KunciRemote.laporan()?.let { put("tombol_ditahan", JsonPrimitive(it)) }
             put("aplikasi_terpasang", JsonArray(AplikasiTv.daftarTerpasang(ctx).take(40).map { JsonPrimitive(it) }))
         }
     }

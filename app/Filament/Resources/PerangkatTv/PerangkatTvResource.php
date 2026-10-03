@@ -303,6 +303,8 @@ class PerangkatTvResource extends Resource
         'device_admin' => 'Izin matikan layar (Device admin)',
         'device_owner' => 'Bisa restart TV penuh (device owner)',
         'remote_terakhir' => 'Perintah remote terakhir',
+        'izin_kunci_remote' => 'Izin kunci remote (Aksesibilitas)',
+        'tombol_ditahan' => 'Tombol remote yang ditahan saat main',
     ];
 
     private static function tabelDiagnostik(array $diag): string

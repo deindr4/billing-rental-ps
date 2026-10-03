@@ -105,6 +105,13 @@ APK ≥ 0.6.3: hanya latar & garis yang transparan (angka tetap pekat), berlaku 
 (APK < 0.6.3 memakai 100% saat sisa waktu ≤ `peringatan_menit`.)
 
 **`pengaturan.ukuran_timer`** (`kecil` | `sedang` | `besar`, APK ≥ 0.6.3): ukuran timer melayang.
+APK ≥ 0.6.6: angka 13 / 17 / 32 sp (sedang = kecil lama, kecil diperkecil).
+
+**`pengaturan.kunci_remote`** (bool, bawaan `true`, APK ≥ 0.6.6): saat `layar` = `main` dan PS/HDMI di depan,
+layanan Aksesibilitas TV Agent menahan semua tombol remote kecuali Volume, Home & OK (juga tombol daya).
+Butuh izin Aksesibilitas di TV (menu staf → "Izin kunci remote", atau
+`adb shell settings put secure enabled_accessibility_services id.rentalps.tvagent/.service.KunciRemote`).
+Diagnostik: `izin_kunci_remote`, `tombol_ditahan` ("12 tombol ditahan, terakhir DPAD_UP 20:15:03").
 
 **`pengaturan.warna_timer`** (`#RRGGBB`, APK ≥ 0.6.4): warna angka timer saat waktu masih banyak
 (putih/hijau/biru/tosca/kuning dari admin). Sisa ≤ `peringatan_menit` selalu merah; waktu pilih game biru.
@@ -152,7 +159,7 @@ Jalankan **sekali per `id`**, abaikan yang `waktu_ms`-nya lebih dari 2 menit lal
 
 | perintah | Aksi di TV |
 |---|---|
-| `layar_mati` / `layar_nyala` | Matikan / nyalakan layar |
+| `layar_mati` / `layar_nyala` | Matikan / bangunkan layar. `layar_nyala` berlaku 10 menit (TV standby mengambilnya saat jaringan aktif lagi), perintah lain 2 menit |
 | `volume_naik` / `volume_turun` / `volume_senyap` | Volume |
 | `restart_aplikasi` / `restart_tv` | Restart TV Agent / reboot (reboot penuh hanya device owner) |
 | `kunci` | Lock dari kasir: batalkan izin keluar / status ditutup, tampilkan & kunci layar TV Agent (server sudah mengakhiri unlock). APK ≥ 0.5.0 |

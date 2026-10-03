@@ -245,13 +245,14 @@ class OverlayTimer(private val ctx: Context) {
         ukuranTerpasang = ukuran
 
         val (judulSp, waktuSp, padH, padV) = when (ukuran) {
-            "kecil" -> listOf(8f, 17f, 20f, 10f)
+            // 0.6.6: "kecil" lama (17sp) jadi sedang, kecil diperkecil lagi
+            "kecil" -> listOf(7f, 13f, 14f, 7f)
             "besar" -> listOf(12f, 32f, 38f, 22f)
-            else -> listOf(10f, 24f, 30f, 16f)
+            else -> listOf(8f, 17f, 20f, 10f)
         }
         judul.setTextSize(TypedValue.COMPLEX_UNIT_SP, judulSp)
         waktu.setTextSize(TypedValue.COMPLEX_UNIT_SP, waktuSp)
-        info.setTextSize(TypedValue.COMPLEX_UNIT_SP, judulSp * 0.75f)
+        info.setTextSize(TypedValue.COMPLEX_UNIT_SP, maxOf(6f, judulSp * 0.75f))
         kotak.setPadding(padH.toInt(), padV.toInt(), padH.toInt(), (padV + 2).toInt())
     }
 
