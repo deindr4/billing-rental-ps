@@ -26,7 +26,11 @@ Akun yang dibuat:
 Yang dipasang otomatis:
 
 - **Layanan Windows** (menyala sendiri saat PC dinyalakan): `BillingPS-Database`, `BillingPS-Web`,
-  `BillingPS-Realtime` (TV), `BillingPS-Antrean`, `BillingPS-Jadwal` (cek pembayaran QRIS, sync, backup harian).
+  `BillingPS-Realtime` (TV), `BillingPS-Antrean`, `BillingPS-Jadwal` (cek pembayaran QRIS, sync, backup harian),
+  `BillingPS-WhatsApp` (laporan & notifikasi WA; Node.js ikut dibundel — **tanpa npm install**).
+- **WhatsApp**: port (3001, atau 3002/3003/3011 bila terpakai) & token acak dibuat otomatis, ditulis ke `.env`
+  (`WA_SERVICE_URL`, `WA_SERVICE_TOKEN`). Hanya `127.0.0.1` (tidak dibuka di firewall). Tinggal login:
+  Admin → Pengaturan → **Notifikasi & Laporan** → scan QR dari HP WhatsApp. Sesi login di `data\whatsapp-sesi` (aman saat update).
 - **Firewall**: port web & realtime TV (8080) dibuka **hanya untuk jaringan lokal**.
 - Database dengan kata sandi acak (tersimpan di `C:\BillingPS\kelola\konfigurasi.json`, hanya Administrator).
 - APK TV terbaru terdaftar sebagai rilis → di TV buka `http://IP-PC/apk`.
@@ -36,7 +40,8 @@ Yang dipasang otomatis:
 | Folder | Isi |
 |---|---|
 | `app` | aplikasi (+ `.env`) |
-| `runtime` | php, apache, mariadb, nssm |
+| `runtime` | php, apache, mariadb, node, nssm |
+| `whatsapp` | layanan WhatsApp (Node + Baileys, `node_modules` siap pakai) |
 | `data` | **database, foto/logo, sesi, backup** — jangan dihapus |
 | `logs` | log pemasangan, apache, mariadb, layanan |
 | `kelola` | skrip pengelola & `konfigurasi.json` |
@@ -54,6 +59,7 @@ Pemeliharaan lain (cache, migrasi, trigger sync) ada di Admin → Pengaturan →
 Jalankan installer versi baru di PC yang sama. Wizard isian dilewati; otomatis:
 backup database → hentikan layanan → ganti program → migrasi database → pasang ulang trigger sync →
 daftarkan APK TV baru → nyalakan layanan. Data, `.env` & pengaturan tetap.
+Pemasangan lama tanpa WhatsApp otomatis mendapat layanan `BillingPS-WhatsApp` + isian `WA_SERVICE_*` di `.env`.
 
 ## Uninstall
 
@@ -68,7 +74,8 @@ powershell -ExecutionPolicy Bypass -File installer\build.ps1 -Versi 2026.10.01
 ```
 
 Hasil: `installer\keluaran\BillingPS-Setup-2026.10.01.exe`. Butuh: Inno Setup 6, Composer, Node.js (hanya untuk build aset),
-dan folder PHP 8.4 **Thread Safe** (lokasi di `installer\bahan.json`, bawaan dari Laragon).
+dan folder PHP 8.4 **Thread Safe** (lokasi di `installer\bahan.json`, bawaan dari Laragon), serta `node.exe`
+(Node 20.6+; lokasi `node` di `bahan.json`) + `whatsapp-service\node_modules` (bila belum ada: `npm ci --omit=dev`).
 Apache (Apache Lounge VS18), MariaDB, NSSM, VC++ redist & cacert diunduh sekali ke `installer\bahan\unduhan`
 (ganti versi lewat URL di `bahan.json`). Bangun APK TV dulu bila ingin ikut dibundel.
 

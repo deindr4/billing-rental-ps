@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (installer Windows - WhatsApp siap pakai)
+-----------------------------------------------------------------------------
+- Layanan WhatsApp kini ikut installer: node.exe + whatsapp-service + node_modules dibundel, dipasang sebagai
+  layanan Windows "BillingPS-WhatsApp" (menyala sendiri). Tidak perlu memasang Node / npm install di PC rental.
+- Port & token dibuat otomatis -> konfigurasi.json & .env (WA_SERVICE_URL, WA_SERVICE_TOKEN). Hanya 127.0.0.1.
+- Sesi login WA disimpan di data\whatsapp-sesi (tidak hilang saat update). whatsapp-service membaca FOLDER_SESI.
+- Update dari versi lama: layanan & isian .env ditambahkan otomatis oleh patch.
+- Setelah pasang/patch: Admin -> Pengaturan -> Notifikasi & Laporan -> scan QR dengan HP WhatsApp.
+
+
 2026-10-04 (APK 0.6.6 - bangunkan TV, ukuran timer, kunci remote)
 -----------------------------------------------------------------------------
 - Kartu unit (Rental): tombol "Bangunkan TV" (matahari) & "Matikan" (daya) kini terpisah, tidak berganti-ganti.

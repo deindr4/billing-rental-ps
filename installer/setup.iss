@@ -47,6 +47,7 @@ Name: "id"; MessagesFile: "Indonesian.isl"
 Source: "{#Staging}\app\*"; DestDir: "{app}\app"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Staging}\runtime\*"; DestDir: "{app}\runtime"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Staging}\kelola\*"; DestDir: "{app}\kelola"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#Staging}\whatsapp\*"; DestDir: "{app}\whatsapp"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#Staging}\apk\*"; DestDir: "{app}\apk"; Flags: ignoreversion
 Source: "{#Staging}\vc_redist.x64.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 

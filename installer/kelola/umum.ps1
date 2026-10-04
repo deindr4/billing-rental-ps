@@ -5,6 +5,7 @@
 #   <root>\data      mysql (database), storage (unggahan, sesi, backup), tmp
 #   <root>\logs      log pemasangan, apache, mariadb, layanan
 #   <root>\kelola    skrip ini + konfigurasi.json
+#   <root>\whatsapp  layanan WhatsApp (Node + Baileys, node.exe di runtime\node); sesi login di data\whatsapp-sesi
 
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
@@ -15,6 +16,8 @@ $Logs = Join-Path $Root 'logs'
 $Php = Join-Path $Runtime 'php\php.exe'
 $Nssm = Join-Path $Runtime 'nssm.exe'
 $FileKonfig = Join-Path $PSScriptRoot 'konfigurasi.json'
+$Node = Join-Path $Runtime 'node\node.exe'
+$WaFolder = Join-Path $Root 'whatsapp'
 
 # PATH untuk semua proses PHP/Apache: DLL PHP (intl, openssl, sodium) & Apache harus ketemu
 $PathRuntime = "$Runtime\php;$Runtime\apache\bin;$Runtime\mariadb\bin;$env:SystemRoot\System32;$env:SystemRoot"
@@ -24,7 +27,8 @@ $Layanan = @(
     @{ Nama = 'BillingPS-Web'; Judul = 'Billing PS - Web (Apache)' },
     @{ Nama = 'BillingPS-Realtime'; Judul = 'Billing PS - Realtime TV (Reverb)' },
     @{ Nama = 'BillingPS-Antrean'; Judul = 'Billing PS - Antrean tugas' },
-    @{ Nama = 'BillingPS-Jadwal'; Judul = 'Billing PS - Jadwal (pembayaran, sync, backup)' }
+    @{ Nama = 'BillingPS-Jadwal'; Judul = 'Billing PS - Jadwal (pembayaran, sync, backup)' },
+    @{ Nama = 'BillingPS-WhatsApp'; Judul = 'Billing PS - WhatsApp (laporan & notifikasi)' }
 )
 
 function Tulis([string] $Pesan) {
@@ -118,7 +122,7 @@ function Ada-Layanan([string] $Nama) {
 }
 
 # Daftarkan layanan Windows lewat NSSM (otomatis menyala saat PC dinyalakan, log dirotasi)
-function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string] $Argumen, [string] $Folder, [string[]] $Bergantung = @()) {
+function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string] $Argumen, [string] $Folder, [string[]] $Bergantung = @(), [string[]] $EnvTambahan = @()) {
     if (Ada-Layanan $Nama) {
         Jalankan $Nssm @('stop', $Nama) | Out-Null
         Nssm @('remove', $Nama, 'confirm')
@@ -130,7 +134,7 @@ function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string]
     Nssm @('set', $Nama, 'DisplayName', $Judul)
     Nssm @('set', $Nama, 'Description', 'Billing Rental PS')
     Nssm @('set', $Nama, 'Start', 'SERVICE_AUTO_START')
-    Nssm @('set', $Nama, 'AppEnvironmentExtra', "PATH=$PathRuntime")
+    Nssm (@('set', $Nama, 'AppEnvironmentExtra', "PATH=$PathRuntime") + $EnvTambahan)
     Nssm @('set', $Nama, 'AppStdout', (Join-Path $Logs "$Nama.log"))
     Nssm @('set', $Nama, 'AppStderr', (Join-Path $Logs "$Nama.log"))
     Nssm @('set', $Nama, 'AppRotateFiles', '1')
@@ -139,6 +143,40 @@ function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string]
     Nssm @('set', $Nama, 'AppExit', 'Default', 'Restart')
     Nssm @('set', $Nama, 'AppRestartDelay', '3000')
     if ($Bergantung.Count -gt 0) { Nssm (@('set', $Nama, 'DependOnService') + $Bergantung) }
+}
+
+# Ubah / tambah satu baris KUNCI=nilai di .env Laravel (UTF-8 tanpa BOM)
+function Atur-Env([string] $Kunci, [string] $Nilai) {
+    $file = Join-Path $App '.env'
+    $baris = [Collections.Generic.List[string]] [IO.File]::ReadAllLines($file)
+    $i = $baris.FindIndex({ param($b) $b -match "^$Kunci=" })
+    if ($i -ge 0) { $baris[$i] = "$Kunci=$Nilai" } else { $baris.Add("$Kunci=$Nilai") }
+    [IO.File]::WriteAllLines($file, $baris, (New-Object Text.UTF8Encoding $false))
+}
+
+# Layanan WhatsApp (pemasangan baru & update dari versi tanpa WhatsApp): port & token dibuat sekali,
+# disimpan di konfigurasi.json & .env Laravel. Hanya mendengarkan 127.0.0.1 (tanpa aturan firewall).
+function Siapkan-WhatsApp($Konfig) {
+    if (-not (Test-Path $Node) -or -not (Test-Path (Join-Path $WaFolder 'index.js'))) {
+        Tulis 'Layanan WhatsApp tidak ada di paket ini; dilewati'
+        return
+    }
+    if (-not $Konfig.port_wa) {
+        $Konfig | Add-Member -NotePropertyName port_wa -NotePropertyValue (Port-Bebas @(3001, 3002, 3003, 3011)) -Force
+    }
+    if (-not $Konfig.wa_token) {
+        $Konfig | Add-Member -NotePropertyName wa_token -NotePropertyValue (Acak 40) -Force
+    }
+    Simpan-Konfig $Konfig
+
+    $sesi = Join-Path $Data 'whatsapp-sesi'
+    New-Item -ItemType Directory -Force -Path $sesi | Out-Null
+    Pasang-Layanan 'BillingPS-WhatsApp' 'Billing PS - WhatsApp (laporan & notifikasi)' $Node 'index.js' $WaFolder @() @(
+        "PORT=$($Konfig.port_wa)", "WA_TOKEN=$($Konfig.wa_token)", "FOLDER_SESI=$sesi"
+    )
+    Atur-Env 'WA_SERVICE_URL' "http://127.0.0.1:$($Konfig.port_wa)"
+    Atur-Env 'WA_SERVICE_TOKEN' $Konfig.wa_token
+    Tulis "Layanan WhatsApp siap (port $($Konfig.port_wa))"
 }
 
 function Mulai-Layanan([string] $Nama) {

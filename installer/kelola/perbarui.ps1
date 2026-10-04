@@ -44,6 +44,8 @@ try {
     Artisan @('sync', 'pasang-trigger')
     Artisan @('pasang:awal', "--apk=$(Join-Path $Root 'apk\tv-agent.apk')")
     Artisan @('storage:link', '--force') -BolehGagal | Out-Null
+    # Versi lama tanpa WhatsApp: layanan & .env dilengkapi di sini (sebelum optimize)
+    Siapkan-WhatsApp $konfig
     Artisan @('optimize')
 
     Tulis 'Menyalakan layanan...'

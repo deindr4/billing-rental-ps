@@ -1,6 +1,7 @@
 /**
  * Service WhatsApp lokal untuk Billing Rental PS.
- * - Login via QR (seperti WhatsApp Web), sesi tersimpan di folder ./sesi
+ * - Login via QR (seperti WhatsApp Web), sesi tersimpan di folder ./sesi (atau FOLDER_SESI; installer Windows:
+ *   <root>\data\whatsapp-sesi supaya tidak hilang saat update)
  * - Semua pesan masuk antrean: dikirim satu per satu dengan jeda acak & batas per jam
  * - Hanya menerima request dengan header x-token yang cocok
  */
@@ -15,7 +16,7 @@ const TOKEN = process.env.WA_TOKEN || '';
 const JEDA_MIN = Number(process.env.JEDA_MIN || 4) * 1000;
 const JEDA_MAKS = Number(process.env.JEDA_MAKS || 9) * 1000;
 const MAKS_PER_JAM = Number(process.env.MAKS_PER_JAM || 40);
-const FOLDER_SESI = './sesi';
+const FOLDER_SESI = process.env.FOLDER_SESI || './sesi';
 
 if (!TOKEN) {
     console.error('WA_TOKEN belum diisi di .env');

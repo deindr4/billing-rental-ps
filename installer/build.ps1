@@ -155,6 +155,20 @@ Copy-Item (Get-ChildItem $nssmEkstrak -Recurse -Filter nssm.exe | Where-Object {
 
 Copy-Item (Unduh $Bahan.vc_redist 'vc_redist.x64.exe') (Join-Path $Staging 'vc_redist.x64.exe')
 
+# Layanan WhatsApp (Node + Baileys): node.exe portabel + kode + node_modules siap pakai (PC rental tanpa npm)
+Tulis 'Menyalin layanan WhatsApp...'
+if (-not (Test-Path $Bahan.node)) { throw "node.exe tidak ada: $($Bahan.node) (atur di installer\bahan.json)" }
+New-Item -ItemType Directory -Force -Path (Join-Path $runtime 'node') | Out-Null
+Copy-Item $Bahan.node (Join-Path $runtime 'node\node.exe')
+$waSumber = Join-Path $Repo 'whatsapp-service'
+if (-not (Test-Path (Join-Path $waSumber 'node_modules'))) {
+    Push-Location $waSumber
+    & cmd.exe /c 'npm ci --omit=dev 2>&1' | Out-Host   # lewat cmd: lihat catatan npm run build
+    Pop-Location
+    if ($LASTEXITCODE -ne 0) { throw 'npm ci whatsapp-service gagal' }
+}
+Salin $waSumber (Join-Path $Staging 'whatsapp') @('sesi') @('.env')
+
 # ---------------- 3. Skrip pengelola & templat ----------------
 Salin (Join-Path $Installer 'kelola') (Join-Path $Staging 'kelola')
 Salin (Join-Path $Installer 'templat') (Join-Path $Staging 'kelola\templat')

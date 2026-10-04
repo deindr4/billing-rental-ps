@@ -99,6 +99,7 @@ try {
         "--pin=$($w.pin)", "--url-lokal=$url", "--apk=$apk")
 
     Artisan @('storage:link', '--force') -BolehGagal
+    Siapkan-WhatsApp $konfig   # sebelum optimize: WA_SERVICE_* masuk cache konfigurasi
     Artisan @('optimize')
 
     # ---------------- 6. Web & layanan pendukung ----------------
