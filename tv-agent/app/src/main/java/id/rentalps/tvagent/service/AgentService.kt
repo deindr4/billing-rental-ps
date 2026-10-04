@@ -4,8 +4,10 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
@@ -47,6 +49,9 @@ class AgentService : Service() {
     override fun onCreate() {
         super.onCreate()
         mulaiLatarDepan()
+
+        // ACTION_SCREEN_ON hanya bisa didaftarkan dari kode (tidak lewat manifest)
+        ContextCompat.registerReceiver(this, layarMenyala, IntentFilter(Intent.ACTION_SCREEN_ON), ContextCompat.RECEIVER_NOT_EXPORTED)
 
         overlay = OverlayTimer(this)
         pemberitahuan = OverlayPemberitahuan(this)
@@ -140,11 +145,39 @@ class AgentService : Service() {
         }
     }
 
+    /**
+     * TV dinyalakan dengan remote = bangun dari standby (bukan boot, jadi BOOT_COMPLETED tidak datang) dan
+     * menampilkan layar Google TV. Saat layar menyala: segarkan status, lalu kembalikan layar kunci / HDMI sesi.
+     */
+    private val layarMenyala = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action != Intent.ACTION_SCREEN_ON) return
+            Log.i(Agent.TAG, "Layar TV menyala: kembali ke tampilan sesuai status")
+            agent.segarkanSekarang()
+            scope.launch {
+                delay(1_500) // beri waktu launcher bawaan selesai tampil, lalu timpa
+                val app = application as AgentApp
+                val k = agent.keadaan.value
+                if (k.tahap != Tahap.Aktif || app.bolehKeluar()) return@launch
+                when (k.layar) {
+                    "main", "darurat" -> {
+                        val berhasil = Hdmi.buka(this@AgentService, agent.inputHdmi())
+                        agent.setHdmiGagal(!berhasil)
+                        if (!berhasil) tampilkanLayarKunci()
+                    }
+                    // Bypass dibiarkan: staf sedang memakai TV bebas (YouTube, dll.)
+                    in Agent.LAYAR_TERKUNCI -> if (!app.layarDepan.value) tampilkanLayarKunci()
+                }
+            }
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        runCatching { unregisterReceiver(layarMenyala) }
         overlay.sembunyikan()
         pemberitahuan.tutupSegera()
         runningText.hentikan()

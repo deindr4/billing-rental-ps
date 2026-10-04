@@ -6,7 +6,17 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
-0.6.6 (kode 17) - 2026-10-04                                   [tag apk-0.6.6]
+0.6.7 (kode 18) - 2026-10-04                                   [tag apk-0.6.7]
+-----------------------------------------------------------------------------
+- TV Agent kembali tampil saat TV dinyalakan dengan remote. TV seperti TCL hanya bangun dari standby (bukan boot),
+  jadi BOOT_COMPLETED tidak datang dan yang tampil layar Google TV. Kini layar menyala (ACTION_SCREEN_ON)
+  -> status disegarkan -> layar kunci, atau HDMI bila sesi sedang main. Bypass dibiarkan.
+- Ditambah sinyal "boot cepat" (QUICKBOOT_POWERON) sebagian merek TV.
+- Syarat: izin "tampil di atas aplikasi lain". Paling andal: TV Agent dijadikan layar utama (Home).
+- Belum teruji di TV asli (emulator terlalu lambat untuk uji standby).
+
+
+0.6.6 (kode 17) - 2026-10-04                                  [tag apk-0.6.6]
 -----------------------------------------------------------------------------
 - Bangunkan TV: perintah "layar_nyala" diterima sampai 10 menit (dulu 2 menit), karena TV standby baru
   mengambil perintah saat jaringannya aktif lagi. Kasir: tombol matahari "Bangunkan TV" di kartu unit.

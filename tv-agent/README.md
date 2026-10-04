@@ -31,6 +31,10 @@ Cek di **Admin → Perangkat TV → Diagnostik** apa yang masih "Tidak":
 
 Sudah otomatis di aplikasi:
 - TV dinyalakan → TV Agent berjalan sendiri (±30 detik setelah boot tanpa langkah di bawah).
+  Kebanyakan TV (mis. TCL Google TV) saat dinyalakan dengan remote hanya **bangun dari standby**, bukan boot:
+  sejak APK 0.6.7 TV Agent juga menangkap "layar menyala" lalu kembali ke layar kunci / HDMI sesi.
+  Syarat: **Izin tampil di atas** sudah diberikan (Android 10+ melarang aplikasi membuka layar dari latar
+  belakang tanpa izin itu). Paling andal: jadikan TV Agent **layar utama** (langkah di bawah).
 - Tombol **Back** diabaikan. Tombol **Home** saat TV terkunci → muncul **"Masukkan PIN staf untuk keluar"**.
   PIN benar (pengguna dengan izin *Bypass TV*) atau kode darurat → layar utama Google TV terbuka **5 menit**,
   lalu TV otomatis terkunci lagi. Tidak diisi 30 detik → dialog tertutup, TV tetap terkunci.
