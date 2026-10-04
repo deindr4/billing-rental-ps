@@ -16,6 +16,7 @@ const TOKEN = process.env.WA_TOKEN || '';
 const JEDA_MIN = Number(process.env.JEDA_MIN || 4) * 1000;
 const JEDA_MAKS = Number(process.env.JEDA_MAKS || 9) * 1000;
 const MAKS_PER_JAM = Number(process.env.MAKS_PER_JAM || 40);
+const MAKS_PER_HARI = Number(process.env.MAKS_PER_HARI || 200);
 const FOLDER_SESI = process.env.FOLDER_SESI || './sesi';
 
 if (!TOKEN) {
@@ -81,7 +82,7 @@ async function mulai() {
 /* Antrean kirim (anti-spam)                                           */
 /* ------------------------------------------------------------------ */
 let antrean = Promise.resolve();
-const riwayatKirim = []; // timestamp pesan terkirim (1 jam terakhir)
+const riwayatKirim = []; // timestamp pesan terkirim (24 jam terakhir)
 
 const tunggu = (ms) => new Promise((r) => setTimeout(r, ms));
 const jedaAcak = () => JEDA_MIN + Math.floor(Math.random() * Math.max(1, JEDA_MAKS - JEDA_MIN));
@@ -102,8 +103,10 @@ function antrekan(kerja) {
         if (status !== 'terhubung' || !sock) throw new Error('WhatsApp belum terhubung');
 
         const satuJamLalu = Date.now() - 3600_000;
-        while (riwayatKirim.length && riwayatKirim[0] < satuJamLalu) riwayatKirim.shift();
-        if (riwayatKirim.length >= MAKS_PER_JAM) throw new Error('Batas pesan per jam tercapai, coba lagi nanti');
+        const sehariLalu = Date.now() - 86_400_000;
+        while (riwayatKirim.length && riwayatKirim[0] < sehariLalu) riwayatKirim.shift();
+        if (riwayatKirim.filter((t) => t >= satuJamLalu).length >= MAKS_PER_JAM) throw new Error('Batas pesan per jam tercapai, coba lagi nanti');
+        if (riwayatKirim.length >= MAKS_PER_HARI) throw new Error('Batas pesan per hari tercapai, coba lagi besok');
 
         await kerja();
         riwayatKirim.push(Date.now());
@@ -114,10 +117,22 @@ function antrekan(kerja) {
     return hasil;
 }
 
+/**
+ * Kirim seperti manusia: cek nomor terdaftar di WhatsApp (mengirim ke nomor tak terdaftar = tanda bot),
+ * "sedang mengetik…" sebanding panjang pesan (± 1,5–8 detik), baru kirim.
+ */
 async function kirim(jid, pesan) {
+    if (jid.endsWith('@s.whatsapp.net')) {
+        const [cek] = await sock.onWhatsApp(jid).catch(() => [null]);
+        if (cek && !cek.exists) throw new Error('Nomor tidak terdaftar di WhatsApp');
+    }
+
+    const panjang = String(pesan.text ?? pesan.caption ?? '').length;
+    const lamaKetik = Math.min(8000, 1500 + panjang * 25) + Math.floor(Math.random() * 1500);
+
     await sock.presenceSubscribe(jid).catch(() => {});
     await sock.sendPresenceUpdate('composing', jid).catch(() => {});
-    await tunggu(1500 + Math.floor(Math.random() * 1500));
+    await tunggu(lamaKetik);
     await sock.sendPresenceUpdate('paused', jid).catch(() => {});
     await sock.sendMessage(jid, pesan);
 }
