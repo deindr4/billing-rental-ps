@@ -46,6 +46,7 @@ try {
     Artisan @('storage:link', '--force') -BolehGagal | Out-Null
     # Versi lama tanpa WhatsApp: layanan & .env dilengkapi di sini (sebelum optimize)
     Siapkan-WhatsApp $konfig
+    Siapkan-Tunnel
     Artisan @('optimize')
 
     Tulis 'Menyalakan layanan...'

@@ -169,6 +169,10 @@ if (-not (Test-Path (Join-Path $waSumber 'node_modules'))) {
 }
 Salin $waSumber (Join-Path $Staging 'whatsapp') @('sesi') @('.env')
 
+# Cloudflare Tunnel (akses dari internet; dinyalakan dari Admin → Pengaturan → Cloudflare Tunnel)
+New-Item -ItemType Directory -Force -Path (Join-Path $runtime 'cloudflared') | Out-Null
+Copy-Item (Unduh $Bahan.cloudflared 'cloudflared.exe') (Join-Path $runtime 'cloudflared\cloudflared.exe')
+
 # ---------------- 3. Skrip pengelola & templat ----------------
 Salin (Join-Path $Installer 'kelola') (Join-Path $Staging 'kelola')
 Salin (Join-Path $Installer 'templat') (Join-Path $Staging 'kelola\templat')

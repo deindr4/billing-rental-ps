@@ -4,6 +4,7 @@
     "mariadb": "https://archive.mariadb.org/mariadb-10.11.10/winx64-packages/mariadb-10.11.10-winx64.zip",
     "nssm": "https://nssm.cc/release/nssm-2.24.zip",
     "node": "C:\\Program Files\\nodejs\\node.exe",
+    "cloudflared": "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-windows-amd64.exe",
     "vc_redist": "https://aka.ms/vc14/vc_redist.x64.exe",
     "cacert": "https://curl.se/ca/cacert.pem"
 }

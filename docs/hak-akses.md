@@ -92,6 +92,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Sinkronisasi | ✅ | ✅ di server lokal | – | di cloud: hanya Super Admin (buat token) |
 | Backup & Restore | ✅ | ✅ di server lokal | – | di cloud: hanya Super Admin |
 | Pemeliharaan sistem | ✅ | ✅ di server lokal | – | di cloud: hanya Super Admin |
+| Cloudflare Tunnel | ✅ | ✅ | – | khusus Owner / Super Admin; hanya muncul di pemasangan Windows (installer) |
 
 **Kenapa beberapa menu dibatasi di server cloud?** Server cloud bisa melayani banyak rental sekaligus.
 Backup, pemeliharaan & token sinkron di sana menyangkut semua rental, jadi hanya Super Admin.

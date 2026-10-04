@@ -35,12 +35,25 @@ Yang dipasang otomatis:
 - Database dengan kata sandi acak (tersimpan di `C:\BillingPS\kelola\konfigurasi.json`, hanya Administrator).
 - APK TV terbaru terdaftar sebagai rilis → di TV buka `http://IP-PC/apk`.
 
+## Akses dari internet (Cloudflare Tunnel)
+
+`cloudflared.exe` & layanan `BillingPS-Tunnel` ikut terpasang tapi **mati** sampai diaktifkan — tidak perlu
+mengunduh / menjalankan cloudflared sendiri di Windows. Owner: Admin → Pengaturan → **Cloudflare Tunnel**:
+
+1. one.dash.cloudflare.com → Networks → Tunnels → **Create a tunnel** → Cloudflared → beri nama.
+2. Pilih Windows, salin perintah yang muncul (berisi `eyJ…`) → tempel utuh di halaman itu → **Aktifkan tunnel**.
+3. Public Hostname: subdomain + domain Anda → Service **HTTP** `localhost` (atau `localhost:PORT` bila port web bukan 80).
+
+Token disimpan di `data\cloudflared\token.txt` (hanya Administrator & SYSTEM); tunnel menyala sendiri setiap PC
+dinyalakan sampai dimatikan dari halaman yang sama. Installer mengisi `TRUSTED_PROXIES=127.0.0.1,::1` (bila masih
+kosong) supaya HTTPS & IP asli pengunjung terbaca — batas login dari internet tetap berlaku.
+
 ## Struktur folder
 
 | Folder | Isi |
 |---|---|
 | `app` | aplikasi (+ `.env`) |
-| `runtime` | php, apache, mariadb, node, nssm |
+| `runtime` | php, apache, mariadb, node, cloudflared, nssm |
 | `whatsapp` | layanan WhatsApp (Node + Baileys, `node_modules` siap pakai) |
 | `data` | **database, foto/logo, sesi, backup** — jangan dihapus |
 | `logs` | log pemasangan, apache, mariadb, layanan |

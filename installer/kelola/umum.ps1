@@ -28,8 +28,11 @@ $Layanan = @(
     @{ Nama = 'BillingPS-Realtime'; Judul = 'Billing PS - Realtime TV (Reverb)' },
     @{ Nama = 'BillingPS-Antrean'; Judul = 'Billing PS - Antrean tugas' },
     @{ Nama = 'BillingPS-Jadwal'; Judul = 'Billing PS - Jadwal (pembayaran, sync, backup)' },
-    @{ Nama = 'BillingPS-WhatsApp'; Judul = 'Billing PS - WhatsApp (laporan & notifikasi)' }
+    @{ Nama = 'BillingPS-WhatsApp'; Judul = 'Billing PS - WhatsApp (laporan & notifikasi)' },
+    @{ Nama = 'BillingPS-Tunnel'; Judul = 'Billing PS - Cloudflare Tunnel (akses internet)' }
 )
+$Cloudflared = Join-Path $Runtime 'cloudflared\cloudflared.exe'
+$TokenTunnel = Join-Path $Data 'cloudflared\token.txt'
 
 function Tulis([string] $Pesan) {
     Write-Host ("[{0:HH:mm:ss}] {1}" -f (Get-Date), $Pesan)
@@ -179,7 +182,30 @@ function Siapkan-WhatsApp($Konfig) {
     Tulis "Layanan WhatsApp siap (port $($Konfig.port_wa))"
 }
 
+# Layanan Cloudflare Tunnel: dipasang tapi mati sampai owner mengisi token di Admin → Pengaturan → Cloudflare Tunnel
+# (aplikasi menulis data\cloudflared\token.txt lalu menyalakan layanan lewat nssm).
+function Siapkan-Tunnel {
+    if (-not (Test-Path $Cloudflared)) { return }
+    $folder = Split-Path $TokenTunnel
+    New-Item -ItemType Directory -Force -Path $folder | Out-Null
+    # Token = rahasia: hanya Administrator & SYSTEM (Apache/aplikasi berjalan sebagai SYSTEM)
+    & icacls $folder /inheritance:r /grant:r 'Administrators:(OI)(CI)F' 'SYSTEM:(OI)(CI)F' | Out-Null
+
+    $ada = (Test-Path $TokenTunnel) -and (Get-Item $TokenTunnel).Length -gt 0
+    # Lokasi token lewat variabel lingkungan (argumen berkutip rusak saat diteruskan PowerShell 5.1)
+    Pasang-Layanan 'BillingPS-Tunnel' 'Billing PS - Cloudflare Tunnel (akses internet)' $Cloudflared `
+        'tunnel --no-autoupdate run' (Split-Path $Cloudflared) @() @("TUNNEL_TOKEN_FILE=$TokenTunnel")
+    if (-not $ada) { Nssm @('set', 'BillingPS-Tunnel', 'Start', 'SERVICE_DEMAND_START') }
+
+    # Lewat tunnel, permintaan datang dari cloudflared di PC ini: percayai 127.0.0.1 supaya HTTPS & IP asli
+    # pengunjung (batas login) terbaca. Isian yang sudah diatur pengguna tidak ditimpa.
+    $isiEnv = [IO.File]::ReadAllText((Join-Path $App '.env'))
+    if ($isiEnv -match '(?m)^TRUSTED_PROXIES=\s*$' -or $isiEnv -notmatch '(?m)^TRUSTED_PROXIES=') { Atur-Env 'TRUSTED_PROXIES' '127.0.0.1,::1' }
+}
+
 function Mulai-Layanan([string] $Nama) {
+    # Tunnel tanpa token tidak dinyalakan (akan gagal & diulang terus)
+    if ($Nama -eq 'BillingPS-Tunnel' -and -not ((Test-Path $TokenTunnel) -and (Get-Item $TokenTunnel).Length -gt 0)) { return }
     if (Ada-Layanan $Nama) {
         Start-Service -Name $Nama -ErrorAction SilentlyContinue
         (Get-Service $Nama).WaitForStatus('Running', [TimeSpan]::FromSeconds(30))

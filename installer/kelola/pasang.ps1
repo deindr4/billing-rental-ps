@@ -100,6 +100,7 @@ try {
 
     Artisan @('storage:link', '--force') -BolehGagal
     Siapkan-WhatsApp $konfig   # sebelum optimize: WA_SERVICE_* masuk cache konfigurasi
+    Siapkan-Tunnel             # TRUSTED_PROXIES juga sebelum optimize
     Artisan @('optimize')
 
     # ---------------- 6. Web & layanan pendukung ----------------

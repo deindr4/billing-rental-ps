@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (Cloudflare Tunnel dari admin)
+-----------------------------------------------------------------------------
+- Admin -> Pengaturan -> Cloudflare Tunnel (owner / super admin, hanya pemasangan Windows): tempel perintah /
+  token dari dashboard Cloudflare -> Aktifkan. Status layanan, Matikan, Hapus token, log terakhir, panduan langkah.
+- Installer membundel cloudflared.exe + layanan "BillingPS-Tunnel" (mati sampai token diisi, lalu menyala
+  otomatis tiap PC dinyalakan). Token di data\cloudflared\token.txt (ACL Administrator & SYSTEM).
+- TRUSTED_PROXIES=127.0.0.1,::1 diisi otomatis bila kosong (HTTPS & IP asli pengunjung lewat tunnel).
+- Pemasangan lama mendapat semuanya lewat patch.
+
+
 2026-10-04 (installer Windows - WhatsApp siap pakai)
 -----------------------------------------------------------------------------
 - Layanan WhatsApp kini ikut installer: node.exe + whatsapp-service + node_modules dibundel, dipasang sebagai
