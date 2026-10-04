@@ -1,20 +1,30 @@
 # Installer Windows (tahap 14)
 
 Satu file `BillingPS-Setup-<versi>.exe` untuk PC rental yang masih bersih (Windows 10/11 64-bit).
-Isi: PHP 8.4, Apache 2.4.68, MariaDB 10.11 LTS, Visual C++ runtime 14.50+, aplikasi siap pakai, APK TV. Tanpa Node.js.
+Isi: PHP 8.4, Apache 2.4.68, MariaDB 10.11 LTS, Visual C++ runtime 14.50+, Node.js (WhatsApp), cloudflared,
+aplikasi siap pakai, APK TV.
 
 ## Memasang di PC rental
 
 1. Klik dua kali `BillingPS-Setup-….exe` (minta izin Administrator).
 2. Wizard:
    - **Folder** — bawaan `C:\BillingPS`.
-   - **Data rental** — nama rental & cabang.
+   - **Jenis pemasangan** — **Pasang baru** (data kosong) atau **Pulihkan dari file backup** (pindah PC / pasang ulang).
+   - Pulihkan: **File backup** (`backup-….zip` dari Admin → Platform → Backup → Unduh, atau
+     `data\storage\app\private\backup` di PC lama). Halaman data rental & akun owner dilewati (diambil dari backup).
+   - Pasang baru: **Data rental** (nama rental & cabang) dan **Akun owner** (nama, email, password min. 8, PIN 4–6 angka).
    - **Zona waktu** — WIB / WITA / WIT.
-   - **Akun owner** — nama, email, password (min. 8), PIN 4–6 angka.
    - **Port web** — biarkan 80 kecuali dipakai program lain.
-3. Tunggu "Menyiapkan database, aplikasi & layanan" (beberapa menit). Halaman akhir menampilkan alamat aplikasi,
-   misalnya `http://192.168.1.10` — buka dari tablet kasir & TV di Wi-Fi yang sama.
-4. Ikon **Billing PS** di Desktop membuka aplikasi di PC itu.
+3. Tunggu "Menyiapkan database, aplikasi & layanan" (beberapa menit).
+4. **Data login** tampil di kotak pesan (harus ditutup dulu) lalu lagi di halaman Selesai: email, username, password,
+   PIN, super admin & alamat aplikasi (mis. `http://192.168.1.10`). Password **tidak** disimpan ke file mana pun.
+   Centang "Buka Billing PS sekarang" untuk langsung membuka aplikasi.
+5. Ikon **Billing PS** di Desktop membuka aplikasi di PC itu.
+
+Pulihkan dari backup — urutan otomatis: buat tabel → pulihkan isi backup (data & logo) → lengkapi tabel/kolom versi baru
+→ hak akses & trigger sync → alamat server lokal TV diganti ke IP PC ini (bila satu cabang). Yang perlu diisi ulang
+karena kunci enkripsi PC baru berbeda: API key payment gateway, token Telegram, scan QR WhatsApp. TV: bila IP PC berubah,
+ganti alamat server di TV (menu staf); kode darurat TV muncul lagi setelah TV dipasangkan ulang.
 
 Akun yang dibuat:
 

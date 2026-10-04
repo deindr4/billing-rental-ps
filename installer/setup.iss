@@ -75,15 +75,20 @@ Name: "{group}\Folder log Billing PS"; Filename: "{app}\logs"
 Name: "{group}\Uninstall Billing PS"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\Billing PS"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
 
+[Run]
+Filename: "{app}\Billing PS.url"; Description: "Buka Billing PS sekarang"; Flags: postinstall shellexec nowait skipifsilent
+
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\kelola\copot.ps1"""; Flags: runhidden waituntilterminated; RunOnceId: "CopotLayanan"
 
 [Code]
 var
   HalRental, HalOwner, HalPort: TInputQueryWizardPage;
-  HalZona: TInputOptionWizardPage;
+  HalZona, HalMode: TInputOptionWizardPage;
+  HalBackup: TInputFileWizardPage;
   ModeUpdate: Boolean;
   HasilPasang: String;
+  BerhasilPasang: Boolean;
 
 function KunciUninstall: String;
 begin
@@ -104,7 +109,19 @@ procedure InitializeWizard;
 begin
   ModeUpdate := SudahTerpasang;
 
-  HalRental := CreateInputQueryPage(wpSelectDir, 'Data rental',
+  HalMode := CreateInputOptionPage(wpSelectDir, 'Jenis pemasangan',
+    'Mulai dari data kosong, atau pindahkan data dari PC / pemasangan sebelumnya.', '', True, False);
+  HalMode.Add('Pasang baru - data kosong, buat akun owner baru');
+  HalMode.Add('Pulihkan dari file backup (.zip) - pindah PC / pasang ulang, akun & data lama tetap');
+  HalMode.SelectedValueIndex := 0;
+
+  HalBackup := CreateInputFilePage(HalMode.ID, 'File backup',
+    'Pilih file backup Billing PS (backup-....zip).',
+    'Ambil dari PC lama: Admin > Platform > Backup > Unduh, atau folder data\storage\app\private\backup. ' +
+    'Akun owner, transaksi, member, pengaturan & logo ikut dipulihkan.');
+  HalBackup.Add('File backup:', 'Backup Billing PS (*.zip)|*.zip', '.zip');
+
+  HalRental := CreateInputQueryPage(HalBackup.ID, 'Data rental',
     'Nama rental & cabang yang tampil di aplikasi, struk, TV dan billboard.', '');
   HalRental.Add('Nama rental:', False);
   HalRental.Add('Nama cabang:', False);
@@ -133,9 +150,21 @@ begin
   HalPort.Values[0] := '80';
 end;
 
+function ModePulihkan: Boolean;
+begin
+  Result := HalMode.SelectedValueIndex = 1;
+end;
+
 function ShouldSkipPage(PageID: Integer): Boolean;
 begin
-  Result := ModeUpdate and ((PageID = HalRental.ID) or (PageID = HalZona.ID) or (PageID = HalOwner.ID) or (PageID = HalPort.ID));
+  if ModeUpdate then
+    Result := (PageID = HalMode.ID) or (PageID = HalBackup.ID) or (PageID = HalRental.ID) or
+      (PageID = HalZona.ID) or (PageID = HalOwner.ID) or (PageID = HalPort.ID)
+  else if ModePulihkan then
+    { Data rental & akun owner diambil dari backup }
+    Result := (PageID = HalRental.ID) or (PageID = HalOwner.ID)
+  else
+    Result := PageID = HalBackup.ID;
 end;
 
 function SemuaAngka(S: String): Boolean;
@@ -152,6 +181,12 @@ var
   Email: String;
 begin
   Result := True;
+
+  if CurPageID = HalBackup.ID then
+    if not FileExists(HalBackup.Values[0]) or (Lowercase(ExtractFileExt(HalBackup.Values[0])) <> '.zip') then begin
+      MsgBox('Pilih file backup .zip yang ada.', mbError, MB_OK);
+      Result := False;
+    end;
 
   if CurPageID = HalRental.ID then
     if Length(Trim(HalRental.Values[0])) < 3 then begin
@@ -186,6 +221,11 @@ begin
   Result := '"' + Result + '"';
 end;
 
+function Pilih(Kondisi: Boolean; Ya, Tidak: String): String;
+begin
+  if Kondisi then Result := Ya else Result := Tidak;
+end;
+
 function Zona: String;
 begin
   case HalZona.SelectedValueIndex of
@@ -217,6 +257,24 @@ begin
     Result := '';
 end;
 
+{ Data login untuk layar selesai. Password hanya dari isian wizard (tidak pernah ditulis ke file). }
+function InfoLogin: String;
+var
+  Email: String;
+begin
+  if ModePulihkan then begin
+    Result := 'Akun dari backup - login dengan email & password yang sama seperti di PC lama.';
+    Exit;
+  end;
+  Email := Trim(HalOwner.Values[1]);
+  Result :=
+    'Email login     : ' + Email + #13#10 +
+    'atau username   : ' + Copy(Email, 1, Pos('@', Email) - 1) + #13#10 +
+    'Password        : ' + HalOwner.Values[2] + #13#10 +
+    'PIN persetujuan : ' + HalOwner.Values[4] + #13#10#13#10 +
+    'Super admin     : superadmin@billing.lokal (password sama dengan owner - segera ganti)';
+end;
+
 { Update: backup database & hentikan layanan sebelum file diganti (memakai skrip versi lama) }
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 begin
@@ -242,6 +300,8 @@ begin
     Kode := PowerShell('perbarui.ps1', '-Tahap sesudah')
   else begin
     Isian := '{' +
+      '"mode":' + Json(Pilih(ModePulihkan, 'pulihkan', 'baru')) + ',' +
+      '"backup":' + Json(Pilih(ModePulihkan, HalBackup.Values[0], '')) + ',' +
       '"rental":' + Json(Trim(HalRental.Values[0])) + ',' +
       '"cabang":' + Json(Trim(HalRental.Values[1])) + ',' +
       '"zona":' + Json(Zona) + ',' +
@@ -260,18 +320,29 @@ begin
 
   WizardForm.ProgressGauge.Style := npbstNormal;
   HasilPasang := BacaHasil;
+  BerhasilPasang := Kode = 0;
 
   if Kode <> 0 then
     MsgBox('Pemasangan belum selesai:' + #13#10 + HasilPasang + #13#10#13#10 +
       'Log lengkap ada di folder ' + ExpandConstant('{app}\logs') + '. Jalankan installer ini lagi setelah masalah diperbaiki.',
-      mbError, MB_OK);
+      mbError, MB_OK)
+  else if not ModeUpdate then
+    { Banyak pengguna langsung "Next / Finish": data login ditampilkan di kotak yang harus ditutup dulu }
+    MsgBox('PEMASANGAN SELESAI - CATAT DATA LOGIN INI' + #13#10#13#10 + InfoLogin + #13#10#13#10 +
+      'Data ini juga tampil di halaman berikutnya.', mbInformation, MB_OK);
 end;
 
 procedure CurPageChanged(CurPageID: Integer);
 begin
-  if (CurPageID = wpFinished) and (HasilPasang <> '') then
-    WizardForm.FinishedLabel.Caption := HasilPasang + #13#10#13#10 +
-      'Buka aplikasi dari ikon "Billing PS" di Desktop. Kelola layanan lewat menu Start > Billing PS.';
+  if (CurPageID = wpFinished) and (HasilPasang <> '') then begin
+    if BerhasilPasang and not ModeUpdate then
+      WizardForm.FinishedLabel.Caption := InfoLogin + #13#10#13#10 + HasilPasang + #13#10#13#10 +
+        'Buka aplikasi dari ikon "Billing PS" di Desktop.'
+    else
+      WizardForm.FinishedLabel.Caption := HasilPasang + #13#10#13#10 +
+        'Buka aplikasi dari ikon "Billing PS" di Desktop. Kelola layanan lewat menu Start > Billing PS.';
+    WizardForm.FinishedLabel.AdjustHeight;
+  end;
 end;
 
 { Uninstall: tanya apakah data (database, foto, backup) ikut dihapus }

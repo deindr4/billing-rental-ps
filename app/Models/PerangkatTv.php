@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\TerenkripsiAman;
 use App\Models\Concerns\BelongsToCabang;
 use App\Models\Concerns\BelongsToTenant;
 use App\Models\Concerns\Diaudit;
@@ -46,7 +47,8 @@ class PerangkatTv extends Model
     protected function casts(): array
     {
         return [
-            'rahasia_offline' => 'encrypted',
+            // APP_KEY lain (pulihkan backup di PC baru): null → kode darurat tersedia lagi setelah TV dipasangkan ulang
+            'rahasia_offline' => TerenkripsiAman::class,
             'diagnostik' => 'array',
             'diagnostik_pada' => 'datetime',
             'hdmi_nama' => 'array',

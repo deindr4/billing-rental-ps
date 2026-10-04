@@ -78,4 +78,39 @@ class PasangAwalTest extends TestCase
         $this->assertSame([9, '0.5.1', true], [$r->versi_kode, $r->versi_nama, (bool) $r->aktif]);
         $this->assertSame(hash('sha256', 'PK-isi-apk'), $r->sha256);
     }
+
+    /** Installer mode "pulihkan dari backup": data sudah ada, alamat lokal TV ikut IP PC baru, daftar owner ditampilkan */
+    public function test_setelah_pulihkan_backup_alamat_lokal_baru_dan_daftar_owner(): void
+    {
+        $this->artisan('pasang:awal', [
+            '--rental' => 'Delta Gaming Hub', '--owner-email' => 'bos@delta.id', '--owner-password' => 'rahasia123',
+            '--url-lokal' => '192.168.1.10',
+        ])->assertSuccessful();
+        $cabang = Cabang::withoutGlobalScopes()->firstOrFail();
+
+        $this->artisan('pasang:awal', ['--url-lokal' => '192.168.5.20', '--daftar-owner' => true])
+            ->expectsOutputToContain('OWNER: bos@delta.id (bos)')
+            ->assertSuccessful();
+
+        app(Tenancy::class)->set($cabang->tenant_id, $cabang->id);
+        $this->assertSame('http://192.168.5.20', Pengaturan::ambil('server.url_lokal', null, $cabang->id));
+        $this->assertSame(1, Tenant::count()); // tidak membuat rental baru
+    }
+
+    /** Data terenkripsi dari APP_KEY lain (backup PC lama) dibaca kosong, bukan error 500 */
+    public function test_rahasia_dari_app_key_lain_dibaca_kosong(): void
+    {
+        $this->artisan('pasang:awal', ['--rental' => 'Delta Gaming Hub', '--owner-email' => 'bos@delta.id', '--owner-password' => 'rahasia123'])->assertSuccessful();
+        $cabang = Cabang::withoutGlobalScopes()->firstOrFail();
+
+        $tv = \App\Models\PerangkatTv::withoutGlobalScopes()->create([
+            'tenant_id' => $cabang->tenant_id, 'cabang_id' => $cabang->id, 'android_id' => 'a1', 'status' => 'aktif',
+            'token_hash' => hash('sha256', 'x'), 'rahasia_offline' => 'RAHASIA123',
+        ]);
+        $this->assertSame('RAHASIA123', $tv->fresh()->rahasia_offline); // format sama dengan cast "encrypted" bawaan
+
+        $lain = new \Illuminate\Encryption\Encrypter(random_bytes(32), 'AES-256-CBC');
+        \Illuminate\Support\Facades\DB::table('perangkat_tv')->where('id', $tv->id)->update(['rahasia_offline' => $lain->encryptString('RAHASIA123')]);
+        $this->assertNull($tv->fresh()->rahasia_offline);
+    }
 }

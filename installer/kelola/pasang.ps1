@@ -87,16 +87,37 @@ try {
         & icacls $fileEnv /inheritance:r /grant:r 'Administrators:F' 'SYSTEM:F' | Out-Null
     }
 
-    Tulis 'Membuat tabel database...'
-    Artisan @('migrate', '--force')
-    Artisan @('db:seed', '--class=HakAksesSeeder', '--force')
-
-    Tulis 'Mengisi data rental & akun owner...'
+    $pulihkan = $w.mode -eq 'pulihkan'
     $url = "http://$($konfig.ip)$(if ($konfig.port_web -ne 80) { ':' + $konfig.port_web })"
     $apk = Join-Path $Root 'apk\tv-agent.apk'
-    Artisan @('pasang:awal', "--rental=$($w.rental)", "--cabang=$($w.cabang)", "--zona=$($konfig.zona)",
-        "--owner-nama=$($w.owner_nama)", "--owner-email=$($w.owner_email)", "--owner-password=$($w.owner_password)",
-        "--pin=$($w.pin)", "--url-lokal=$url", "--apk=$apk")
+
+    Tulis 'Membuat tabel database...'
+    Artisan @('migrate', '--force')
+
+    if ($pulihkan) {
+        # Pindah PC / pasang ulang: seluruh data (akun, transaksi, member, pengaturan, logo) dari file backup
+        Tulis 'Memulihkan data dari backup...'
+        if (-not (Test-Path $w.backup)) { throw "File backup tidak ditemukan: $($w.backup)" }
+        $folderBackup = Join-Path $Data 'storage\app\private\backup'
+        New-Item -ItemType Directory -Force -Path $folderBackup | Out-Null
+        $namaBackup = 'backup-dipulihkan-{0:yyyyMMdd-HHmmss}.zip' -f (Get-Date)
+        Copy-Item $w.backup (Join-Path $folderBackup $namaBackup)
+        Artisan @('backup:pulihkan', $namaBackup, '--force')
+        Artisan @('migrate', '--force')   # backup dari versi lama: lengkapi tabel/kolom baru
+    }
+
+    Artisan @('db:seed', '--class=HakAksesSeeder', '--force')
+
+    if ($pulihkan) {
+        Artisan @('sync', 'pasang-trigger')
+        Artisan @('pasang:awal', "--url-lokal=$url", "--apk=$apk")
+        $owner = Artisan-Keluaran @('pasang:awal', '--daftar-owner') | Where-Object { $_ -match '^OWNER: ' } | ForEach-Object { $_.Substring(7) }
+    } else {
+        Tulis 'Mengisi data rental & akun owner...'
+        Artisan @('pasang:awal', "--rental=$($w.rental)", "--cabang=$($w.cabang)", "--zona=$($konfig.zona)",
+            "--owner-nama=$($w.owner_nama)", "--owner-email=$($w.owner_email)", "--owner-password=$($w.owner_password)",
+            "--pin=$($w.pin)", "--url-lokal=$url", "--apk=$apk")
+    }
 
     Artisan @('storage:link', '--force') -BolehGagal
     Siapkan-WhatsApp $konfig   # sebelum optimize: WA_SERVICE_* masuk cache konfigurasi
@@ -124,13 +145,23 @@ try {
     Pasang-Firewall $konfig
     Tulis-Pintasan $konfig
 
+    # Password tidak ditulis ke file (installer menampilkannya langsung di layar selesai)
+    $login = if ($pulihkan) {
+        "Login owner (dari backup, password sama seperti sebelumnya):`r`n" + (($owner | ForEach-Object { "  - $_" }) -join "`r`n")
+    } else {
+        "Login owner:        $($w.owner_email)`r`nLogin super admin:  superadmin@billing.lokal (password sama dengan owner; ganti lewat: php artisan superadmin)"
+    }
     $hasil = @"
 Alamat aplikasi (kasir/tablet di Wi-Fi rental):  $url
 Panel admin:                                     $url/admin
 Unduh APK TV:                                    $url/apk
-Login owner:        $($w.owner_email)
-Login super admin:  superadmin@billing.lokal (password sama dengan owner; ganti lewat: php artisan superadmin)
+$login
 "@
+    if ($pulihkan) {
+        $hasil += "`r`n`r`nDipulihkan dari backup. Isi ulang: API key payment gateway & token Telegram (Admin > Pengaturan); " +
+            "WhatsApp: scan QR lagi. TV: bila IP PC berubah, ganti alamat server di TV (menu staf); " +
+            "kode darurat TV muncul lagi setelah TV dipasangkan ulang."
+    }
     [IO.File]::WriteAllText((Join-Path $Logs 'hasil-pasang.txt'), $hasil)
     Tulis 'Pemasangan selesai.'
     Write-Host $hasil

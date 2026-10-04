@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\TerenkripsiAman;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -24,7 +25,7 @@ class PairingTv extends Model
     {
         return [
             'info' => 'array',
-            'kredensial' => 'encrypted:array',
+            'kredensial' => TerenkripsiAman::class.':array',
             'kedaluwarsa_pada' => 'datetime',
         ];
     }

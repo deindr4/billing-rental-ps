@@ -111,6 +111,19 @@ function Jalankan-Php([string[]] $Argumen, [switch] $BolehGagal) {
     return $kode
 }
 
+# Jalankan artisan & kembalikan baris keluarannya (untuk dibaca skrip, mis. daftar owner)
+function Artisan-Keluaran([string[]] $Argumen) {
+    $lama = $env:PATH
+    $env:PATH = $PathRuntime
+    try {
+        Push-Location $App
+        return @(Jalankan $Php (@('artisan') + $Argumen + @('--no-interaction')))
+    } finally {
+        Pop-Location
+        $env:PATH = $lama
+    }
+}
+
 function Artisan([string[]] $Argumen, [switch] $BolehGagal) {
     return Jalankan-Php (@('artisan') + $Argumen + @('--no-interaction')) -BolehGagal:$BolehGagal
 }

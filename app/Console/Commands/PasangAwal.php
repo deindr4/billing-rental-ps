@@ -34,7 +34,8 @@ class PasangAwal extends Command
         {--pin= : PIN owner 4-6 angka (persetujuan di kasir & TV)}
         {--superadmin-email=superadmin@billing.lokal : Email super admin}
         {--apk= : File APK TV Agent untuk didaftarkan sebagai rilis}
-        {--url-lokal= : Alamat server lokal untuk TV (mis. http://192.168.1.10)}';
+        {--url-lokal= : Alamat server lokal untuk TV (mis. http://192.168.1.10)}
+        {--daftar-owner : Tampilkan email login owner (pemasangan dari backup)}';
 
     protected $description = 'Data awal pemasangan: rental, cabang, owner, super admin, rilis APK TV';
 
@@ -45,6 +46,27 @@ class PasangAwal extends Command
         if ($this->option('rental')) {
             if (! $this->dataRental()) {
                 return self::FAILURE;
+            }
+        } elseif ($url = StatusTvService::urlServer($this->option('url-lokal'))) {
+            // Dipulihkan dari backup di PC baru: alamat server lokal TV ikut IP PC ini (hanya bila satu cabang)
+            $cabang = Cabang::withoutGlobalScopes()->get();
+
+            if ($cabang->count() === 1) {
+                Pengaturan::simpan('server.url_lokal', $url, $cabang->first()->id);
+                $this->line("Alamat server lokal TV: {$url}");
+            }
+        }
+
+        if ($this->option('daftar-owner')) {
+            // Langsung ke tabel peran (relasi roles() Spatie tersaring tim/tenant aktif, di konsol tidak ada)
+            $owner = DB::table('users')
+                ->join('model_has_roles', fn ($j) => $j->on('model_has_roles.model_id', '=', 'users.id')->where('model_has_roles.model_type', (new User)->getMorphClass()))
+                ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->where('roles.name', 'Owner')->where('users.is_active', true)
+                ->distinct()->get(['users.email', 'users.username']);
+
+            foreach ($owner as $u) {
+                $this->line("OWNER: {$u->email} ({$u->username})");
             }
         }
 
