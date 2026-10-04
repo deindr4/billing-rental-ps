@@ -111,6 +111,36 @@ class KeamananTest extends TestCase
         $this->assertFalse($lokal('127.0.0.1', ['CF-Connecting-IP' => '198.51.100.7']));
     }
 
+    public function test_cloudflare_tunnel_memakai_ip_asli_pengunjung(): void
+    {
+        // Installer Windows: TRUSTED_PROXIES=127.0.0.1,::1,<LAN>; cloudflared di PC ini meneruskan dari 127.0.0.1
+        Request::setTrustedProxies(['127.0.0.1', '::1', '192.168.0.0/16'], Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_PROTO);
+
+        // Hanya CF-Connecting-IP (tanpa X-Forwarded-For): tetap terbaca IP internet, bukan "lokal"
+        $this->dariIp('127.0.0.1', ['CF-Connecting-IP' => '198.51.100.7']);
+        $this->assertSame('198.51.100.7', BatasLogin::ipAsli(request()));
+        $this->assertFalse(BatasLogin::ipLokal(request()));
+
+        // Service Cloudflare diisi IP LAN PC (bukan localhost): sama
+        $this->dariIp('192.168.1.10', ['CF-Connecting-IP' => '198.51.100.8', 'X-Forwarded-Proto' => 'https']);
+        $this->assertSame('198.51.100.8', BatasLogin::ipAsli(request()));
+        $this->assertTrue(request()->isSecure());
+
+        // Pengunjung tunnel berbeda tidak berbagi kunci blokir
+        BatasLogin::gagal(request());
+        BatasLogin::gagal(request());
+        BatasLogin::gagal(request());
+        $this->assertGreaterThan(0, BatasLogin::sisaBlokir(request()));
+        $this->dariIp('127.0.0.1', ['CF-Connecting-IP' => '198.51.100.9']);
+        $this->assertSame(0, BatasLogin::sisaBlokir(request()));
+
+        // Header palsu dari luar (bukan proxy tepercaya) diabaikan
+        $this->dariIp('203.0.113.5', ['CF-Connecting-IP' => '10.0.0.1']);
+        $this->assertSame('203.0.113.5', BatasLogin::ipAsli(request()));
+
+        Request::setTrustedProxies([], Request::HEADER_X_FORWARDED_FOR);
+    }
+
     /**
      * Request uji Livewire selalu dari 127.0.0.1: pengecualian lokal dimatikan supaya
      * diperlakukan seperti pengunjung internet.

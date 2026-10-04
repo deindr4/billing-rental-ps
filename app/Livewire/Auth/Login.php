@@ -39,7 +39,7 @@ class Login extends Component
         }
 
         // Semua jaringan (termasuk Wi-Fi rental): 5 percobaan per menit per akun + IP
-        $key = 'login:'.Str::lower($this->login).'|'.request()->ip();
+        $key = 'login:'.Str::lower($this->login).'|'.BatasLogin::ipAsli(request());
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $detik = RateLimiter::availableIn($key);

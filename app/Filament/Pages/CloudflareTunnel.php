@@ -88,6 +88,8 @@ class CloudflareTunnel extends Page
             'idTunnel' => $tunnel->idTunnel(),
             'log' => $tunnel->logTerakhir(),
             'layananLokal' => 'http://localhost'.($port ? ':'.$port : ''),
+            // Kosong = lewat tunnel aset & Livewire dimuat via http di halaman https → diblokir browser → login gagal
+            'proxyTepercaya' => (string) config('billing.proxy_tepercaya'),
         ];
     }
 }

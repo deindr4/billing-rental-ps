@@ -197,10 +197,13 @@ function Siapkan-Tunnel {
         'tunnel --no-autoupdate run' (Split-Path $Cloudflared) @() @("TUNNEL_TOKEN_FILE=$TokenTunnel")
     if (-not $ada) { Nssm @('set', 'BillingPS-Tunnel', 'Start', 'SERVICE_DEMAND_START') }
 
-    # Lewat tunnel, permintaan datang dari cloudflared di PC ini: percayai 127.0.0.1 supaya HTTPS & IP asli
-    # pengunjung (batas login) terbaca. Isian yang sudah diatur pengguna tidak ditimpa.
+    # Lewat tunnel, permintaan datang dari cloudflared (127.0.0.1, atau IP LAN PC ini bila Service di Cloudflare diisi
+    # http://192.168.x.x): percayai keduanya supaya HTTPS & IP asli pengunjung (batas login) terbaca. Tanpa ini halaman
+    # https memuat aset/Livewire lewat http → diblokir browser → login gagal. Isian lain dari pengguna tidak ditimpa.
     $isiEnv = [IO.File]::ReadAllText((Join-Path $App '.env'))
-    if ($isiEnv -match '(?m)^TRUSTED_PROXIES=\s*$' -or $isiEnv -notmatch '(?m)^TRUSTED_PROXIES=') { Atur-Env 'TRUSTED_PROXIES' '127.0.0.1,::1' }
+    if ($isiEnv -match '(?m)^TRUSTED_PROXIES=(\s*|127\.0\.0\.1,::1\s*)$' -or $isiEnv -notmatch '(?m)^TRUSTED_PROXIES=') {
+        Atur-Env 'TRUSTED_PROXIES' '127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16'
+    }
 }
 
 function Mulai-Layanan([string] $Nama) {

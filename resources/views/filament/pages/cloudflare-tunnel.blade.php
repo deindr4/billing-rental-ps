@@ -22,7 +22,15 @@
             <div style="{{ $baris }} border-top:none"><span style="{{ $redup }}">Layanan tunnel</span><b style="color: {{ $warna }}">{{ $label }}</b></div>
             <div style="{{ $baris }}"><span style="{{ $redup }}">Token</span>
                 <span>{{ $adaToken ? 'Tersimpan'.($idTunnel ? ' · tunnel '.\Illuminate\Support\Str::limit($idTunnel, 13) : '') : 'Belum diisi' }}</span></div>
+            <div style="{{ $baris }}"><span style="{{ $redup }}">Proxy tepercaya (TRUSTED_PROXIES)</span>
+                <span style="color: {{ $proxyTepercaya === '' ? '#ef4444' : 'inherit' }}; text-align:right">{{ $proxyTepercaya ?: 'Belum diatur — login lewat tunnel akan gagal' }}</span></div>
         </div>
+        @if ($proxyTepercaya === '')
+            <div style="margin-top:10px; padding:10px 12px; border-radius:8px; background:rgba(239,68,68,.1); font-size:13px">
+                Jalankan installer / patch terbaru (mengisi otomatis), atau isi manual di <code>C:\BillingPS\app\.env</code>:
+                <code>TRUSTED_PROXIES=127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16</code>, lalu Pemeliharaan sistem → <b>Optimalkan</b>.
+            </div>
+        @endif
 
         <div style="margin-top:14px">
             <label for="isian-token" style="font-size:14px; font-weight:600">Token / perintah dari Cloudflare</label>
@@ -62,6 +70,11 @@
             <li>Buka <code>https://kasir.domainanda.com</code> — login dengan akun biasa.
                 Batas login dari internet tetap berlaku (3x salah → diblokir 15 menit per IP).</li>
         </ol>
+        <div style="font-size:13px; margin-top:8px">
+            <b>Login gagal / tombol tidak bereaksi lewat domain?</b> Cek: (1) baris "Proxy tepercaya" di atas tidak merah;
+            (2) Cloudflare → Speed → Optimization → <b>Rocket Loader: Off</b> (merusak JavaScript aplikasi);
+            (3) Security → Bots → <b>Bot Fight Mode: Off</b> (menantang permintaan aplikasi); (4) Service memakai <b>HTTP</b>, bukan HTTPS.
+        </div>
         <div style="font-size:12px; {{ $redup }} margin-top:6px">
             TV tetap memakai server lokal (LAN). Untuk keamanan tambahan, aktifkan <b>Cloudflare Access</b> (login email) pada hostname tersebut.
         </div>

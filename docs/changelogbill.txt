@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (perbaikan login lewat Cloudflare Tunnel)
+-----------------------------------------------------------------------------
+- Gejala: lewat domain tunnel gagal login, lokal aman. Penyebab: proxy tidak dipercaya -> halaman https memuat
+  CSS/JS & Livewire lewat http -> diblokir browser. Patch mengisi TRUSTED_PROXIES=127.0.0.1,::1 + jaringan lokal
+  (juga bila Service tunnel diisi IP LAN PC, bukan localhost).
+- Batas login memakai IP asli pengunjung (CF-Connecting-IP) bila datang dari proxy tepercaya: pengunjung tunnel tidak
+  dianggap "lokal" & tidak berbagi satu kunci blokir. Berlaku juga di server cloud di belakang Cloudflare.
+- Halaman Cloudflare Tunnel: baris "Proxy tepercaya" (merah bila kosong) + daftar cek (Rocket Loader, Bot Fight Mode).
+
+
 2026-10-04 (batal F&B salah order)
 -----------------------------------------------------------------------------
 - POS -> pilih "Gabung ke <unit>" -> daftar "Sudah di tagihan": tombol "−1" & "Semua" (atau "Batal" untuk qty 1)

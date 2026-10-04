@@ -35,7 +35,18 @@ final class BatasLogin
             return false;
         }
 
-        return IpUtils::checkIp((string) $r->ip(), self::JARINGAN_LOKAL);
+        return IpUtils::checkIp(self::ipAsli($r), self::JARINGAN_LOKAL);
+    }
+
+    /**
+     * IP pengunjung. Lewat Cloudflare Tunnel / proxy Cloudflare yang tepercaya, IP asli ada di CF-Connecting-IP
+     * (cloudflared sendiri 127.0.0.1) — dipakai juga untuk kunci blokir supaya pengunjung tunnel tidak berbagi satu kunci.
+     */
+    public static function ipAsli(Request $r): string
+    {
+        $cf = $r->headers->get('CF-Connecting-IP');
+
+        return $cf && $r->isFromTrustedProxy() && filter_var($cf, FILTER_VALIDATE_IP) ? $cf : (string) $r->ip();
     }
 
     /** IP ini bebas dari batas 3x (LOGIN_BEBAS_LOKAL=true & dari localhost / LAN) */
@@ -75,6 +86,6 @@ final class BatasLogin
 
     private static function kunci(Request $r): string
     {
-        return 'login-gagal:'.$r->ip();
+        return 'login-gagal:'.self::ipAsli($r);
     }
 }

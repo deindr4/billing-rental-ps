@@ -45,8 +45,14 @@ mengunduh / menjalankan cloudflared sendiri di Windows. Owner: Admin → Pengatu
 3. Public Hostname: subdomain + domain Anda → Service **HTTP** `localhost` (atau `localhost:PORT` bila port web bukan 80).
 
 Token disimpan di `data\cloudflared\token.txt` (hanya Administrator & SYSTEM); tunnel menyala sendiri setiap PC
-dinyalakan sampai dimatikan dari halaman yang sama. Installer mengisi `TRUSTED_PROXIES=127.0.0.1,::1` (bila masih
-kosong) supaya HTTPS & IP asli pengunjung terbaca — batas login dari internet tetap berlaku.
+dinyalakan sampai dimatikan dari halaman yang sama. Installer mengisi
+`TRUSTED_PROXIES=127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16` (bila kosong / masih nilai lama `127.0.0.1,::1`)
+supaya HTTPS & IP asli pengunjung (`CF-Connecting-IP`) terbaca — batas login dari internet tetap berlaku per pengunjung.
+
+**Login gagal lewat domain tapi lokal aman** → halaman https memuat aset/Livewire lewat http & diblokir browser:
+- Halaman Cloudflare Tunnel → baris "Proxy tepercaya" merah? Jalankan patch terbaru, atau isi nilai di atas di
+  `C:\BillingPS\app\.env` lalu Pemeliharaan sistem → Optimalkan (atau `..\runtime\php\php.exe artisan optimize`).
+- Cloudflare: Rocket Loader **Off**, Bot Fight Mode **Off**, Service tunnel **HTTP** (bukan HTTPS).
 
 ## Struktur folder
 
