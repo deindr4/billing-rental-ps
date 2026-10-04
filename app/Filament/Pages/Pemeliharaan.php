@@ -4,6 +4,7 @@ namespace App\Filament\Pages;
 
 use App\Models\User;
 use App\Services\Gateway\PengaturanGateway;
+use App\Services\UpdateAplikasi;
 use App\Support\Audit;
 use BackedEnum;
 use Filament\Notifications\Notification;
@@ -114,6 +115,30 @@ class Pemeliharaan extends Page
 
         Notification::make()->title($judul.($this->hasilGagal ? ' gagal' : ' selesai'))
             ->{$this->hasilGagal ? 'danger' : 'success'}()->send();
+    }
+
+    /* ---------------- Update aplikasi (GitHub Releases) ---------------- */
+
+    /** Hasil cek update (cache 6 jam; halaman ini boleh menghubungi GitHub bila cache kosong) */
+    public function getUpdateProperty(): ?array
+    {
+        return app(UpdateAplikasi::class)->cek();
+    }
+
+    public function cekUpdate(): void
+    {
+        abort_unless(static::canAccess(), 403);
+        $r = app(UpdateAplikasi::class)->cek(paksa: true);
+
+        Notification::make()
+            ->title(match (true) {
+                $r === null => 'Cek update dimatikan',
+                isset($r['error']) => $r['error'],
+                $r['baru'] => "Versi baru {$r['versi']} tersedia",
+                default => 'Aplikasi sudah versi terbaru',
+            })
+            ->{isset($r['error']) ? 'warning' : 'success'}()
+            ->send();
     }
 
     public function kosongkanLog(): void

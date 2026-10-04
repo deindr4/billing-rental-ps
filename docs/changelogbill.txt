@@ -5,6 +5,14 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (cek update dari GitHub)
+-----------------------------------------------------------------------------
+- Versi aplikasi di file VERSION. Aplikasi memeriksa rilis terbaru di GitHub (deindr4/billing-rental-ps) tiap 6 jam.
+- Dasbor: kartu "Versi aplikasi" (kuning bila ada update). Pemeliharaan sistem -> "Update aplikasi": catatan fitur,
+  tombol unduh file yang cocok (.exe PC Windows / .tar.gz cloud), Cek sekarang. Tidak memasang otomatis.
+- installer\rilis.ps1 menerbitkan rilis GitHub (exe, tar.gz, APK + catatan dari changelog). Panduan: docs/update-aplikasi.md.
+
+
 2026-10-04 (WhatsApp: kirim lebih mirip manusia)
 -----------------------------------------------------------------------------
 - Nomor dicek terdaftar di WhatsApp sebelum dikirimi (kirim ke nomor tak terdaftar = tanda bot); gagal dengan pesan jelas.

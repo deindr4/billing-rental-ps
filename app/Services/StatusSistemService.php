@@ -35,7 +35,25 @@ final class StatusSistemService
             'realtime' => $this->realtime(),
             'backup' => $this->backup(),
             'tv' => $this->tv(),
+            'versi' => $this->versi(),
         ];
+    }
+
+    /** Versi aplikasi & update dari GitHub (hasil cek terakhir; tidak menunggu internet) */
+    public function versi(): array
+    {
+        $u = app(UpdateAplikasi::class);
+        $r = $u->terakhir();
+        $sekarang = UpdateAplikasi::versiSekarang();
+
+        return match (true) {
+            $u->repo() === null => ['status' => 'info', 'judul' => 'Versi aplikasi', 'nilai' => $sekarang, 'detail' => 'Cek update dimatikan'],
+            $r === null => ['status' => 'info', 'judul' => 'Versi aplikasi', 'nilai' => $sekarang, 'detail' => 'Belum dicek — Pemeliharaan → Cek update'],
+            isset($r['error']) => ['status' => 'info', 'judul' => 'Versi aplikasi', 'nilai' => $sekarang, 'detail' => $r['error']],
+            $r['baru'] => ['status' => 'peringatan', 'judul' => 'Versi aplikasi', 'nilai' => "Update {$r['versi']} tersedia",
+                'detail' => "Terpasang {$sekarang} · buka Pemeliharaan sistem untuk catatan & unduhan"],
+            default => ['status' => 'ok', 'judul' => 'Versi aplikasi', 'nilai' => $sekarang, 'detail' => 'Terbaru'],
+        };
     }
 
     public function lupakan(): void

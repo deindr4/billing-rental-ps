@@ -3,6 +3,7 @@
 use App\Models\Iklan;
 use App\Services\Gateway\BayarMandiriService;
 use App\Services\Publik\BookingService;
+use App\Services\UpdateAplikasi;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -10,6 +11,19 @@ use Illuminate\Support\Facades\Schedule;
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
+
+// Cek versi baru di GitHub Releases (hasil di-cache; dasbor & Pemeliharaan sistem membacanya)
+Artisan::command('update:cek', function () {
+    $r = app(UpdateAplikasi::class)->cek(paksa: true);
+
+    match (true) {
+        $r === null => $this->line('Cek update dimatikan (UPDATE_REPO kosong).'),
+        isset($r['error']) => $this->warn($r['error']),
+        $r['baru'] => $this->info("Versi baru {$r['versi']} tersedia (terpasang {$r['sekarang']}): {$r['halaman']}"),
+        default => $this->line("Sudah terbaru ({$r['sekarang']})."),
+    };
+})->purpose('Cek versi baru aplikasi di GitHub');
+Schedule::command('update:cek')->everySixHours()->withoutOverlapping();
 
 // Backup harian jam 02:00 (butuh scheduler berjalan: `php artisan schedule:work` atau Task Scheduler/cron)
 Schedule::command('backup:buat')->dailyAt('02:00')->withoutOverlapping();

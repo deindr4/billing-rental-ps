@@ -18,6 +18,65 @@
         <p style="font-size:12px; margin-top:8px; {{ $redup }}">Kuning = perlu perhatian di server produksi (mis. debug nyala, cache belum dibuat).</p>
     </x-filament::section>
 
+    @php
+        $u = $this->update;
+        $jenis = \App\Services\UpdateAplikasi::jenisPemasangan();
+        $mb = fn ($b) => number_format($b / 1048576, 0, ',', '.').' MB';
+    @endphp
+    <x-filament::section>
+        <x-slot name="heading">Update aplikasi</x-slot>
+        <x-slot name="description">Versi baru diumumkan di GitHub. Diperiksa otomatis tiap 6 jam.</x-slot>
+        <x-slot name="afterHeader">
+            <x-filament::button size="sm" color="gray" icon="heroicon-o-arrow-path" wire:click="cekUpdate" wire:loading.attr="disabled">Cek sekarang</x-filament::button>
+        </x-slot>
+
+        <div>
+            <div style="{{ $baris }} border-top:none"><span style="{{ $redup }}">Versi terpasang</span><b>{{ \App\Services\UpdateAplikasi::versiSekarang() }}</b></div>
+            @if ($u === null)
+                <div style="{{ $baris }}"><span style="{{ $redup }}">Versi terbaru</span><span>Cek update dimatikan (UPDATE_REPO kosong)</span></div>
+            @elseif (isset($u['error']))
+                <div style="{{ $baris }}"><span style="{{ $redup }}">Versi terbaru</span><span style="color:#f59e0b">{{ $u['error'] }}</span></div>
+            @else
+                <div style="{{ $baris }}"><span style="{{ $redup }}">Versi terbaru</span>
+                    <b style="color: {{ $u['baru'] ? '#f59e0b' : '#22c55e' }}">
+                        {{ $u['versi'] }}{{ $u['baru'] ? ' — tersedia' : ' — sudah terbaru' }}
+                        @if ($u['tanggal']) <span style="font-weight:400; {{ $redup }}">({{ \Illuminate\Support\Carbon::parse($u['tanggal'])->translatedFormat('d M Y') }})</span> @endif
+                    </b></div>
+            @endif
+        </div>
+
+        @if (is_array($u) && ! isset($u['error']) && $u['baru'])
+            @if (trim($u['catatan']) !== '')
+                <div style="margin-top:12px; font-size:13px; line-height:1.6; padding:12px; border-radius:8px; background:rgba(127,127,127,.08); max-height:320px; overflow:auto" class="prose dark:prose-invert max-w-none">
+                    {!! \Illuminate\Support\Str::markdown($u['catatan'], ['html_input' => 'strip', 'allow_unsafe_links' => false]) !!}
+                </div>
+            @endif
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; align-items:center">
+                @if ($u['unduh'])
+                    <x-filament::button tag="a" :href="$u['unduh']['url']" icon="heroicon-o-arrow-down-tray">
+                        Unduh {{ $u['unduh']['nama'] }} ({{ $mb($u['unduh']['ukuran']) }})
+                    </x-filament::button>
+                @endif
+                @if ($u['halaman'])
+                    <x-filament::button tag="a" :href="$u['halaman']" target="_blank" color="gray" icon="heroicon-o-arrow-top-right-on-square">Halaman rilis</x-filament::button>
+                @endif
+            </div>
+
+            <div style="font-size:13px; margin-top:10px; {{ $redup }}">
+                @if ($jenis === 'windows')
+                    Jalankan file .exe yang diunduh di PC ini (klik dua kali, izinkan Administrator). Installer otomatis
+                    backup database, memperbarui aplikasi & layanan, lalu menyala lagi — data & pengaturan tetap. Aplikasi mati ± 2–5 menit.
+                @elseif ($jenis === 'cloud')
+                    Unggah file .tar.gz ke server lalu jalankan langkah "Update versi baru" di panduan CloudPanel
+                    (down → backup → ekstrak → migrate → optimize → up).
+                @else
+                    Unduh file yang sesuai dari halaman rilis: .exe untuk PC Windows, .tar.gz untuk server cloud, .apk untuk TV.
+                @endif
+            </div>
+        @endif
+    </x-filament::section>
+
     <x-filament::section>
         <x-slot name="heading">Tindakan</x-slot>
         <x-slot name="description">Setelah update aplikasi: Backup → Update database → Pasang ulang trigger sinkron → Optimalkan → Restart antrean & realtime.</x-slot>

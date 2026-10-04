@@ -7,7 +7,7 @@
 #   apache, mariadb, nssm, vc_redist, cacert : diunduh sekali ke installer\bahan\unduhan
 #   (Apache Lounge VS18 butuh VC++ runtime 14.50+ → vc_redist dari aka.ms/vc14)
 param(
-    [string] $Versi = (Get-Date -Format 'yyyy.MM.dd'),
+    [string] $Versi = '',  # kosong = isi file VERSION di akar repo (dipakai juga oleh cek update aplikasi)
     [switch] $LewatiAset,  # lewati npm run build (aset sudah dibangun)
     [switch] $PaketCloud   # hanya aplikasi -> keluaran\BillingPS-cloud-<versi>.tar.gz (VPS / CloudPanel)
 )
@@ -16,6 +16,8 @@ $ErrorActionPreference = 'Stop'
 $ProgressPreference = 'SilentlyContinue'
 $Installer = $PSScriptRoot
 $Repo = Split-Path -Parent $Installer
+if (-not $Versi) { $Versi = (Get-Content (Join-Path $Repo 'VERSION') -Raw).Trim() }
+if ($Versi -notmatch '^\d{4}\.\d{2}\.\d{2}(\.\d+)?$') { throw "Versi '$Versi' harus YYYY.MM.DD atau YYYY.MM.DD.N" }
 $Bahan = Get-Content (Join-Path $Installer 'bahan.json') -Raw | ConvertFrom-Json
 $Unduhan = Join-Path $Installer 'bahan\unduhan'
 $Staging = Join-Path $Installer 'staging'

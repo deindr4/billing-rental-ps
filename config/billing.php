@@ -12,6 +12,11 @@ return [
     // Jangan "*" jika server bisa diakses langsung tanpa proxy (IP bisa dipalsukan lewat header).
     'proxy_tepercaya' => env('TRUSTED_PROXIES'),
 
+    // Cek versi baru di GitHub Releases (repo publik "pemilik/nama"). Kosongkan untuk mematikan.
+    'update' => [
+        'repo' => env('UPDATE_REPO', 'deindr4/billing-rental-ps'),
+    ],
+
     // Login gagal 3x per IP -> blokir 15 menit. true = localhost & IP LAN (Wi-Fi rental) dikecualikan.
     'login_bebas_lokal' => (bool) env('LOGIN_BEBAS_LOKAL', true),
 
