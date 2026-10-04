@@ -49,7 +49,14 @@ $body += "`n## File`n- **BillingPS-Setup-$Versi.exe** - PC rental Windows (pasan
 if ($Uji) { Write-Host $body; Write-Host "Aset:"; $aset | ForEach-Object { Write-Host "  $_" }; exit 0 }
 
 # Token GitHub dari Git Credential Manager
-$kred = "protocol=https`nhost=github.com`n`n" | git credential fill 2>$null
+# (baris per baris; stderr git di PS 5.1 + ErrorAction Stop dianggap error, jadi sementara Continue)
+# Masukan lewat file ber-akhiran LF: pipa PowerShell mengirim CRLF yang ditolak git ("missing protocol field")
+$masukan = Join-Path $env:TEMP 'billingps-kred.txt'
+[IO.File]::WriteAllText($masukan, "protocol=https`nhost=github.com`n`n")
+$ErrorActionPreference = 'Continue'
+$kred = & cmd.exe /c "git credential fill < `"$masukan`" 2>NUL"
+$ErrorActionPreference = 'Stop'
+Remove-Item $masukan -Force
 $token = ($kred | Where-Object { $_ -like 'password=*' }) -replace '^password=', ''
 if (-not $token) { throw 'Akun GitHub belum login di git (Git Credential Manager).' }
 $h = @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json'; 'User-Agent' = 'BillingPS-Rilis' }
