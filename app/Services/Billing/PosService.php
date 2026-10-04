@@ -11,6 +11,7 @@ use App\Models\SesiLog;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 use App\Models\User;
+use App\Support\Audit;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -83,7 +84,7 @@ final class PosService
 
             $this->shift->wajibAktif($user, $transaksi->cabang_id);
 
-            $this->tambahItem($transaksi, $keranjang, $user);
+            $itemBaru = $this->tambahItem($transaksi, $keranjang, $user);
             $transaksi->hitungUlang();
 
             if ($transaksi->isLunas() && $transaksi->sisaTagihan() > 0) {
@@ -101,7 +102,8 @@ final class PosService
                     'sesi_id' => $sesi->id,
                     'user_id' => $user->id,
                     'jenis' => 'tambah_fnb',
-                    'data' => ['item' => count($keranjang), 'total' => $transaksi->total],
+                    // item_ids: siapa & kapan item dicatat (aturan batal tanpa PIN)
+                    'data' => ['item' => count($keranjang), 'total' => $transaksi->total, 'item_ids' => $itemBaru],
                 ]);
             }
 
@@ -109,9 +111,94 @@ final class PosService
         });
     }
 
-    /** @param  array<string,int>  $keranjang */
-    private function tambahItem(Transaksi $transaksi, array $keranjang, User $user): void
+    /**
+     * Batalkan F&B yang salah dicatat di tagihan (sebagian qty atau semua). Item tidak dihapus (dilindungi database):
+     * qty dikurangi; bila habis → qty 0, Rp0, "(dibatalkan)" & qty asli di catatan. Stok dikembalikan.
+     * Ditolak bila tagihan sudah terbayar melebihi total baru (batalkan lewat menu Transaksi supaya uang tercatat kembali).
+     */
+    public function batalItem(string $itemId, User $user, int $qty, string $alasan): Transaksi
     {
+        if (mb_strlen(trim($alasan)) < 3) {
+            throw new BillingException('Alasan pembatalan wajib diisi.');
+        }
+
+        return DB::transaction(function () use ($itemId, $user, $qty, $alasan) {
+            $item = TransaksiItem::withoutGlobalScopes()->where('tenant_id', $user->tenant_id)->find($itemId)
+                ?? throw new BillingException('Item tidak ditemukan.');
+            $transaksi = Transaksi::withoutGlobalScopes()->whereKey($item->transaksi_id)->lockForUpdate()->firstOrFail();
+            $item->refresh();
+
+            if ($transaksi->isDibatalkan()) {
+                throw new BillingException('Transaksi sudah dibatalkan.');
+            }
+
+            if ($item->jenis !== TransaksiItem::JENIS_PRODUK || $item->qty < 1) {
+                throw new BillingException('Item ini tidak bisa dibatalkan (bukan F&B atau sudah dibatalkan).');
+            }
+
+            if ($qty < 1 || $qty > $item->qty) {
+                throw new BillingException("Jumlah batal 1 sampai {$item->qty}.");
+            }
+
+            $this->shift->wajibAktif($user, $transaksi->cabang_id);
+
+            $sisa = $item->qty - $qty;
+            $catatan = trim(($item->catatan ? $item->catatan.' | ' : '')."Batal {$qty}x: ".trim($alasan));
+            $item->update($sisa > 0
+                ? ['qty' => $sisa, 'subtotal' => $item->harga_satuan * $sisa, 'catatan' => $catatan]
+                : ['qty' => 0, 'subtotal' => 0, 'nama' => $item->nama.' (dibatalkan)', 'catatan' => $catatan]);
+
+            $produk = Produk::withoutGlobalScopes()->find($item->referensi_id);
+
+            if ($produk?->lacak_stok) {
+                $this->stok->catat($produk, $transaksi->cabang_id, $qty, 'pembatalan', $user, $item, "Batal F&B {$transaksi->nomor}");
+            }
+
+            $transaksi->hitungUlang();
+
+            if ($transaksi->totalDibayar() > $transaksi->total) {
+                throw new BillingException('Item ini sudah dibayar. Batalkan lewat menu Transaksi supaya uangnya tercatat dikembalikan.');
+            }
+
+            $nilai = $item->harga_satuan * $qty;
+            $sesi = Sesi::withoutGlobalScopes()->where('transaksi_id', $transaksi->id)->first();
+
+            if ($sesi) {
+                $sesi->versi_tagihan = $sesi->versi_tagihan + 1; // TV ikut memperbarui rincian
+                $sesi->save();
+
+                SesiLog::create([
+                    'tenant_id' => $sesi->tenant_id,
+                    'cabang_id' => $sesi->cabang_id,
+                    'sesi_id' => $sesi->id,
+                    'user_id' => $user->id,
+                    'jenis' => 'batal_fnb',
+                    'data' => ['item_id' => $item->id, 'nama' => $produk?->nama ?? $item->nama, 'qty' => $qty, 'nilai' => $nilai, 'alasan' => trim($alasan)],
+                ]);
+            }
+
+            Audit::catat('batal_fnb', "Batal {$qty}x ".($produk?->nama ?? $item->nama)." di {$transaksi->nomor} (Rp ".number_format($nilai, 0, ',', '.')."): {$alasan}", $transaksi, [
+                'item_id' => $item->id, 'qty' => $qty, 'nilai' => $nilai, 'alasan' => $alasan,
+            ], userId: $user->id);
+
+            return $transaksi;
+        });
+    }
+
+    /** Pencatat item F&B di tagihan sesi (dari log tambah_fnb) — untuk aturan batal tanpa PIN */
+    public static function pencatatItem(string $sesiId, string $itemId): ?SesiLog
+    {
+        return SesiLog::withoutGlobalScopes()->where('sesi_id', $sesiId)->where('jenis', 'tambah_fnb')->latest()->get()
+            ->first(fn (SesiLog $l) => in_array($itemId, $l->data['item_ids'] ?? [], true));
+    }
+
+    /**
+     * @param  array<string,int>  $keranjang
+     * @return array<int,string> id item yang dibuat
+     */
+    private function tambahItem(Transaksi $transaksi, array $keranjang, User $user): array
+    {
+        $dibuat = [];
         $produkList = Produk::withoutGlobalScopes()
             ->where('tenant_id', $transaksi->tenant_id)
             ->whereIn('id', array_keys($keranjang))
@@ -154,7 +241,11 @@ final class PosService
             if ($produk->lacak_stok) {
                 $this->stok->catat($produk, $transaksi->cabang_id, -$qty, 'penjualan', $user, $item, "Penjualan {$transaksi->nomor}");
             }
+
+            $dibuat[] = $item->id;
         }
+
+        return $dibuat;
     }
 
     /** @param  array<string,int>  $keranjang */

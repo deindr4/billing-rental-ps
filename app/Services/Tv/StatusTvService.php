@@ -267,6 +267,8 @@ final class StatusTvService
 
         return TransaksiItem::withoutGlobalScopes()
             ->where('transaksi_id', $transaksi->id)
+            // F&B yang dibatalkan penuh (salah order, qty 0) tidak perlu dilihat pelanggan
+            ->where(fn ($q) => $q->where('jenis', '!=', TransaksiItem::JENIS_PRODUK)->orWhere('qty', '>', 0))
             ->orderBy('created_at')
             ->get()
             ->map(fn (TransaksiItem $i) => [

@@ -31,15 +31,40 @@
             @else
                 <ul class="divide-y divide-line text-sm max-h-56 overflow-y-auto">
                     @foreach ($aktifItem as $item)
-                        @php $fnb = $item->jenis === \App\Models\TransaksiItem::JENIS_PRODUK; @endphp
-                        <li class="px-3 py-1.5 flex items-start justify-between gap-2">
+                        @php
+                            $fnb = $item->jenis === \App\Models\TransaksiItem::JENIS_PRODUK;
+                            $dibatalkan = $fnb && $item->qty < 1;
+                            $pin = $fnb && ! $dibatalkan && $this->batalButuhPin($item);
+                            $ketPin = $pin ? ' Butuh PIN supervisor/owner.' : '';
+                        @endphp
+                        <li class="px-3 py-1.5 flex items-start justify-between gap-2" wire:key="item-{{ $item->id }}-{{ $item->qty }}">
                             <span class="min-w-0">
-                                <span @class(['block truncate', 'text-muted' => ! $fnb])>
-                                    {{ $item->nama }}{{ $item->qty > 1 ? ' ×'.$item->qty : '' }}
-                                </span>
-                                <span class="block text-xs text-muted num">{{ $item->created_at->format('H:i') }}</span>
+                                <span @class(['block truncate', 'text-muted' => ! $fnb || $dibatalkan, 'line-through' => $dibatalkan])>{{ $item->nama }}</span>
+                                {{-- Jumlah di baris kecil supaya tidak ikut terpotong nama yang panjang --}}
+                                <span class="block text-xs text-muted num">{{ $item->created_at->format('H:i') }}{{ $item->qty > 1 ? ' · ×'.$item->qty : '' }}</span>
                             </span>
-                            <x-rupiah :nilai="$item->subtotal" class="shrink-0 {{ $fnb ? '' : 'text-muted' }}" />
+                            <span class="shrink-0 flex items-center gap-1.5">
+                                <x-rupiah :nilai="$item->subtotal" class="{{ $fnb && ! $dibatalkan ? '' : 'text-muted' }}" />
+                                {{-- Salah order: batalkan 1 / semua (stok kembali, TV ikut berubah) --}}
+                                @if ($fnb && ! $dibatalkan)
+                                    <x-confirm-button action="batalItem" :params="[$item->id, 1]"
+                                                      title="Batalkan 1× {{ $item->nama }}?"
+                                                      text="Dihapus dari tagihan {{ $sesiT->unit->nama }} & stok dikembalikan.{{ $ketPin }}"
+                                                      confirm-text="Ya, batalkan" reason :pin="$pin"
+                                                      class="btn-tint tint-merah h-7 px-2 text-xs">
+                                        {{ $item->qty > 1 ? '−1' : 'Batal' }}
+                                    </x-confirm-button>
+                                    @if ($item->qty > 1)
+                                        <x-confirm-button action="batalItem" :params="[$item->id, $item->qty]"
+                                                          title="Batalkan semua {{ $item->qty }}× {{ $item->nama }}?"
+                                                          text="Dihapus dari tagihan {{ $sesiT->unit->nama }} & stok dikembalikan.{{ $ketPin }}"
+                                                          confirm-text="Ya, batalkan semua" reason :pin="$pin"
+                                                          class="btn-tint tint-merah h-7 px-2 text-xs">
+                                            Semua
+                                        </x-confirm-button>
+                                    @endif
+                                @endif
+                            </span>
                         </li>
                     @endforeach
                 </ul>

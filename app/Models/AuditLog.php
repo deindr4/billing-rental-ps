@@ -29,6 +29,8 @@ class AuditLog extends Model
         'pin_gagal' => 'PIN salah',
         'batal_transaksi' => 'Batal transaksi',
         'waktu_gratis' => 'Tambah waktu gratis',
+        'batal_tambah_waktu' => 'Batal tambah waktu',
+        'batal_fnb' => 'Batal F&B (salah order)',
         'bypass_tv' => 'Bypass TV',
         'kode_darurat' => 'Kode darurat TV',
         'koreksi_member' => 'Koreksi member',

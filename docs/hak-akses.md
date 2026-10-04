@@ -64,6 +64,8 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Pemberitahuan ke layar TV & running text promo (dicatat di log aktivitas) | ✅ | ✅ | ✅ | – |
 | Batal tambah waktu / batal sesi (tidak jadi main) — buatan sendiri, ≤ 5 menit, belum dibayar | ✅ | ✅ | ✅ | – |
 | Batal tambah waktu / batal sesi di luar itu | ✅ | ✅ | PIN | – |
+| Batal F&B salah order di tagihan unit (POS → "Sudah di tagihan": −1 / Semua) — dicatat sendiri, ≤ 5 menit | ✅ | ✅ | ✅ | – |
+| Batal F&B di luar itu (item yang sudah dibayar: lewat menu Transaksi) | ✅ | ✅ | PIN | – |
 | Pilih / pindah HDMI TV (TV dengan beberapa konsol) | ✅ | ✅ | ✅ | – |
 | Unlock TV, Tutup aplikasi TV, akses staf di TV (Home → OK → PIN), kode darurat | PIN | PIN | – | PIN |
 | **Admin** | | | | |

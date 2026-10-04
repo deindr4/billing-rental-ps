@@ -19,7 +19,7 @@ final class Audit
     /** Aksi yang otomatis dianggap anomali (tampil di laporan) */
     public const ANOMALI = [
         'pin_gagal', 'batal_transaksi', 'waktu_gratis', 'bypass_tv', 'kode_darurat',
-        'koreksi_member', 'batal_pengeluaran', 'selisih_kas', 'login_gagal',
+        'koreksi_member', 'batal_pengeluaran', 'selisih_kas', 'login_gagal', 'batal_fnb',
     ];
 
     private static bool $nonaktif = false;

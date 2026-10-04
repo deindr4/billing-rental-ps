@@ -984,7 +984,8 @@ final class BillingService
         foreach ($items as $item) {
             $p = $produk->get($item->referensi_id);
 
-            if ($p && $p->lacak_stok) {
+            // qty 0 = item sudah dibatalkan sendiri (stoknya sudah kembali)
+            if ($p && $p->lacak_stok && $item->qty > 0) {
                 app(StokService::class)->catat($p, $transaksi->cabang_id, $item->qty, 'pembatalan', $user, $item, "Pembatalan {$transaksi->nomor}");
             }
         }

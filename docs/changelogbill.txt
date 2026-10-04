@@ -5,6 +5,18 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-04 (batal F&B salah order)
+-----------------------------------------------------------------------------
+- POS -> pilih "Gabung ke <unit>" -> daftar "Sudah di tagihan": tombol "−1" & "Semua" (atau "Batal" untuk qty 1)
+  pada tiap F&B. Wajib alasan. Stok dikembalikan, total tagihan berkurang, TV langsung menyesuaikan
+  (F&B yang dibatalkan penuh tidak tampil di TV; di kasir tampil dicoret "(dibatalkan)" Rp0).
+- PIN: tidak perlu bila yang mencatat item itu sendiri & masih dalam "Batal tanpa PIN (menit)" (bawaan 5),
+  atau pemilik izin batal transaksi; selain itu PIN supervisor/owner.
+- Ditolak bila item sudah dibayar (batalkan lewat menu Transaksi supaya uang tercatat dikembalikan).
+- Tercatat di log sesi, audit "Batal F&B (salah order)" & ditandai anomali di laporan.
+- Perbaikan: batal seluruh transaksi tidak mengembalikan stok item yang sudah dibatalkan sendiri (tidak dobel).
+
+
 2026-10-04 (Cloudflare Tunnel dari admin)
 -----------------------------------------------------------------------------
 - Admin -> Pengaturan -> Cloudflare Tunnel (owner / super admin, hanya pemasangan Windows): tempel perintah /

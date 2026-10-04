@@ -7,9 +7,12 @@ use App\Livewire\Concerns\WithAlert;
 use App\Models\Cabang;
 use App\Models\KategoriProduk;
 use App\Models\Produk;
+use App\Models\Pengaturan;
 use App\Models\Sesi;
 use App\Models\Transaksi;
+use App\Models\TransaksiItem;
 use App\Services\Billing\PosService;
+use App\Services\PinService;
 use App\Support\Tenancy;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -241,6 +244,55 @@ class Pos extends Component
 
         $this->kosongkan();
         $this->dispatch('buka-pembayaran', transaksiId: $transaksi->id);
+    }
+
+    /* ---------------- Batal F&B di tagihan unit (salah order) ---------------- */
+
+    /**
+     * Tanpa PIN: pemilik izin batal transaksi, atau yang mencatat item itu sendiri masih dalam batas menit
+     * (Pengaturan Operasional → "Batal tanpa PIN"), sama dengan batal tambah waktu.
+     */
+    public function batalButuhPin(TransaksiItem $item): bool
+    {
+        if (auth()->user()->can('transaksi.batal')) {
+            return false;
+        }
+
+        $sesi = $this->sesiTujuan;
+        $log = $sesi ? PosService::pencatatItem($sesi->id, $item->id) : null;
+        $menit = max(0, (int) Pengaturan::ambil('sesi.batal_tanpa_pin_menit', 5));
+
+        return ! ($log && $log->user_id === auth()->id() && $log->created_at->gte(now()->subMinutes($menit)));
+    }
+
+    /** Dipanggil dari tombol konfirmasi: $konfirmasi['reason'], ['pin'] (bila perlu) */
+    public function batalItem(string $itemId, int $qty, array $konfirmasi = []): void
+    {
+        $item = $this->tagihanTujuan?->items->firstWhere('id', $itemId);
+
+        if (! $item || $item->jenis !== TransaksiItem::JENIS_PRODUK || $item->qty < 1) {
+            $this->error('Item ini sudah tidak bisa dibatalkan');
+
+            return;
+        }
+
+        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: 'Salah order';
+
+        try {
+            if ($this->batalButuhPin($item)) {
+                $penyetuju = app(PinService::class)->setujui($konfirmasi['pin'] ?? null, 'transaksi.batal', app(Tenancy::class)->tenantId());
+                $alasan .= " (disetujui {$penyetuju->name})";
+            }
+
+            app(PosService::class)->batalItem($item->id, auth()->user(), $qty, $alasan);
+        } catch (BillingException $e) {
+            $this->alert('Tidak bisa dibatalkan', $e->getMessage(), 'error');
+
+            return;
+        }
+
+        $this->success("{$qty}× {$item->nama} dibatalkan");
+        $this->dispatch('sesi-berubah');
     }
 
     #[On('sesi-berubah')]
