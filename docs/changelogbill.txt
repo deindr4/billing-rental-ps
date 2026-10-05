@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-05 (skrip pemasangan CloudPanel)
+-----------------------------------------------------------------------------
+- installer/cloudpanel/pasang-site.sh (site user): ekstrak paket ke folder site, buat .env (database ditanya, REVERB
+  acak, APP_KEY opsional dari PC rental), cek database & log_bin_trust_function_creators, migrasi, hak akses, trigger,
+  super admin, optimize. Dijalankan lagi saat sudah terpasang = mode update. Menolak paket yang terekstrak di public/.
+- installer/cloudpanel/pasang-root.sh (root): setelan database untuk trigger + supervisor antrean, realtime TV & jadwal
+  (schedule:work, tanpa cron).
+- .env.example: DB_CONNECTION=mysql (SQLite tidak didukung).
+
+
 2026-10-04 (cek update dari GitHub)
 -----------------------------------------------------------------------------
 - Versi aplikasi di file VERSION. Aplikasi memeriksa rilis terbaru di GitHub (deindr4/billing-rental-ps) tiap 6 jam.
