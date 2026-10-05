@@ -108,6 +108,12 @@ for ($coba = 1; $coba -le 3; $coba++) {
 }
 Pop-Location
 if ($kode -ne 0) { throw 'composer install gagal' }
+# Aset Livewire sebagai file statis (public/vendor/livewire): server Nginx yang menyajikan *.js langsung dari disk
+# (mis. template CloudPanel + Varnish) tidak meneruskan /livewire-xxx/livewire.min.js ke PHP -> 404 -> tombol mati
+Push-Location $app
+& cmd.exe /c 'php artisan vendor:publish --tag=livewire:assets --force 2>&1' | Out-Null
+Pop-Location
+if (-not (Test-Path (Join-Path $app 'public\vendor\livewire\livewire.min.js'))) { throw 'Publikasi aset Livewire gagal' }
 Remove-Item -Recurse -Force (Join-Path $app 'storage')
 Get-ChildItem (Join-Path $app 'bootstrap\cache') -Filter '*.php' | Remove-Item -Force
 

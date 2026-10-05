@@ -2,7 +2,7 @@
 # Billing PS - langkah ROOT di server CloudPanel (sekali):
 #   sudo bash pasang-root.sh
 # 1. Setelan database untuk trigger sinkron (log_bin_trust_function_creators=1)
-# 2. Supervisor: antrean (queue:work), realtime TV (Reverb :8080 lokal), jadwal (schedule:work - pengganti cron)
+# 2. Supervisor: antrean (queue:work), realtime TV (Reverb 127.0.0.1:6001), jadwal (schedule:work - pengganti cron)
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudbill.deltagamesbali.id}"
@@ -48,6 +48,9 @@ else
 fi
 
 judul "2. Supervisor: antrean, realtime TV, jadwal"
+# Port Reverb dari .env (pasang-site.sh: 6001; 8080 dipakai Nginx backend di template CloudPanel ber-Varnish)
+PORT_WS="$(sed -nE 's/^REVERB_SERVER_PORT=([0-9]+).*/\1/p' "$SITE/.env" 2>/dev/null | head -1)"
+PORT_WS="${PORT_WS:-6001}"
 if ! command -v supervisorctl >/dev/null; then
     # apt bisa melaporkan error dari paket lain yang tertunda (mis. update CloudPanel setengah jalan)
     # walau supervisor sendiri terpasang: yang dicek hasil akhirnya
@@ -72,7 +75,7 @@ stdout_logfile=$SITE/storage/logs/antrean.log
 stdout_logfile_maxbytes=5MB
 
 [program:billingps-realtime]
-command=$PHP $SITE/artisan reverb:start --host=127.0.0.1 --port=8080
+command=$PHP $SITE/artisan reverb:start --host=127.0.0.1 --port=$PORT_WS
 directory=$SITE
 user=$SITE_USER
 autostart=true
@@ -101,5 +104,5 @@ judul "3. Langkah berikut (aplikasi) - sebagai site user $SITE_USER"
 echo "  su -s /bin/bash $SITE_USER -c \"SITE=$SITE bash $(cd "$(dirname "$0")" && pwd)/pasang-site.sh <file-paket.tar.gz>\""
 
 hijau ""
-hijau "Selesai. Jangan buka port 8080 & 3306 di firewall (Reverb diakses lewat Nginx /app)."
+hijau "Selesai. Jangan buka port $PORT_WS & 3306 di firewall (Reverb diakses lewat Nginx /app)."
 echo "Tidak perlu Cron Job schedule:run di CloudPanel - jadwal sudah berjalan lewat supervisor (billingps-jadwal)."

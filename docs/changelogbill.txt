@@ -13,6 +13,9 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 - installer/cloudpanel/pasang-root.sh (root): setelan database untuk trigger + supervisor antrean, realtime TV & jadwal
   (schedule:work, tanpa cron).
 - .env.example: DB_CONNECTION=mysql (SQLite tidak didukung).
+- Perbaikan untuk vhost CloudPanel ber-Varnish (Nginx menyajikan *.js langsung dari disk, backend di 8080):
+  aset Livewire dipublikasikan ke public/vendor/livewire (paket & skrip) - sebelumnya livewire.min.js 404 & login
+  tidak bereaksi; Reverb pindah ke port 6001; TRUSTED_PROXIES=127.0.0.1,::1,cloudflare. Vhost: installer/cloudpanel/README.md.
 
 
 2026-10-04 (cek update dari GitHub)

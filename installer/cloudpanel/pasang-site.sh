@@ -69,6 +69,7 @@ if [ -f .env ]; then
     art down || true
     art backup:buat || merah "Backup gagal - lanjut? (Ctrl+C untuk batal)"; sleep 3
     tar -xzf "$PAKET" -C "$SITE"          # .env & isi storage tetap
+    art vendor:publish --tag=livewire:assets --force >/dev/null   # JS Livewire sebagai file statis (Nginx)
     art migrate --force
     art db:seed --class=HakAksesSeeder --force
     art sync pasang-trigger
@@ -117,15 +118,17 @@ atur BROADCAST_CONNECTION reverb
 atur REVERB_APP_ID "$(shuf -i 100000-999999 -n 1)"
 atur REVERB_APP_KEY "$(openssl rand -hex 10)"
 atur REVERB_APP_SECRET "$(openssl rand -hex 16)"
+# 6001, bukan 8080: template CloudPanel ber-Varnish memakai 8080 untuk Nginx backend situs
 atur REVERB_HOST 127.0.0.1
-atur REVERB_PORT 8080
+atur REVERB_PORT 6001
 atur REVERB_SCHEME http
 atur REVERB_SERVER_HOST 127.0.0.1
-atur REVERB_SERVER_PORT 8080
+atur REVERB_SERVER_PORT 6001
 atur TV_WS_HOST "$DOMAIN"
 atur TV_WS_PORT 443
 atur TV_WS_SCHEME https
-if [[ "$CF" =~ ^[Yy] ]]; then atur TRUSTED_PROXIES cloudflare; else atur TRUSTED_PROXIES ""; fi
+# PHP menerima permintaan dari Nginx/Varnish lokal (127.0.0.1): percayai juga, supaya IP asli pengunjung terbaca
+if [[ "$CF" =~ ^[Yy] ]]; then atur TRUSTED_PROXIES "127.0.0.1,::1,cloudflare"; else atur TRUSTED_PROXIES "127.0.0.1,::1"; fi
 
 if [ -n "$KUNCI" ]; then atur APP_KEY "$KUNCI"; else atur APP_KEY ""; art key:generate --force; fi
 
@@ -144,6 +147,7 @@ esac
 judul "Tabel, hak akses & trigger sinkron"
 mkdir -p storage/framework/{cache/data,sessions,views} storage/logs bootstrap/cache
 chmod -R u+rwX storage bootstrap/cache
+art vendor:publish --tag=livewire:assets --force >/dev/null   # JS Livewire sebagai file statis (Nginx)
 art migrate --force
 art db:seed --class=HakAksesSeeder --force
 art sync pasang-trigger
