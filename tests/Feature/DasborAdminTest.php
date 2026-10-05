@@ -67,6 +67,23 @@ class DasborAdminTest extends TestCase
         $this->assertSame('peringatan', app(StatusSistemService::class)->cloud(paksa: true)['status']);
     }
 
+    /** Di cloud, alamat LAN server lokal tidak terjangkau: status dibaca dari kontak sinkron terakhir, tanpa ping */
+    public function test_di_cloud_status_server_lokal_dari_kontak_sinkron(): void
+    {
+        config(['app.mode' => 'cloud']);
+        Http::fake();
+        $tenant = \App\Models\Tenant::firstOrFail();
+        $this->assertSame('Belum terhubung', app(StatusSistemService::class)->cloud(paksa: true)['nilai']);
+
+        $s = \App\Models\ServerSinkron::create(['tenant_id' => $tenant->id, 'nama' => 'PC rental', 'token_hash' => hash('sha256', 'x'), 'is_active' => true, 'terakhir_kontak' => now()->subMinute()]);
+        $kartu = app(StatusSistemService::class)->cloud(paksa: true);
+        $this->assertSame(['ok', 'Online'], [$kartu['status'], $kartu['nilai']]);
+
+        $s->update(['terakhir_kontak' => now()->subHour()]);
+        $this->assertSame('mati', app(StatusSistemService::class)->cloud(paksa: true)['status']);
+        Http::assertNothingSent(); // tidak mencoba menghubungi 192.168.x.x
+    }
+
     public function test_widget_rekap_dan_operasional(): void
     {
         Livewire::test(RekapHariIni::class)->assertSee('Omzet hari ini')->assertSee('Unit terpakai');

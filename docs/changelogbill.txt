@@ -5,6 +5,13 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-05 (status server lokal di cloud)
+-----------------------------------------------------------------------------
+- Dasbor cloud: kartu "Server lokal (rental)" tidak lagi mencoba menghubungi alamat LAN (192.168.x.x - memang tidak
+  terjangkau dari internet, dulu selalu "Bermasalah"). Status dibaca dari kontak sinkron terakhir server lokal:
+  Online (< 3 menit) / kuning (< 15 menit) / merah. Per rental (owner hanya melihat server lokal miliknya).
+
+
 2026-10-05 (skrip pemasangan CloudPanel)
 -----------------------------------------------------------------------------
 - installer/cloudpanel/pasang-site.sh (site user): ekstrak paket ke folder site, buat .env (database ditanya, REVERB

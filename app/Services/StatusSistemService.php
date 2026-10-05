@@ -118,7 +118,14 @@ final class StatusSistemService
 
         return Cache::remember(self::CACHE.'cloud', 60, function () {
             $diCloud = config('app.mode') === 'cloud';
-            $judul = $diCloud ? 'Server lokal (rental)' : 'Server cloud / VPS';
+
+            // Dari cloud, alamat LAN rental (192.168.x.x) memang tidak terjangkau: status server lokal dibaca dari
+            // kapan server lokal terakhir menghubungi cloud lewat sinkron (tiap menit), bukan dengan ping
+            if ($diCloud) {
+                return $this->serverLokalDariSinkron();
+            }
+
+            $judul = 'Server cloud / VPS';
             $kunci = $diCloud ? 'server.url_lokal' : 'server.url_cloud';
             $url = StatusTvService::urlServer($this->pengaturan($kunci));
 
@@ -145,6 +152,35 @@ final class StatusSistemService
                 return ['status' => 'mati', 'judul' => $judul, 'nilai' => 'Tidak bisa dihubungi', 'detail' => $url];
             }
         });
+    }
+
+    private function serverLokalDariSinkron(): array
+    {
+        $judul = 'Server lokal (rental)';
+        $tenantId = app(\App\Support\Tenancy::class)->tenantId(); // super admin: semua rental
+        $server = ServerSinkron::query()->where('is_active', true)->when($tenantId, fn ($q) => $q->where('tenant_id', $tenantId))->get();
+
+        if ($server->isEmpty()) {
+            return ['status' => 'info', 'judul' => $judul, 'nilai' => 'Belum terhubung',
+                'detail' => 'Server lokal belum sinkron ke sini · Pengaturan → Sinkronisasi (token)'];
+        }
+
+        $terakhir = $server->max('terakhir_kontak');
+
+        if (! $terakhir) {
+            return ['status' => 'info', 'judul' => $judul, 'nilai' => 'Belum pernah kontak',
+                'detail' => 'Token sudah dibuat; isi alamat cloud & token di server lokal lalu Simpan'];
+        }
+
+        $terakhir = Carbon::parse($terakhir);
+
+        return [
+            'status' => $terakhir->gt(now()->subMinutes(3)) ? 'ok' : ($terakhir->gt(now()->subMinutes(15)) ? 'peringatan' : 'mati'),
+            'judul' => $judul,
+            'nilai' => $terakhir->gt(now()->subMinutes(3)) ? 'Online' : 'Tidak ada kontak',
+            'detail' => 'Sinkron terakhir '.$terakhir->diffForHumans()
+                .' · bila server lokal mati, TV & kasir otomatis memakai server cloud ini',
+        ];
     }
 
     /** Jumlah data yang belum pernah tersinkron (kolom synced_at kosong) */
