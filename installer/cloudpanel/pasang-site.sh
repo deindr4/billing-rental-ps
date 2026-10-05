@@ -19,6 +19,15 @@ judul() { printf '\n\033[36m== %s ==\033[0m\n' "$*"; }
 [ -d "$SITE" ] || { merah "Folder site tidak ada: $SITE (cek DOMAIN / buat site Laravel di CloudPanel dulu)"; exit 1; }
 command -v "$PHP" >/dev/null || { merah "$PHP tidak ditemukan. Atur PHP=php8.x"; exit 1; }
 
+# Semua isi folder site harus milik user ini (yang dibuat / diunggah sebagai root tidak bisa ditimpa)
+BUKAN_MILIK="$(find "$SITE" -maxdepth 3 ! -user "$(id -un)" -print -quit 2>/dev/null || true)"
+if [ -n "$BUKAN_MILIK" ]; then
+    merah "Ada file/folder bukan milik $(id -un), mis. $BUKAN_MILIK"
+    merah "Perbaiki sebagai root, lalu jalankan skrip ini lagi:"
+    echo "  chown -R $(id -un):$(id -un) $SITE"
+    exit 1
+fi
+
 # Paket salah tempat: aplikasi tidak boleh diekstrak ke dalam folder public (.env & kode bisa diunduh orang)
 if [ -f "$SITE/public/artisan" ] || [ -f "$SITE/public/.env" ]; then
     merah "Aplikasi terekstrak di dalam folder public/ - BERBAHAYA (kode & .env bisa diunduh)."

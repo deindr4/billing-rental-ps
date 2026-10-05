@@ -6,7 +6,10 @@
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudbill.deltagamesbali.id}"
-SITE_USER="${SITE_USER:-indra}"
+# Site user = pemilik /home/<user>/htdocs/<domain> (dibuat CloudPanel saat Add Site)
+if [ -z "${SITE_USER:-}" ]; then
+    SITE_USER="$(ls -d /home/*/htdocs/"$DOMAIN" 2>/dev/null | head -1 | cut -d/ -f3)"
+fi
 SITE="/home/$SITE_USER/htdocs/$DOMAIN"
 PHP="${PHP:-/usr/bin/php8.4}"
 
@@ -15,7 +18,11 @@ hijau() { printf '\033[32m%s\033[0m\n' "$*"; }
 judul() { printf '\n\033[36m== %s ==\033[0m\n' "$*"; }
 
 [ "$(id -u)" -eq 0 ] || { merah "Jalankan sebagai root: sudo bash $0"; exit 1; }
-[ -d "$SITE" ] || { merah "Folder site tidak ada: $SITE (atur DOMAIN / SITE_USER)"; exit 1; }
+[ -n "$SITE_USER" ] && [ -d "$SITE" ] || { merah "Folder site /home/*/htdocs/$DOMAIN tidak ditemukan (atur DOMAIN / SITE_USER)"; exit 1; }
+hijau "Site: $SITE (user $SITE_USER)"
+
+# Semua file site milik site user (file yang dibuat / diunggah sebagai root membuat site user tidak bisa menulis)
+chown -R "$SITE_USER":"$SITE_USER" "$SITE"
 [ -x "$PHP" ] || { merah "PHP tidak ada di $PHP (atur PHP=/usr/bin/php8.x)"; exit 1; }
 
 judul "1. Database: log_bin_trust_function_creators"

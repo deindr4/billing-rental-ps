@@ -9,7 +9,7 @@ buat database) dan 5 (blok Nginx di Vhost) tetap lewat panel.
 | `pasang-root.sh` | root | `log_bin_trust_function_creators=1` (MySQL 8 / MariaDB) & supervisor: antrean, realtime TV (Reverb), jadwal (`schedule:work`, pengganti cron). |
 
 Ganti domain / user / PHP lewat variabel: `DOMAIN=... SITE_USER=... PHP=... bash pasang-root.sh`
-(bawaan: `cloudbill.deltagamesbali.id`, `indra`, PHP 8.4).
+(bawaan: `cloudbill.deltagamesbali.id`, site user dideteksi dari /home/<user>/htdocs/<domain>, PHP 8.4).
 
 ```bash
 # site user
