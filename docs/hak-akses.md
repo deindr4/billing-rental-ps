@@ -69,6 +69,11 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Batal F&B salah order di tagihan unit (POS → "Sudah di tagihan": −1 / Semua) — dicatat sendiri, ≤ 5 menit | ✅ | ✅ | ✅ | – |
 | Batal F&B di luar itu (item yang sudah dibayar: lewat menu Transaksi) | ✅ | ✅ | PIN | – |
 | Pilih / pindah HDMI TV (TV dengan beberapa konsol) | ✅ | ✅ | ✅ | – |
+| **PC** (menu Rental PC, lihat docs/pc-agent.md) | | | | |
+| Rental PC: mulai, kelola & selesaikan sesi (tamu / member yang sama dengan PS) | ✅ | ✅ | ✅ | – |
+| Tutup game yang hang di PC | ✅ | ✅ | ✅ | – |
+| Kunci, log off, restart, matikan & nyalakan PC (Wake-on-LAN); izinkan Task Manager sementara | ✅ | ✅ | – | ✅ |
+| Menu staf di PC (buka Task Manager dll.) | PIN | PIN | – | PIN |
 | Unlock TV, Tutup aplikasi TV, akses staf di TV (Home → OK → PIN), kode darurat | PIN | PIN | – | PIN |
 | **Admin** | | | | |
 | Masuk panel admin | ✅ | ✅ | – | – |

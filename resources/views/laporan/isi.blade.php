@@ -116,7 +116,12 @@
             <span class="label">{{ $hari }} hari</span>
         </div>
         <dl class="px-4 py-3 text-sm space-y-2">
-            <div class="flex justify-between"><dt class="text-muted">Sewa PS</dt><dd><x-rupiah :nilai="$r['pendapatan_sewa']" /></dd></div>
+            @if (($r['pendapatan_sewa_pc'] ?? 0) > 0)
+                <div class="flex justify-between"><dt class="text-muted">Sewa PS</dt><dd><x-rupiah :nilai="$r['pendapatan_sewa'] - $r['pendapatan_sewa_pc']" /></dd></div>
+                <div class="flex justify-between"><dt class="text-muted">Sewa PC</dt><dd><x-rupiah :nilai="$r['pendapatan_sewa_pc']" /></dd></div>
+            @else
+                <div class="flex justify-between"><dt class="text-muted">Sewa PS</dt><dd><x-rupiah :nilai="$r['pendapatan_sewa']" /></dd></div>
+            @endif
             <div class="flex justify-between"><dt class="text-muted">F&amp;B</dt><dd><x-rupiah :nilai="$r['pendapatan_fnb']" /></dd></div>
             @if ($r['pendapatan_lainnya'] > 0)
                 <div class="flex justify-between"><dt class="text-muted">Lainnya</dt><dd><x-rupiah :nilai="$r['pendapatan_lainnya']" /></dd></div>

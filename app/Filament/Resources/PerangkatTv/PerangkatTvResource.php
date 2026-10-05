@@ -45,9 +45,9 @@ class PerangkatTvResource extends Resource
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $modelLabel = 'Perangkat TV';
+    protected static ?string $modelLabel = 'Perangkat TV & PC';
 
-    protected static ?string $pluralModelLabel = 'Perangkat TV';
+    protected static ?string $pluralModelLabel = 'Perangkat TV & PC';
 
     public static function table(Table $table): Table
     {
@@ -59,6 +59,11 @@ class PerangkatTvResource extends Resource
                     ->label('Unit')
                     ->placeholder('Belum ada unit')
                     ->description(fn (PerangkatTv $r) => $r->namaTampil()),
+                TextColumn::make('jenis')
+                    ->label('Jenis')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state) => $state === PerangkatTv::JENIS_PC ? 'PC' : 'TV')
+                    ->color(fn (?string $state) => $state === PerangkatTv::JENIS_PC ? 'info' : 'gray'),
                 TextColumn::make('online')
                     ->label('Koneksi')
                     ->badge()
@@ -94,8 +99,9 @@ class PerangkatTvResource extends Resource
                     ->color(fn (PerangkatTv $r) => self::perluUpdate($r) ? 'warning' : 'success')
                     ->description(fn (PerangkatTv $r) => self::perluUpdate($r)
                         ? 'Terbaru '.self::versiTerbaru()
-                        : ($r->versi_android ? 'Android '.$r->versi_android : null)),
+                        : ($r->versi_android ? ($r->isPc() ? 'Windows ' : 'Android ').$r->versi_android : null)),
                 TextColumn::make('ip')->label('IP')->placeholder('-')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('mac')->label('MAC (Wake-on-LAN)')->placeholder('-')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('status')
             ->toolbarActions([
@@ -219,7 +225,8 @@ class PerangkatTvResource extends Resource
 
     public static function perluUpdate(PerangkatTv $r): bool
     {
-        return $r->status === PerangkatTv::STATUS_AKTIF && self::versiTerbaru() && $r->versi_app !== self::versiTerbaru();
+        // Rilis APK hanya untuk TV; agen PC punya versi sendiri
+        return $r->status === PerangkatTv::STATUS_AKTIF && ! $r->isPc() && self::versiTerbaru() && $r->versi_app !== self::versiTerbaru();
     }
 
     /** "L 12 ms · C 85 ms" (L putus = tidak terjangkau). Kosong untuk TV offline / APK < 0.6.5 (angka lama menyesatkan). */

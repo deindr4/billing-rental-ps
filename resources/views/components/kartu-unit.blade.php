@@ -24,13 +24,14 @@
         ? sprintf('%02d:%02d', intdiv($sesi->durasi_menit, 60), $sesi->durasi_menit % 60)
         : null;
 
-    // Indikator TV Agent: [teks, warna, keterangan]
+    // Indikator TV Agent / agen PC: [teks, warna, keterangan]
+    $alat = ($tv?->isPc() ?? $unit->isPc()) ? 'PC' : 'TV';
     $indikatorTv = match (true) {
-        $tv === null && $unit->pakaiTvAgent() => ['TV belum dipasang', 'var(--text-muted)', 'Pasangkan TV di Admin → Perangkat TV'],
+        $tv === null && $unit->pakaiTvAgent() => ["{$alat} belum dipasang", 'var(--text-muted)', "Pasangkan {$alat} di Admin → Perangkat TV & PC"],
         $tv === null => null,
-        ! $tv->isOnline() => ['TV offline', 'var(--status-offline)', $tv->terakhir_online ? 'Terakhir terlihat '.$tv->terakhir_online->diffForHumans() : 'Belum pernah tersambung'],
-        $tv->sedangBypass() => ['TV bypass s/d '.$tv->bypass_sampai->format('H:i'), 'var(--status-hampir-habis)', 'TV terbuka sementara tanpa sesi'],
-        default => ['TV online', 'var(--status-kosong)', 'TV Agent tersambung'],
+        ! $tv->isOnline() => ["{$alat} offline", 'var(--status-offline)', $tv->terakhir_online ? 'Terakhir terlihat '.$tv->terakhir_online->diffForHumans() : 'Belum pernah tersambung'],
+        $tv->sedangBypass() => ["{$alat} bypass s/d ".$tv->bypass_sampai->format('H:i'), 'var(--status-hampir-habis)', "{$alat} terbuka sementara tanpa sesi"],
+        default => ["{$alat} online", 'var(--status-kosong)', $alat === 'PC' ? 'Agen kiosk PC tersambung' : 'TV Agent tersambung'],
     };
 @endphp
 
@@ -161,8 +162,85 @@
         @endif
     </div>
 
+    {{-- Remote PC (agen kiosk Windows): mati → Nyalakan (Wake-on-LAN); menyala → kunci, tutup game, Task Manager, daya --}}
+    @if ($tv && $tv->isPc() && ! $tv->isOnline())
+        <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-2">
+            <span class="text-xs text-muted">PC mati / offline</span>
+            @if ($bisaRemote)
+                <button type="button" title="Nyalakan PC (Wake-on-LAN)" wire:click="nyalakanPc('{{ $unit->id }}')"
+                        class="btn btn-remote text-st-kosong">
+                    <x-ikon name="daya" size="16" />
+                </button>
+            @endif
+        </div>
+    @elseif ($tv && $tv->isPc())
+        <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-1.5 min-[380px]:gap-2">
+            <span title="Tutup game yang hang">
+                <x-confirm-button action="perintahTv" :params="[$unit->id, 'tutup_game']"
+                                  title="Tutup game di {{ $unit->nama }}?"
+                                  text="Aplikasi yang sedang di depan dipaksa tutup, pemain kembali ke kiosk. Waktu sewa tetap berjalan."
+                                  confirm-text="Tutup game"
+                                  class="btn-remote text-danger">
+                    <x-ikon name="tutup-game" size="16" />
+                </x-confirm-button>
+            </span>
+            @if ($bisaRemote)
+                <span title="Izinkan Task Manager sementara">
+                    <x-confirm-button action="izinTaskManager" :params="[$unit->id]"
+                                      title="Buka Task Manager di {{ $unit->nama }}?"
+                                      text="Task Manager boleh dibuka sementara (lihat Admin → Pengaturan Operasional → Rental PC), lalu diblok lagi otomatis."
+                                      confirm-text="Izinkan"
+                                      class="btn-remote text-ik-kuning">
+                        <x-ikon name="aktivitas" size="16" />
+                    </x-confirm-button>
+                </span>
+            @endif
+
+            <button type="button" title="Pemberitahuan ke layar PC"
+                    wire:click="$dispatch('buka-pemberitahuan', { unitId: '{{ $unit->id }}' })"
+                    class="btn btn-remote text-ik-pink ml-1 min-[380px]:ml-2">
+                <x-ikon name="pengumuman" size="16" />
+            </button>
+            <button type="button" title="Bypass (pilih durasi & PIN)"
+                    wire:click="$dispatch('buka-kelola-tv', { unitId: '{{ $unit->id }}' })"
+                    @class(['btn btn-remote', 'text-st-main bg-st-main/15' => $tv->sedangBypass(), 'text-ik-ungu' => ! $tv->sedangBypass()])>
+                <x-ikon name="gembok-buka" size="16" />
+            </button>
+
+            @if ($bisaRemote)
+                <span title="Kunci PC" class="ml-1 min-[380px]:ml-2">
+                    <x-confirm-button action="perintahTv" :params="[$unit->id, 'kunci']"
+                                      title="Kunci {{ $unit->nama }}?" text="Layar kiosk PC dikunci lagi." confirm-text="Kunci"
+                                      class="btn-remote text-ik-biru">
+                        <x-ikon name="gembok" size="16" />
+                    </x-confirm-button>
+                </span>
+                <span title="Log off akun pemain">
+                    <x-confirm-button action="perintahTv" :params="[$unit->id, 'logoff_pc']"
+                                      title="Log off akun pemain di {{ $unit->nama }}?" text="Semua aplikasi pemain ditutup, Windows kembali ke layar login lalu kiosk." confirm-text="Log off"
+                                      class="btn-remote text-ik-ungu">
+                        <x-ikon name="keluar" size="16" />
+                    </x-confirm-button>
+                </span>
+                <span title="Restart PC">
+                    <x-confirm-button action="perintahTv" :params="[$unit->id, 'restart_pc']"
+                                      title="Restart {{ $unit->nama }}?" text="PC dinyalakan ulang (±1–2 menit)." confirm-text="Restart"
+                                      class="btn-remote text-ik-teal">
+                        <x-ikon name="restart" size="16" />
+                    </x-confirm-button>
+                </span>
+                <span title="Matikan PC">
+                    <x-confirm-button action="perintahTv" :params="[$unit->id, 'matikan_pc']"
+                                      title="Matikan {{ $unit->nama }}?" text="PC dimatikan. Nyalakan lagi dari tombol daya di kartu ini (Wake-on-LAN) atau manual." confirm-text="Matikan"
+                                      class="btn-remote text-ik-oranye">
+                        <x-ikon name="daya" size="16" />
+                    </x-confirm-button>
+                </span>
+            @endif
+        </div>
+
     {{-- Remote TV. TV standby berhenti melapor (tampak offline): tombol Bangunkan tetap ada --}}
-    @if ($tv && ! $tv->isOnline())
+    @elseif ($tv && ! $tv->isOnline())
         <div class="px-3 py-2.5 border-t border-line flex items-center justify-center gap-2">
             <span class="text-xs text-muted">TV offline / standby</span>
             @if ($bisaRemote)

@@ -8,6 +8,7 @@ use App\Models\PairingTv;
 use App\Models\PerangkatTv;
 use App\Models\Unit;
 use App\Models\User;
+use App\Support\WakeOnLan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -50,6 +51,8 @@ final class PairingTvService
                 'model' => $info['model'] ?? null,
                 'versi_android' => $info['versi_android'] ?? null,
                 'versi_app' => $info['versi_app'] ?? null,
+                'jenis' => ($info['jenis'] ?? null) === PerangkatTv::JENIS_PC ? PerangkatTv::JENIS_PC : null,
+                'mac' => WakeOnLan::rapikanMac($info['mac'] ?? null),
             ]),
             'kedaluwarsa_pada' => now()->addMinutes(self::MASA_BERLAKU_MENIT),
         ]);
@@ -96,6 +99,15 @@ final class PairingTvService
                 throw new BillingException('Kode tidak ditemukan atau sudah kedaluwarsa. Minta TV menampilkan kode baru.');
             }
 
+            $info = $pairing->info ?? [];
+            $jenis = ($info['jenis'] ?? null) === PerangkatTv::JENIS_PC ? PerangkatTv::JENIS_PC : PerangkatTv::JENIS_TV;
+
+            if (($jenis === PerangkatTv::JENIS_PC) !== $unit->isPc()) {
+                throw new BillingException($jenis === PerangkatTv::JENIS_PC
+                    ? 'Kode ini dari PC, tapi unit yang dipilih bukan unit PC. Pilih unit bertipe PC.'
+                    : 'Kode ini dari TV, tapi unit yang dipilih adalah unit PC.');
+            }
+
             // Satu unit hanya satu TV aktif: TV lama dicabut
             PerangkatTv::withoutGlobalScopes()
                 ->where('unit_id', $unit->id)
@@ -112,11 +124,12 @@ final class PairingTvService
 
             $token = Str::random(64);
             $rahasia = Str::random(32);
-            $info = $pairing->info ?? [];
 
             $perangkat->fill([
                 'cabang_id' => $unit->cabang_id,
                 'unit_id' => $unit->id,
+                'jenis' => $jenis,
+                'mac' => $info['mac'] ?? $perangkat->mac,
                 'merek' => $info['merek'] ?? $perangkat->merek,
                 'model' => $info['model'] ?? $perangkat->model,
                 'versi_android' => $info['versi_android'] ?? $perangkat->versi_android,
@@ -131,7 +144,7 @@ final class PairingTvService
 
             $unit->update([
                 'mode_kontrol' => Unit::MODE_TV_AGENT,
-                'tipe_perangkat' => 'android_tv',
+                'tipe_perangkat' => $jenis === PerangkatTv::JENIS_PC ? 'windows_pc' : 'android_tv',
             ]);
 
             $pairing->update([

@@ -11,6 +11,7 @@ use App\Services\PinService;
 use App\Services\Tv\BypassTvService;
 use App\Services\Tv\RilisApkService;
 use App\Services\Tv\StatusTvService;
+use App\Support\WakeOnLan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -50,8 +51,11 @@ class TvController extends Controller
             'ping_lokal_ms' => 'nullable|integer|min:-1|max:60000',
             'ping_cloud_ms' => 'nullable|integer|min:-1|max:60000',
             'server_dipakai' => 'nullable|in:lokal,cloud',
+            // Agen PC: MAC kartu jaringan untuk Wake-on-LAN
+            'mac' => 'nullable|string|max:20',
         ]);
 
+        $data['mac'] = WakeOnLan::rapikanMac($data['mac'] ?? null);
         $ping = ['ping_lokal_ms', 'ping_cloud_ms', 'server_dipakai'];
         $ubah = array_filter(Arr::except($data, $ping), fn ($v) => $v !== null && ! is_array($v)) + ['terakhir_online' => now(), 'ip' => $request->ip()];
 

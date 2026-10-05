@@ -11,6 +11,7 @@ use App\Services\Struk\StrukService;
 use App\Services\Tv\NotifikasiTv;
 use App\Services\Tv\StatusTvService;
 use App\Support\PemberitahuanTv;
+use App\Support\PengaturanPc;
 use App\Support\Tenancy;
 use BackedEnum;
 use Filament\Forms\Components\Repeater;
@@ -20,6 +21,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -97,6 +99,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['server_lokal'] = $cabangId ? (string) Pengaturan::ambil('server.url_lokal', '', $cabangId) : '';
         $isi['server_cloud'] = $cabangId ? (string) Pengaturan::ambil('server.url_cloud', '', $cabangId) : '';
         $isi['pilih_game_otomatis'] = $cabangId ? (bool) Pengaturan::ambil('sesi.pilih_game_otomatis', true, $cabangId) : true;
+        $isi['pc'] = PengaturanPc::ambil($cabangId);
 
         $isi['qris_aktif'] = $cabangId ? (bool) Pengaturan::ambil('qris.aktif', false, $cabangId) : false;
         $isi['qris_payload'] = $cabangId ? (string) Pengaturan::ambil('qris.payload', '', $cabangId) : '';
@@ -275,6 +278,41 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Rental PC (agen kiosk Windows)')
+                    ->description('Untuk unit bertipe PC. Pemain memakai akun Windows kedua (bukan admin); agen menampilkan layar kunci, '
+                        .'terbuka saat sesi dimulai dari kasir (tamu / member), lalu kiosk berisi aplikasi di bawah ini.')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        Select::make('pc.akhir_sesi')
+                            ->label('Saat sesi selesai / waktu habis')
+                            ->options(PengaturanPc::AKHIR_SESI)
+                            ->required(),
+                        TextInput::make('pc.task_manager_menit')
+                            ->label('Izin Task Manager sementara')
+                            ->helperText('Untuk game hang/crash: kasir menekan tombol Task Manager di kartu unit, atau staf memasukkan PIN di PC.')
+                            ->numeric()->minValue(1)->maxValue(60)->suffix('menit')->required(),
+                        Fieldset::make('Proteksi')
+                            ->schema(collect(PengaturanPc::PROTEKSI)
+                                ->map(fn ($p, $k) => Toggle::make("pc.proteksi.{$k}")->label($p[0]))
+                                ->values()->all())
+                            ->columns(1)
+                            ->columnSpanFull(),
+                        Repeater::make('pc.aplikasi')
+                            ->label('Aplikasi / launcher game di kiosk')
+                            ->helperText('Hanya aplikasi ini yang bisa dibuka pemain dari kiosk. Isi lokasi file .exe di PC.')
+                            ->schema([
+                                TextInput::make('nama')->label('Nama')->required()->maxLength(40)->placeholder('Steam'),
+                                TextInput::make('path')->label('Lokasi .exe')->required()->maxLength(260)
+                                    ->placeholder('C:\Program Files (x86)\Steam\steam.exe'),
+                            ])
+                            ->columns(2)
+                            ->maxItems(30)
+                            ->defaultItems(0)
+                            ->addActionLabel('Tambah aplikasi')
+                            ->columnSpanFull(),
+                    ]),
+
                 Section::make('Server lokal & cloud')
                     ->description('TV Agent memakai server lokal (LAN rental). Jika server lokal mati, TV otomatis pindah ke server cloud dan kembali ke lokal saat hidup lagi.')
                     ->columns(2)
@@ -433,6 +471,7 @@ class PengaturanOperasional extends Page implements HasSchemas
             fn ($a) => ['nama' => trim($a['nama']), 'paket' => trim($a['paket'])],
             $data['tv_aplikasi'] ?? []
         )), $cabangId);
+        PengaturanPc::simpan($data['pc'] ?? [], $cabangId);
         Pengaturan::simpan('struk.lebar', (int) ($data['struk_lebar'] ?? 58), $cabangId);
         Pengaturan::simpan('struk.header', trim((string) ($data['struk_header'] ?? '')), $cabangId);
         Pengaturan::simpan('struk.footer', trim((string) ($data['struk_footer'] ?? '')), $cabangId);

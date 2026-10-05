@@ -47,6 +47,10 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Tambahan di luar desain — tombol mata (`btn-ghost btn-ikon`, ikon `mata` / `mata-tutup`) di header kasir sebelah
   jam & di topbar admin: sembunyikan nominal untuk foto layar. `<x-rupiah rahasia>` atau semua `<x-rupiah>` di dalam
   `[data-rahasia]` tampil "Rp *******" (CSS di `partials/sembunyi-uang.blade.php`).
+- Tambahan di luar desain — Rental PC: menu kasir "Rental PC" (ikon `pc`, teal) di bawah "Rental PS", memakai
+  matriks unit yang sama. Kartu unit PC: indikator "PC online/offline", baris remote: Tutup game (`tutup-game`, merah),
+  Task Manager (`aktivitas`, kuning) | Pemberitahuan, Bypass | Kunci (`gembok`), Log off, Restart, Matikan;
+  PC mati → "PC mati / offline" + tombol daya (Wake-on-LAN). Laporan: baris "Sewa PS" / "Sewa PC".
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

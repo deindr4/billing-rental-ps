@@ -2,7 +2,7 @@
     {{-- Judul + cari --}}
     <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
         <div>
-            <div class="label">Rental station</div>
+            <div class="label">{{ $jenis === 'pc' ? 'Rental PC' : 'Rental PS' }}</div>
             <h1 class="text-xl font-semibold tracking-tight">Matriks Unit</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
@@ -60,7 +60,13 @@
 
     {{-- Grid unit --}}
     @if ($units->isEmpty())
-        <div class="kartu p-10 text-center text-muted">Tidak ada unit yang cocok.</div>
+        <div class="kartu p-10 text-center text-muted">
+            @if ($jenis === 'pc' && $ringkasan['semua'] === 0)
+                Belum ada unit PC. Buat tipe konsol berjenis <b>PC</b> di Admin → Tipe Konsol, lalu tambahkan unit dengan tipe itu.
+            @else
+                Tidak ada unit yang cocok.
+            @endif
+        </div>
     @else
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             @foreach ($units as $unit)

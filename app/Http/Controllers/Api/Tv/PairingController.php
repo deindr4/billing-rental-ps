@@ -23,6 +23,9 @@ class PairingController extends Controller
             'model' => 'nullable|string|max:100',
             'versi_android' => 'nullable|string|max:20',
             'versi_app' => 'nullable|string|max:20',
+            // Agen kiosk PC Windows: jenis=pc (android_id = ID mesin, versi_android = versi Windows) + MAC untuk Wake-on-LAN
+            'jenis' => 'nullable|in:tv,pc',
+            'mac' => 'nullable|string|max:20',
         ]);
 
         ['pairing' => $pairing, 'kunci' => $kunci] = $this->pairing->mulai($data);

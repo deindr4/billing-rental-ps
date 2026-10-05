@@ -32,14 +32,14 @@ class ListPerangkatTv extends ListRecords
                 ->action(fn (array $data) => PerangkatTvResource::push(PerangkatTv::query()->aktif()->get(), (bool) $data['paksa'])),
 
             Action::make('pasangkan')
-                ->label('Pasangkan TV')
+                ->label('Pasangkan TV / PC')
                 ->icon('heroicon-o-link')
-                ->modalHeading('Pasangkan TV ke unit')
-                ->modalDescription('Buka aplikasi TV Agent di TV. Kode 6 angka akan tampil di layar TV.')
+                ->modalHeading('Pasangkan TV / PC ke unit')
+                ->modalDescription('Buka aplikasi TV Agent di TV, atau agen kiosk di PC. Kode 6 angka akan tampil di layar. Unit PC hanya untuk kode dari PC.')
                 ->modalSubmitActionLabel('Pasangkan')
                 ->schema([
                     TextInput::make('kode')
-                        ->label('Kode di layar TV')
+                        ->label('Kode di layar TV / PC')
                         ->required()
                         ->regex('/^\d{6}$/')
                         ->validationMessages(['regex' => 'Kode terdiri dari 6 angka.'])
@@ -51,7 +51,7 @@ class ListPerangkatTv extends ListRecords
                         ->options(fn () => $this->pilihanUnit())
                         ->searchable()
                         ->required()
-                        ->helperText('Jika unit sudah punya TV, TV lama otomatis dicabut.'),
+                        ->helperText('Jika unit sudah punya perangkat, yang lama otomatis dicabut.'),
                 ])
                 ->action(function (array $data, Action $action) {
                     $unit = Unit::aktif()->find($data['unit_id']);
@@ -71,7 +71,7 @@ class ListPerangkatTv extends ListRecords
                     }
 
                     Notification::make()
-                        ->title('TV terpasang ke '.$unit->nama)
+                        ->title(($perangkat->isPc() ? 'PC' : 'TV').' terpasang ke '.$unit->nama)
                         ->body($perangkat->namaTampil().' akan tersambung dalam beberapa detik.')
                         ->success()
                         ->send();
@@ -86,9 +86,10 @@ class ListPerangkatTv extends ListRecords
 
         return Unit::aktif()
             ->urut()
-            ->get(['id', 'kode', 'nama'])
+            ->with('tipeKonsol:id,jenis')
+            ->get(['id', 'kode', 'nama', 'tipe_konsol_id'])
             ->mapWithKeys(fn (Unit $u) => [
-                $u->id => $u->nama.($sudahAda->has($u->id) ? ' (sudah ada TV)' : ''),
+                $u->id => $u->nama.($u->isPc() ? ' · PC' : '').($sudahAda->has($u->id) ? ' (sudah ada perangkat)' : ''),
             ])
             ->all();
     }

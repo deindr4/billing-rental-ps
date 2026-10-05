@@ -17,6 +17,7 @@ use App\Livewire\Operator\PembayaranOnlineKasir;
 use App\Livewire\Operator\Pengeluaran;
 use App\Livewire\Operator\Pos;
 use App\Livewire\Operator\Rental;
+use App\Livewire\Operator\RentalPc;
 use App\Livewire\Operator\Stok;
 use App\Livewire\Operator\TutupKas;
 use App\Livewire\Publik\Billboard;
@@ -103,6 +104,7 @@ Route::middleware('auth')->group(function () {
         // Wajib shift terbuka
         Route::middleware('shift')->group(function () {
             Route::get('/', Rental::class)->middleware('can:rental.kelola')->name('rental');
+            Route::get('/pc', RentalPc::class)->middleware('can:rental.kelola')->name('rental-pc');
             Route::get('/pos', Pos::class)->middleware('can:pos.jual')->name('pos');
         });
     });

@@ -23,12 +23,17 @@ class PerangkatTv extends Model
     /** Data heartbeat & status remote berubah terus: tidak diaudit */
     protected array $auditAbaikan = [
         'terakhir_online', 'ip', 'layar', 'diagnostik', 'diagnostik_pada', 'volume', 'senyap', 'layar_hidup',
-        'versi_app', 'versi_android', 'bypass_sampai',
+        'versi_app', 'versi_android', 'bypass_sampai', 'mac',
     ];
 
     public const STATUS_AKTIF = 'aktif';
 
     public const STATUS_DICABUT = 'dicabut';
+
+    public const JENIS_TV = 'tv';
+
+    /** Agen kiosk PC Windows: API & pairing sama, perintah remote sendiri (lihat docs/pc-agent.md) */
+    public const JENIS_PC = 'pc';
 
     /** TV dianggap online jika melapor dalam rentang ini (detik) */
     public const BATAS_ONLINE_DETIK = 60;
@@ -36,7 +41,7 @@ class PerangkatTv extends Model
     protected $table = 'perangkat_tv';
 
     protected $fillable = [
-        'tenant_id', 'cabang_id', 'unit_id', 'android_id', 'merek', 'model', 'versi_android', 'versi_app',
+        'tenant_id', 'cabang_id', 'unit_id', 'jenis', 'mac', 'android_id', 'merek', 'model', 'versi_android', 'versi_app',
         'status', 'token_hash', 'rahasia_offline', 'bypass_sampai', 'terakhir_online', 'ip', 'layar',
         'diagnostik', 'diagnostik_pada', 'volume', 'senyap', 'layar_hidup', 'input_hdmi', 'input_hdmi_label', 'hdmi_nama',
         'ping_lokal_ms', 'ping_cloud_ms', 'server_dipakai', 'dipasangkan_pada', 'dipasangkan_oleh',
@@ -92,7 +97,13 @@ class PerangkatTv extends Model
 
     public function namaTampil(): string
     {
-        return trim(($this->merek ?? '').' '.($this->model ?? '')) ?: 'TV '.substr($this->android_id, -6);
+        return trim(($this->merek ?? '').' '.($this->model ?? '')) ?: ($this->isPc() ? 'PC ' : 'TV ').substr($this->android_id, -6);
+    }
+
+    /** Agen kiosk PC Windows (bukan TV Agent Android) */
+    public function isPc(): bool
+    {
+        return $this->jenis === self::JENIS_PC;
     }
 
     /**

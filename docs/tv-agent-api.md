@@ -3,6 +3,10 @@
 Kontrak antara server billing dan aplikasi TV Agent (Android TV / Google TV).
 Semua endpoint di bawah `/api/tv`, request & response JSON.
 
+Agen kiosk **PC Windows** memakai API yang sama (pairing dengan `jenis: "pc"` + `mac`, blok `pc` di status,
+perintah remote khusus PC) — lihat `docs/pc-agent.md`. Status selalu berisi `perangkat.jenis` (`tv` | `pc`)
+dan `pc` (null untuk TV).
+
 ## 1. Pairing (TV belum terdaftar)
 
 ```
@@ -24,7 +28,7 @@ POST /api/tv/pairing/cek   { "kunci": "..." }
 ```
 
 Simpan `token` & `rahasia_offline` di penyimpanan terenkripsi (EncryptedSharedPreferences).
-Admin memasangkan lewat panel: **Rental → Perangkat TV → Pasangkan TV**.
+Admin memasangkan lewat panel: **Rental → Perangkat TV & PC → Pasangkan TV / PC**.
 
 ## 2. Endpoint TV terdaftar
 

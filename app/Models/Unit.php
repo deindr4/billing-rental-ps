@@ -41,6 +41,8 @@ class Unit extends Model
         'vidaa' => 'Smart TV VIDAA (Hisense/Toshiba)',
         'tizen' => 'Smart TV Tizen (Samsung)',
         'smart_plug' => 'Smart Plug / Relay',
+        // Agen kiosk di PC Windows: memakai API & pairing TV Agent (perangkat_tv.jenis = pc)
+        'windows_pc' => 'PC Windows Agent (kiosk)',
     ];
 
     public const POSISI_TIMER = [
@@ -126,6 +128,21 @@ class Unit extends Model
     public function scopeUrut(Builder $query): Builder
     {
         return $query->orderBy('urutan')->orderBy('kode');
+    }
+
+    /** Unit rental PS atau PC (dari jenis tipe konsolnya; tanpa tipe = PS) */
+    public function scopeJenis(Builder $query, string $jenis): Builder
+    {
+        $pc = fn (Builder $q) => $q->where('jenis', TipeKonsol::JENIS_PC);
+
+        return $jenis === TipeKonsol::JENIS_PC
+            ? $query->whereHas('tipeKonsol', $pc)
+            : $query->whereDoesntHave('tipeKonsol', $pc);
+    }
+
+    public function isPc(): bool
+    {
+        return $this->tipeKonsol?->jenis === TipeKonsol::JENIS_PC;
     }
 
     public function isKosong(): bool

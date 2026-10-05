@@ -15,6 +15,7 @@ use App\Services\Billing\BillingService;
 use App\Services\Gateway\BayarMandiriService;
 use App\Services\Gateway\PengaturanGateway;
 use App\Services\Publik\QrisService;
+use App\Support\PengaturanPc;
 use App\Support\RunningTextTv;
 use App\Support\Tema;
 use Illuminate\Support\Facades\Storage;
@@ -56,6 +57,7 @@ final class StatusTvService
             'layar' => $this->layar($perangkat, $unit, $sesi),
             'perangkat' => [
                 'id' => $perangkat->id,
+                'jenis' => $perangkat->jenis ?? PerangkatTv::JENIS_TV,
                 'nama' => $perangkat->namaTampil(),
                 'bypass_sampai_ms' => $perangkat->sedangBypass() ? $perangkat->bypass_sampai->getTimestampMs() : null,
             ],
@@ -72,6 +74,8 @@ final class StatusTvService
             ] : null,
             'sesi' => $sesi ? $this->dataSesi($sesi, $zona) : null,
             'pengaturan' => $this->pengaturan($perangkat, $unit),
+            // Agen kiosk PC: akhir sesi, proteksi, izin Task Manager & daftar aplikasi kiosk (null untuk TV)
+            'pc' => $perangkat->isPc() ? PengaturanPc::ambil($perangkat->cabang_id) : null,
             'tema' => [
                 'nama_rental' => $cabang?->tenant?->nama ?? config('app.name'),
                 'cabang' => $cabang?->nama,

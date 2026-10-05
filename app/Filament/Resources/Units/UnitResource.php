@@ -78,14 +78,14 @@ class UnitResource extends Resource
                         ->default(0),
                 ]),
 
-            Section::make('Kontrol TV')
+            Section::make('Kontrol TV / PC')
                 ->columns(2)
                 ->schema([
                     Select::make('mode_kontrol')
                         ->label('Mode')
                         ->options([
                             'manual' => 'Manual (tanpa kontrol TV)',
-                            'tv_agent' => 'TV Agent',
+                            'tv_agent' => 'Agent (TV Agent / PC kiosk)',
                         ])
                         ->default('manual')
                         ->required(),
@@ -154,7 +154,8 @@ class UnitResource extends Resource
                 TextColumn::make('status')->badge(),
                 TextColumn::make('mode_kontrol')
                     ->label('Kontrol')
-                    ->formatStateUsing(fn (?string $state) => $state === 'tv_agent' ? 'TV Agent' : 'Manual'),
+                    ->formatStateUsing(fn (?string $state, Unit $record) => $state !== 'tv_agent' ? 'Manual'
+                        : ($record->tipe_perangkat === 'windows_pc' ? 'PC Agent' : 'TV Agent')),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
             ])
             ->defaultSort('urutan')

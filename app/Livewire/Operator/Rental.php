@@ -8,6 +8,7 @@ use App\Models\Maintenance;
 use App\Models\Pengaturan;
 use App\Models\PerangkatTv;
 use App\Models\Sesi;
+use App\Models\TipeKonsol;
 use App\Models\Transaksi;
 use App\Models\Unit;
 use App\Services\Aset\MaintenanceService;
@@ -34,6 +35,9 @@ class Rental extends Component
     #[Url(as: 'cari', except: '')]
     public string $cari = '';
 
+    /** ps | pc — menu "Rental PS" & "Rental PC" (RentalPc) memakai halaman ini */
+    public string $jenis = TipeKonsol::JENIS_PS;
+
     /** Dipanggil saat sesi berubah (mulai, tambah waktu, selesai, bayar, dll.) */
     #[On('sesi-berubah')]
     #[On('running-text-berubah')]
@@ -57,10 +61,11 @@ class Rental extends Component
             return;
         }
 
-        $izin = str_starts_with($perintah, 'volume_') ? 'rental.kelola' : 'tv.remote';
+        // Volume & tutup game (game hang di PC) cukup izin rental; daya, restart, log off butuh izin remote
+        $izin = str_starts_with($perintah, 'volume_') || $perintah === 'tutup_game' ? 'rental.kelola' : 'tv.remote';
 
         if (! $user->can($izin)) {
-            $this->alert('Akses ditolak', 'Perintah ini butuh izin Remote TV.', 'error');
+            $this->alert('Akses ditolak', 'Perintah ini butuh izin Remote TV / PC.', 'error');
 
             return;
         }
@@ -68,7 +73,7 @@ class Rental extends Component
         $perangkat = PerangkatTv::aktif()->where('unit_id', $unitId)->first();
 
         if (! $perangkat) {
-            $this->error('TV tidak terhubung');
+            $this->error('TV / PC tidak terhubung');
 
             return;
         }
@@ -83,6 +88,47 @@ class Rental extends Component
 
         if (! str_starts_with($perintah, 'volume_')) {
             $this->success(TvRemoteService::PERINTAH[$perintah].' dikirim');
+        }
+    }
+
+    /** PC: Task Manager boleh dibuka sementara (game hang/crash), lalu diblok lagi otomatis */
+    public function izinTaskManager(string $unitId, array $konfirmasi = []): void
+    {
+        $this->aksiPc($unitId, function (PerangkatTv $pc, TvRemoteService $remote) {
+            $menit = $remote->izinTaskManager($pc, auth()->user());
+            $this->success("Task Manager di {$pc->unit?->nama} terbuka {$menit} menit");
+        });
+    }
+
+    /** PC mati: nyalakan lewat Wake-on-LAN (dari server lokal, atau dititipkan ke PC lain yang menyala) */
+    public function nyalakanPc(string $unitId): void
+    {
+        $this->aksiPc($unitId, function (PerangkatTv $pc, TvRemoteService $remote) {
+            $lewat = $remote->bangunkanPc($pc, auth()->user());
+            $this->success('Perintah nyala dikirim'.($lewat === 'server' ? '' : " lewat {$lewat}").'. Tunggu ±1 menit.');
+        });
+    }
+
+    private function aksiPc(string $unitId, callable $aksi): void
+    {
+        if (! auth()->user()->can('tv.remote')) {
+            $this->alert('Akses ditolak', 'Perintah ini butuh izin Remote TV / PC.', 'error');
+
+            return;
+        }
+
+        $pc = PerangkatTv::aktif()->with('unit:id,nama')->where('unit_id', $unitId)->where('jenis', PerangkatTv::JENIS_PC)->first();
+
+        if (! $pc) {
+            $this->error('PC belum dipasangkan');
+
+            return;
+        }
+
+        try {
+            $aksi($pc, app(TvRemoteService::class));
+        } catch (BillingException $e) {
+            $this->error($e->getMessage());
         }
     }
 
@@ -150,7 +196,8 @@ class Rental extends Component
     public function render(BillingService $billing)
     {
         $semuaUnit = Unit::aktif()
-            ->with(['tipeKonsol:id,kode,nama', 'kategori:id,nama'])
+            ->jenis($this->jenis)
+            ->with(['tipeKonsol:id,kode,nama,jenis', 'kategori:id,nama'])
             ->urut()
             ->get();
 
@@ -159,7 +206,7 @@ class Rental extends Component
         // TV Agent yang terpasang per unit (untuk indikator online/offline)
         $tvPerUnit = PerangkatTv::aktif()
             ->whereIn('unit_id', $semuaUnit->pluck('id'))
-            ->get(['id', 'unit_id', 'terakhir_online', 'bypass_sampai', 'status', 'volume', 'senyap', 'layar_hidup', 'diagnostik', 'input_hdmi', 'hdmi_nama'])
+            ->get(['id', 'unit_id', 'jenis', 'mac', 'terakhir_online', 'bypass_sampai', 'status', 'volume', 'senyap', 'layar_hidup', 'diagnostik', 'input_hdmi', 'hdmi_nama'])
             ->keyBy('unit_id');
 
         $tarif = $semuaUnit->mapWithKeys(fn (Unit $unit) => [
@@ -184,6 +231,7 @@ class Rental extends Component
             });
 
         return view('livewire.operator.rental', [
+            'jenis' => $this->jenis,
             'units' => $units,
             'sesiPerUnit' => $sesiPerUnit,
             'tvPerUnit' => $tvPerUnit,

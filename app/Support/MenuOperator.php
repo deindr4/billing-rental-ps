@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\TipeKonsol;
+use App\Models\Unit;
 use Illuminate\Support\Facades\Route;
 
 /**
@@ -19,7 +21,9 @@ final class MenuOperator
     {
         return [
             'Kasir' => [
-                ['route' => 'rental', 'label' => 'Rental', 'ikon' => 'rental', 'warna' => 'text-ik-biru', 'izin' => 'rental.kelola'],
+                ['route' => 'rental', 'label' => 'Rental PS', 'ikon' => 'rental', 'warna' => 'text-ik-biru', 'izin' => 'rental.kelola'],
+                // Tampil bila cabang punya unit bertipe PC (Admin → Tipe konsol → jenis PC)
+                ['route' => 'rental-pc', 'label' => 'Rental PC', 'ikon' => 'pc', 'warna' => 'text-ik-teal', 'izin' => 'rental.kelola', 'syarat' => 'ada_pc'],
                 ['route' => 'pos', 'label' => 'POS & F&B', 'ikon' => 'pos', 'warna' => 'text-ik-oranye', 'izin' => 'pos.jual'],
                 ['route' => 'jadwal', 'label' => 'Jadwal & Booking', 'ikon' => 'jadwal', 'warna' => 'text-ik-ungu', 'izin' => 'rental.kelola'],
                 ['route' => 'lounge', 'label' => 'Billboard', 'ikon' => 'lounge', 'warna' => 'text-ik-pink', 'izin' => 'rental.kelola'],
@@ -49,7 +53,7 @@ final class MenuOperator
                 array_map(fn ($m) => $m + [
                     'aktif' => request()->routeIs($m['route'], $m['route'].'.*'),
                 ], $items),
-                fn ($m) => Route::has($m['route']) && $user?->can($m['izin'])
+                fn ($m) => Route::has($m['route']) && $user?->can($m['izin']) && self::syarat($m['syarat'] ?? null)
             ));
 
             if ($items !== []) {
@@ -58,6 +62,22 @@ final class MenuOperator
         }
 
         return $hasil;
+    }
+
+    private static function syarat(?string $syarat): bool
+    {
+        return match ($syarat) {
+            null => true,
+            'ada_pc' => self::adaUnitPc(),
+            default => false,
+        };
+    }
+
+    /** Cabang aktif punya unit PC aktif */
+    public static function adaUnitPc(): bool
+    {
+        return app(Tenancy::class)->cabangId() !== null
+            && Unit::aktif()->jenis(TipeKonsol::JENIS_PC)->exists();
     }
 
     /** 3 menu utama untuk navigasi bawah di HP. */

@@ -10,6 +10,7 @@ use App\Models\TipeKonsol;
 use App\Support\Tenancy;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -55,6 +56,12 @@ class TipeKonsolResource extends Resource
                     TextInput::make('nama')
                         ->required()
                         ->maxLength(50),
+                    Select::make('jenis')
+                        ->label('Jenis rental')
+                        ->options(TipeKonsol::JENIS)
+                        ->default(TipeKonsol::JENIS_PS)
+                        ->required()
+                        ->helperText('Menentukan unit tampil di menu kasir "Rental PS" atau "Rental PC". Laporan tetap satu.'),
                     TextInput::make('urutan')
                         ->numeric()
                         ->minValue(0)
@@ -73,6 +80,9 @@ class TipeKonsolResource extends Resource
             ->columns([
                 TextColumn::make('kode')->searchable()->sortable(),
                 TextColumn::make('nama')->searchable(),
+                TextColumn::make('jenis')->label('Jenis')->badge()
+                    ->formatStateUsing(fn (?string $state) => TipeKonsol::JENIS[$state] ?? $state)
+                    ->color(fn (?string $state) => $state === TipeKonsol::JENIS_PC ? 'info' : 'gray'),
                 TextColumn::make('urutan')->sortable(),
                 IconColumn::make('is_active')->label('Aktif')->boolean(),
             ])

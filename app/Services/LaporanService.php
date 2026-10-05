@@ -7,6 +7,7 @@ use App\Models\Cabang;
 use App\Models\Pembayaran;
 use App\Models\Pengeluaran;
 use App\Models\Sesi;
+use App\Models\TipeKonsol;
 use App\Models\Transaksi;
 use App\Models\TransaksiItem;
 use App\Models\Unit;
@@ -45,6 +46,14 @@ final class LaporanService
             ->keyBy('jenis');
 
         $sewa = (int) (($perJenis['sewa']->total ?? 0) + ($perJenis['tambah_waktu']->total ?? 0));
+
+        // Bagian sewa dari unit PC (laporan tetap satu; ringkasan memisah Sewa PS & Sewa PC)
+        $sewaPc = (int) TransaksiItem::query()
+            ->join('transaksi', 'transaksi.id', '=', 'transaksi_item.transaksi_id')
+            ->whereIn('transaksi_item.transaksi_id', (clone $lunas)->select('id'))
+            ->whereIn('transaksi_item.jenis', ['sewa', 'tambah_waktu'])
+            ->whereIn('transaksi.unit_id', Unit::withoutGlobalScopes()->jenis(TipeKonsol::JENIS_PC)->select('id'))
+            ->sum('transaksi_item.subtotal');
         $fnb = (int) ($perJenis['produk']->total ?? 0);
         $lainnya = (int) ($perJenis['lainnya']->total ?? 0);
         $hpp = (int) ($perJenis['produk']->hpp ?? 0);
@@ -81,6 +90,7 @@ final class LaporanService
             'omzet_bersih' => $bersih,
             'rata_rata' => $trx->jumlah > 0 ? intdiv($bersih, (int) $trx->jumlah) : 0,
             'pendapatan_sewa' => $sewa,
+            'pendapatan_sewa_pc' => $sewaPc,
             'pendapatan_fnb' => $fnb,
             'pendapatan_lainnya' => $lainnya,
             'hpp' => $hpp,
