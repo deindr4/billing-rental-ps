@@ -5,7 +5,7 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
-2026-10-06 (analisa pintar)
+2026-10-05 (analisa pintar)
 -----------------------------------------------------------------------------
 - Menu kasir baru "Analisa Pintar" (Operasional, khusus Owner): aturan otomatis tanpa AI/internet.
   Tab Temuan (Penting/Perhatikan/Info + saran), Audit kasir (skor risiko 0-100: pembatalan, kas kurang, bonus
