@@ -47,8 +47,10 @@ Token baru di server lokal belum dipakai sampai tombol Simpan ditekan.
 
 1. Admin → **Pengaturan → Sinkronisasi** → isi alamat cloud (`https://...`) + token → centang aktif → **Simpan** → **Tes koneksi**.
 2. Klik **Kirim ulang semua** (memasukkan seluruh data ke antrean), lalu **Sync sekarang**.
-3. Pastikan scheduler berjalan (`php artisan schedule:work`, atau Task Scheduler Windows menjalankan
-   `php artisan schedule:run` tiap menit — disiapkan di tahap 14).
+3. Pastikan scheduler berjalan. PC hasil installer Windows: otomatis (layanan `BillingPS-Jadwal`).
+   Server pengembangan: `php artisan schedule:work`.
+4. Supaya TV bisa pindah ke cloud saat PC mati: Admin → **Pengaturan Operasional → Server lokal & cloud** →
+   isi alamat server lokal (IP LAN) & alamat cloud (`https://...`).
 
 ## Perintah
 
