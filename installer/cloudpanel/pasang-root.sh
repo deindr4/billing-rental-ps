@@ -32,7 +32,15 @@ else
 fi
 
 judul "2. Supervisor: antrean, realtime TV, jadwal"
-command -v supervisorctl >/dev/null || { apt-get update -qq && apt-get install -y -qq supervisor; }
+if ! command -v supervisorctl >/dev/null; then
+    # apt bisa melaporkan error dari paket lain yang tertunda (mis. update CloudPanel setengah jalan)
+    # walau supervisor sendiri terpasang: yang dicek hasil akhirnya
+    apt-get update -qq || true
+    apt-get install -y -qq supervisor || merah "apt melaporkan error (lihat di atas) - memeriksa supervisor..."
+    command -v supervisorctl >/dev/null || { merah "Supervisor gagal dipasang."; exit 1; }
+    hijau "Supervisor terpasang"
+fi
+systemctl enable --now supervisor >/dev/null 2>&1 || true
 mkdir -p "$SITE/storage/logs" && chown "$SITE_USER":"$SITE_USER" "$SITE/storage/logs"
 
 cat > /etc/supervisor/conf.d/billingps.conf <<EOF
