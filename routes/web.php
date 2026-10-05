@@ -4,6 +4,7 @@ use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\StrukController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\PilihCabang;
+use App\Livewire\Operator\AnalisaPintar;
 use App\Livewire\Operator\AsetModal;
 use App\Livewire\Operator\BukaShift;
 use App\Livewire\Operator\DaftarMaintenance;
@@ -86,6 +87,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi', DaftarTransaksi::class)->middleware('can:transaksi.lihat')->name('transaksi');
         Route::get('/stok', Stok::class)->middleware('can:stok.lihat')->name('stok');
         Route::get('/laporan', Laporan::class)->middleware('can:laporan.lihat')->name('laporan');
+        Route::get('/analisa', AnalisaPintar::class)->middleware('can:laporan.laba')->name('analisa');
         Route::get('/pengeluaran', Pengeluaran::class)->middleware('can:pengeluaran.catat')->name('pengeluaran');
         Route::get('/member', Member::class)->middleware('can:member.kelola')->name('member');
         Route::get('/pembayaran-online', PembayaranOnlineKasir::class)->middleware('can:pembayaran.terima')->name('pembayaran-online');

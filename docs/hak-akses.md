@@ -52,6 +52,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | **Laporan** | | | | |
 | Lihat laporan | ✅ | ✅ | – | – |
 | Lihat HPP, margin & laba | ✅ | – | – | – |
+| Analisa Pintar (audit kecurangan kasir, keuangan, operasional, stok) — izin laporan.laba | ✅ | – | – | – |
 | **Aset & maintenance** | | | | |
 | Tiket maintenance unit | ✅ | ✅ | ✅ | ✅ |
 | Lihat aset, penyusutan & ROI | ✅ | ✅ | – | ✅ |

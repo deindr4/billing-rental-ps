@@ -38,6 +38,8 @@ final class MenuOperator
                 ['route' => 'maintenance', 'label' => 'Maintenance', 'ikon' => 'maintenance', 'warna' => 'text-ik-oranye', 'izin' => 'maintenance.kelola'],
                 ['route' => 'aset', 'label' => 'Aset & Modal', 'ikon' => 'aset', 'warna' => 'text-ik-hijau', 'izin' => 'aset.lihat'],
                 ['route' => 'laporan', 'label' => 'Laporan', 'ikon' => 'laporan', 'warna' => 'text-ik-biru', 'izin' => 'laporan.lihat'],
+                // Audit kecurangan kasir & analisa keuangan/operasional/stok (aturan otomatis), khusus Owner
+                ['route' => 'analisa', 'label' => 'Analisa Pintar', 'ikon' => 'analisa', 'warna' => 'text-ik-ungu', 'izin' => 'laporan.laba'],
             ],
         ];
     }

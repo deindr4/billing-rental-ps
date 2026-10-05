@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-06 (analisa pintar)
+-----------------------------------------------------------------------------
+- Menu kasir baru "Analisa Pintar" (Operasional, khusus Owner): aturan otomatis tanpa AI/internet.
+  Tab Temuan (Penting/Perhatikan/Info + saran), Audit kasir (skor risiko 0-100: pembatalan, kas kurang, bonus
+  waktu, bypass TV, batal F&B, sesi batal, diskon, PIN salah), Keuangan (vs periode lalu, titik impas harian,
+  proyeksi akhir bulan, rasio, ROI aset, pengeluaran melonjak), Operasional (utilisasi unit, jam sepi, omzet per
+  hari, paket terlaris, member tidur), Stok (hilang saat opname, segera habis, margin rugi/tipis, stok mati).
+  Aturan & ambang: docs/analisa-pintar.md. Nominal ikut tombol mata.
+
+
 2026-10-05 (rental PC - sisi server & admin)
 -----------------------------------------------------------------------------
 - Tipe konsol punya "Jenis rental": PlayStation/konsol atau PC. Unit bertipe PC tampil di menu kasir baru

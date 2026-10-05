@@ -51,6 +51,9 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
   matriks unit yang sama. Kartu unit PC: indikator "PC online/offline", baris remote: Tutup game (`tutup-game`, merah),
   Task Manager (`aktivitas`, kuning) | Pemberitahuan, Bypass | Kunci (`gembok`), Log off, Restart, Matikan;
   PC mati → "PC mati / offline" + tombol daya (Wake-on-LAN). Laporan: baris "Sewa PS" / "Sewa PC".
+- Tambahan di luar desain — Analisa Pintar (menu Operasional, ikon `analisa`, ungu): pola halaman Laporan
+  (tombol periode, `kartu`, tabel). 3 kartu jumlah temuan (merah/kuning/biru), tab font-mono, daftar temuan memakai
+  `kartu kartu-status` dengan garis warna tingkat + chip bagian; seluruh halaman `data-rahasia`.
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.
