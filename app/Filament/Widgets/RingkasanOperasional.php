@@ -9,6 +9,7 @@ use App\Models\Produk;
 use App\Services\Aset\AsetService;
 use App\Services\LaporanService;
 use App\Services\StatusSistemService;
+use App\Support\Rupiah;
 use App\Support\Tenancy;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -78,8 +79,8 @@ class RingkasanOperasional extends StatsOverviewWidget
         if (auth()->user()?->can('laporan.laba')) {
             $bulan = app(LaporanService::class)->ringkasan(now()->startOfMonth(), now());
 
-            $stats[] = Stat::make('Laba bersih bulan ini', 'Rp '.number_format($bulan['laba_bersih'], 0, ',', '.'))
-                ->description('Omzet Rp '.number_format($bulan['omzet_bersih'], 0, ',', '.').' · beban Rp '.number_format($bulan['beban'], 0, ',', '.'))
+            $stats[] = Stat::make('Laba bersih bulan ini', Rupiah::html($bulan['laba_bersih']))
+                ->description(Rupiah::html('Omzet ', $bulan['omzet_bersih'], ' · beban ', $bulan['beban']))
                 ->color($bulan['laba_bersih'] >= 0 ? 'success' : 'danger')
                 ->icon('heroicon-o-chart-bar');
         }

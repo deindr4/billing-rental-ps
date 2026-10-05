@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     @vite(['resources/css/admin-laporan.css'])
 
-    <div class="lap">
+    <div class="lap" data-rahasia>
         {{-- Periode + cabang --}}
         <div class="flex flex-wrap items-center gap-1.5 mb-5">
             <select wire:model.live="cabang" class="input w-auto h-8 mr-2">

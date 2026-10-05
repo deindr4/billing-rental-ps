@@ -11,10 +11,10 @@
     </div>
     <div class="px-5 border-l border-line">
         <div class="label">Omzet shift</div>
-        <x-rupiah :nilai="$omzet" class="font-semibold leading-tight text-accent" />
+        <x-rupiah :nilai="$omzet" rahasia class="font-semibold leading-tight text-accent" />
     </div>
     <div class="px-5 border-l border-line">
         <div class="label">Kas laci</div>
-        <x-rupiah :nilai="$kas" class="font-semibold leading-tight" />
+        <x-rupiah :nilai="$kas" rahasia class="font-semibold leading-tight" />
     </div>
 </div>

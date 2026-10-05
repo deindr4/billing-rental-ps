@@ -1,4 +1,4 @@
-<div>
+<div data-rahasia>
     {{-- Judul + periode --}}
     <div class="mb-4">
         <div class="label">Periode laporan</div>

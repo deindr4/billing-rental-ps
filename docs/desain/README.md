@@ -44,6 +44,9 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
   = Bangunkan TV dan ikon daya (oranye) = Matikan; TV offline/standby menampilkan "TV offline / standby" + Bangunkan.
 - Tambahan di luar desain — dialog Pembayaran: bagian lipat "Bayar sekaligus dengan tagihan lain" (daftar centang
   tagihan unit/POS: nama unit, nomor, sisa) di atas bagian member; label total menjadi "Total gabungan N tagihan".
+- Tambahan di luar desain — tombol mata (`btn-ghost btn-ikon`, ikon `mata` / `mata-tutup`) di header kasir sebelah
+  jam & di topbar admin: sembunyikan nominal untuk foto layar. `<x-rupiah rahasia>` atau semua `<x-rupiah>` di dalam
+  `[data-rahasia]` tampil "Rp *******" (CSS di `partials/sembunyi-uang.blade.php`).
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

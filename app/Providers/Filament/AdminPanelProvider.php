@@ -14,6 +14,7 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -55,6 +56,9 @@ class AdminPanelProvider extends PanelProvider
                     ->sort(-10)
                     ->visible(fn () => (bool) auth()->user()?->tenant_id),
             ])
+            // Sembunyikan nominal (foto layar): CSS + status di <head>, tombol mata sebelum menu profil
+            ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('partials.sembunyi-uang'))
+            ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.tombol-sembunyi-uang'))
             ->navigationGroups([
                 'Rental',
                 'F&B',

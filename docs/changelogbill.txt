@@ -5,6 +5,14 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-05 (sembunyikan nominal untuk foto layar)
+-----------------------------------------------------------------------------
+- Tombol mata di header kasir (sebelah jam) & di topbar admin (sebelah menu profil): nominal menjadi "Rp *******".
+  Yang disembunyikan: Omzet shift & Kas laci di header kasir, seluruh nominal di Laporan (kasir & admin), nominal
+  di widget dasbor admin (omzet hari ini, rata-rata, pengeluaran, top up, laba bulan ini). Halaman pembayaran/POS tidak
+  ikut (kasir tetap butuh angka). Pilihan diingat di browser itu saja; klik lagi untuk menampilkan.
+
+
 2026-10-05 (bayar gabungan antar unit + koreksi harga pokok)
 -----------------------------------------------------------------------------
 - Bayar sekaligus: di dialog Pembayaran ada bagian "Bayar sekaligus dengan tagihan lain". Centang tagihan unit lain /

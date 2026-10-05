@@ -8,6 +8,7 @@ use App\Filament\Widgets\StatusSistem;
 use App\Models\Cabang;
 use App\Models\Pengaturan;
 use App\Models\User;
+use App\Services\Billing\ShiftService;
 use App\Services\StatusSistemService;
 use App\Support\Tenancy;
 use Database\Seeders\DatabaseSeeder;
@@ -88,5 +89,19 @@ class DasborAdminTest extends TestCase
     {
         Livewire::test(RekapHariIni::class)->assertSee('Omzet hari ini')->assertSee('Unit terpakai');
         Livewire::test(RingkasanOperasional::class)->assertSee('TV Agent')->assertSee('Laba bersih bulan ini');
+    }
+
+    public function test_nominal_bisa_disembunyikan_untuk_foto(): void
+    {
+        // Admin: tombol mata + CSS di head; nominal widget berupa markup rahasia (tidak ter-escape)
+        $this->get('/admin')->assertOk()->assertSee('ubahSembunyiUang', false)->assertSee('Sembunyikan nominal');
+        Livewire::test(RekapHariIni::class)
+            ->assertSeeHtml('<span class="rp-rahasia"><span class="rp-nilai">Rp 0</span>')
+            ->assertSeeHtml('Rp *******');
+
+        // Kasir: omzet & kas laci di header, seluruh nominal di laporan
+        app(ShiftService::class)->buka(auth()->user(), Cabang::where('kode', 'DGH1')->firstOrFail(), 0);
+        $this->get('/')->assertOk()->assertSee('ubahSembunyiUang', false)->assertSeeHtml('rp-rahasia');
+        $this->get('/laporan')->assertOk()->assertSeeHtml('data-rahasia')->assertSeeHtml('rp-tutup');
     }
 }

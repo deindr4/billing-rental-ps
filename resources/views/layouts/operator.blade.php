@@ -26,6 +26,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? 'Rental' }} · {{ config('app.name') }}</title>
     <x-ikon-aplikasi />
+    @include('partials.sembunyi-uang')
 
     @vite(['resources/css/operator.css', 'resources/js/operator.js'])
     @livewireStyles
@@ -172,6 +173,15 @@
                              setInterval(f, 1000);
                          },
                      }">
+                    <button type="button" class="btn btn-ghost btn-ikon text-muted"
+                            x-data="{ tutup: document.documentElement.classList.contains('sembunyi-uang') }"
+                            @sembunyi-uang.window="tutup = $event.detail"
+                            @click="ubahSembunyiUang()"
+                            :title="tutup ? 'Tampilkan nominal' : 'Sembunyikan nominal (untuk foto layar)'"
+                            aria-label="Sembunyikan / tampilkan nominal">
+                        <x-ikon name="mata" size="18" x-show="! tutup" />
+                        <x-ikon name="mata-tutup" size="18" x-show="tutup" x-cloak />
+                    </button>
                     <span class="hidden sm:inline-flex items-center gap-1.5 label">
                         <span class="dot text-st-kosong"></span> Online
                     </span>

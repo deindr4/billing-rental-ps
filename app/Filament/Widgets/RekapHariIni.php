@@ -7,6 +7,7 @@ use App\Models\Sesi;
 use App\Models\Shift;
 use App\Models\Unit;
 use App\Services\LaporanService;
+use App\Support\Rupiah;
 use App\Support\Tenancy;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -49,23 +50,24 @@ class RekapHariIni extends StatsOverviewWidget
 
         $shift = Shift::query()->where('status', Shift::STATUS_BUKA)->with('user:id,name')->latest('dibuka_pada')->first();
 
-        $rp = fn (int $n) => 'Rp '.number_format($n, 0, ',', '.');
+        // Nominal bisa disembunyikan tombol mata (foto layar)
+        $rp = fn (int $n) => Rupiah::html($n);
 
         return [
             Stat::make('Omzet hari ini', $rp($hari['omzet_bersih']))
-                ->description($persen === null ? 'Kemarin '.$rp($kemarin['omzet_bersih']) : ($selisih >= 0 ? '+' : '').$persen.'% dari kemarin (s/d jam ini)')
+                ->description($persen === null ? Rupiah::html('Kemarin ', $kemarin['omzet_bersih']) : ($selisih >= 0 ? '+' : '').$persen.'% dari kemarin (s/d jam ini)')
                 ->descriptionIcon($selisih >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
                 ->color($selisih >= 0 ? 'success' : 'danger')
                 ->chart($grafik),
             Stat::make('Transaksi', number_format($hari['jumlah_transaksi'], 0, ',', '.'))
-                ->description('Rata-rata '.$rp($hari['rata_rata']).' · sewa '.$rp($hari['pendapatan_sewa']).' · F&B '.$rp($hari['pendapatan_fnb']))
+                ->description(Rupiah::html('Rata-rata ', $hari['rata_rata'], ' · sewa ', $hari['pendapatan_sewa'], ' · F&B ', $hari['pendapatan_fnb']))
                 ->icon('heroicon-o-receipt-percent'),
             Stat::make('Unit terpakai', "{$dipakai} / {$unitAktif}")
                 ->description($servis > 0 ? "{$servis} unit servis" : 'Semua unit siap')
                 ->descriptionColor($servis > 0 ? 'warning' : 'success')
                 ->icon('heroicon-o-tv'),
             Stat::make('Pengeluaran', $rp($hari['beban'] + $hari['belanja_stok']))
-                ->description($hari['batal_jumlah'] > 0 ? "{$hari['batal_jumlah']} transaksi dibatalkan (".$rp($hari['batal_nilai']).')' : 'Tidak ada pembatalan')
+                ->description($hari['batal_jumlah'] > 0 ? Rupiah::html("{$hari['batal_jumlah']} transaksi dibatalkan (", $hari['batal_nilai'], ')') : 'Tidak ada pembatalan')
                 ->descriptionColor($hari['batal_jumlah'] > 0 ? 'warning' : 'gray')
                 ->icon('heroicon-o-banknotes'),
             Stat::make('Top up member', $rp($hari['topup']))

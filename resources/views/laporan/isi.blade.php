@@ -137,7 +137,7 @@
 
             <div class="flex justify-between pt-2 border-t border-line text-muted">
                 <dt>Transaksi dibatalkan</dt>
-                <dd class="num">{{ $r['batal_jumlah'] }} · Rp {{ number_format($r['batal_nilai'], 0, ',', '.') }}</dd>
+                <dd class="num">{{ $r['batal_jumlah'] }} · <x-rupiah :nilai="$r['batal_nilai']" /></dd>
             </div>
         </dl>
         @if ($lihatLaba)
