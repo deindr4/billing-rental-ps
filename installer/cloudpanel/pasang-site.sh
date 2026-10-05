@@ -8,6 +8,8 @@ set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudbill.deltagamesbali.id}"
 SITE="${SITE:-$HOME/htdocs/$DOMAIN}"
+# Folder home situs (/home/<folder>), tempat paket diunggah; bisa beda dengan $HOME bila dijalankan lewat su
+RUMAH="$(dirname "$(dirname "$SITE")")"
 PHP="${PHP:-php8.4}"
 ZONA_BAWAAN="${ZONA:-Asia/Makassar}"
 
@@ -38,12 +40,12 @@ fi
 # Cari paket: argumen, lalu ~/ , folder site, folder public (bila terlanjur diunggah ke sana)
 PAKET="${1:-}"
 if [ -z "$PAKET" ]; then
-    PAKET="$(ls -t "$HOME"/BillingPS-cloud-*.tar.gz "$SITE"/BillingPS-cloud-*.tar.gz "$SITE"/public/BillingPS-cloud-*.tar.gz 2>/dev/null | head -1 || true)"
+    PAKET="$(ls -t "$RUMAH"/BillingPS-cloud-*.tar.gz "$HOME"/BillingPS-cloud-*.tar.gz "$SITE"/BillingPS-cloud-*.tar.gz "$SITE"/public/BillingPS-cloud-*.tar.gz 2>/dev/null | head -1 || true)"
 fi
-[ -n "$PAKET" ] && [ -f "$PAKET" ] || { merah "Paket BillingPS-cloud-*.tar.gz tidak ditemukan. Unggah ke $HOME atau sebut lokasinya."; exit 1; }
+[ -n "$PAKET" ] && [ -f "$PAKET" ] || { merah "Paket BillingPS-cloud-*.tar.gz tidak ditemukan. Unggah ke $RUMAH atau sebut lokasinya."; exit 1; }
 # Jangan tinggalkan paket di folder publik (bisa diunduh siapa saja)
 if [[ "$PAKET" == "$SITE/public/"* ]]; then
-    mv "$PAKET" "$HOME/" && PAKET="$HOME/$(basename "$PAKET")"
+    mv "$PAKET" "$RUMAH/" && PAKET="$RUMAH/$(basename "$PAKET")"
 fi
 hijau "Paket: $PAKET"
 

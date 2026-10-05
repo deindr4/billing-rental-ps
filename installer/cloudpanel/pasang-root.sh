@@ -6,11 +6,17 @@
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudbill.deltagamesbali.id}"
-# Folder site: /home/<folder>/htdocs/<domain>. Site user & grup = PEMILIK folder htdocs yang dibuat CloudPanel
-# (nama folder home tidak selalu sama dengan nama site user)
+# Folder site: /home/<folder>/htdocs/<domain>. Site user & grup = user PHP-FPM situs ini (yang menulis storage);
+# nama folder home / user SSH bisa berbeda. Cadangan: pemilik folder site.
 SITE="${SITE:-$(ls -d /home/*/htdocs/"$DOMAIN" 2>/dev/null | head -1)}"
-if [ -z "${SITE_USER:-}" ] && [ -n "$SITE" ]; then
-    SITE_USER="$(stat -c %U "$(dirname "$SITE")")"
+POOL="$(grep -lE "$DOMAIN" /etc/php/*/fpm/pool.d/*.conf 2>/dev/null | head -1 || true)"
+if [ -z "${SITE_USER:-}" ]; then
+    if [ -n "$POOL" ]; then
+        SITE_USER="$(sed -nE 's/^user *= *([^ ]+).*/\1/p' "$POOL" | head -1)"
+        SITE_GROUP="${SITE_GROUP:-$(sed -nE 's/^group *= *([^ ]+).*/\1/p' "$POOL" | head -1)}"
+    elif [ -n "$SITE" ]; then
+        SITE_USER="$(stat -c %U "$SITE")"
+    fi
 fi
 SITE_GROUP="${SITE_GROUP:-$(id -gn "${SITE_USER:-root}" 2>/dev/null || echo "")}"
 PHP="${PHP:-/usr/bin/php8.4}"
@@ -90,6 +96,9 @@ supervisorctl reread
 supervisorctl update
 sleep 3
 supervisorctl status | grep billingps || true
+
+judul "3. Langkah berikut (aplikasi) - sebagai site user $SITE_USER"
+echo "  su -s /bin/bash $SITE_USER -c \"SITE=$SITE bash $(cd "$(dirname "$0")" && pwd)/pasang-site.sh <file-paket.tar.gz>\""
 
 hijau ""
 hijau "Selesai. Jangan buka port 8080 & 3306 di firewall (Reverb diakses lewat Nginx /app)."
