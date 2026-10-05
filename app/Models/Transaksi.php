@@ -36,7 +36,7 @@ class Transaksi extends Model
     protected $fillable = [
         'tenant_id', 'cabang_id', 'shift_id', 'unit_id', 'user_id', 'nomor', 'jenis', 'status',
         'member_id', 'pelanggan_nama', 'subtotal', 'total_diskon', 'total', 'total_bayar', 'kembalian',
-        'dibayar_pada', 'dibatalkan_pada', 'dibatalkan_oleh', 'alasan_batal', 'catatan', 'is_latihan',
+        'dibayar_pada', 'dibatalkan_pada', 'dibatalkan_oleh', 'alasan_batal', 'catatan', 'is_latihan', 'grup_bayar',
     ];
 
     protected function casts(): array

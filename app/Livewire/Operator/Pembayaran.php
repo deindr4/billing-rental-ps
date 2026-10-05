@@ -35,6 +35,9 @@ class Pembayaran extends Component
 
     public ?int $poinDitukar = null;
 
+    /** Tagihan lain (unit / POS) yang ikut dibayar sekaligus: id transaksi */
+    public array $gabung = [];
+
     #[On('buka-pembayaran')]
     public function bukaUntuk(string $transaksiId): void
     {
@@ -56,8 +59,62 @@ class Pembayaran extends Component
         $this->memberId = $trx->member_id;
         $this->jenisPelanggan = $trx->member_id ? 'member' : 'tamu';
         $this->poinDitukar = null;
+        $this->gabung = [];
+        unset($this->tagihanLain, $this->tagihanGabung);
         $this->baris = $trx->sisaTagihan() > 0 ? [$this->barisBaru('tunai', $trx->sisaTagihan())] : [];
         $this->buka = true;
+    }
+
+    /* ---------------- Bayar gabungan antar unit ---------------- */
+
+    /**
+     * Tagihan lain di cabang yang bisa ikut dibayar: belum lunas, tidak dibatalkan, sesinya sudah selesai (atau POS).
+     *
+     * @return Collection<int, Transaksi>
+     */
+    #[Computed]
+    public function tagihanLain(): Collection
+    {
+        $trx = $this->transaksi;
+
+        if (! $trx || $trx->member_id) {
+            return collect(); // tagihan member dibayar terpisah (saldo, poin, stamp per member)
+        }
+
+        return Transaksi::query()
+            ->with('unit:id,nama')
+            ->where('cabang_id', $trx->cabang_id)
+            ->whereKeyNot($trx->id)
+            ->where('status', Transaksi::STATUS_BELUM_BAYAR)
+            ->whereNull('member_id')
+            ->whereDoesntHave('sesi', fn ($q) => $q->withoutGlobalScopes()->whereIn('status', [\App\Models\Sesi::STATUS_BERJALAN, \App\Models\Sesi::STATUS_DIJEDA]))
+            ->latest()
+            ->limit(30)
+            ->get()
+            ->filter(fn (Transaksi $t) => $t->sisaTagihan() > 0)
+            ->values();
+    }
+
+    /** @return Collection<int, Transaksi> tagihan lain yang dicentang */
+    #[Computed]
+    public function tagihanGabung(): Collection
+    {
+        return $this->tagihanLain->whereIn('id', $this->gabung)->values();
+    }
+
+    public function toggleGabung(string $transaksiId): void
+    {
+        if (! $this->tagihanLain->contains('id', $transaksiId)) {
+            return;
+        }
+
+        $this->gabung = in_array($transaksiId, $this->gabung, true)
+            ? array_values(array_diff($this->gabung, [$transaksiId]))
+            : [...$this->gabung, $transaksiId];
+
+        unset($this->tagihanGabung, $this->sisa);
+        $this->resetValidation();
+        $this->baris = $this->sisa > 0 ? [$this->barisBaru('tunai', $this->sisa)] : [];
     }
 
     /* ---------------- Data ---------------- */
@@ -73,7 +130,7 @@ class Pembayaran extends Component
     /** Metode yang bisa dipilih: Saldo hanya untuk transaksi member */
     public function metodeTersedia(): array
     {
-        return $this->transaksi?->member_id
+        return $this->transaksi?->member_id && $this->gabung === []
             ? self::METODE + ['saldo' => 'Saldo']
             : self::METODE;
     }
@@ -196,7 +253,7 @@ class Pembayaran extends Component
 
     private function segarkanTagihan(): void
     {
-        unset($this->transaksi, $this->sisa, $this->member);
+        unset($this->transaksi, $this->sisa, $this->member, $this->tagihanLain, $this->tagihanGabung);
         $this->resetValidation();
 
         if ($this->sisa <= 0) {
@@ -209,10 +266,12 @@ class Pembayaran extends Component
         $this->baris = [$this->barisBaru('tunai', $this->sisa)];
     }
 
+    /** Sisa tagihan ini + tagihan lain yang ikut dibayar sekaligus */
     #[Computed]
     public function sisa(): int
     {
-        return $this->transaksi?->sisaTagihan() ?? 0;
+        return ($this->transaksi?->sisaTagihan() ?? 0)
+            + (int) $this->tagihanGabung->sum(fn (Transaksi $t) => $t->sisaTagihan());
     }
 
     public function totalInput(): int
@@ -328,17 +387,25 @@ class Pembayaran extends Component
             return;
         }
 
+        $bayar = array_map(fn ($b) => [
+            'metode' => $b['metode'],
+            'jumlah' => (int) $b['jumlah'],
+            'diterima' => $b['metode'] === 'tunai' ? (int) $b['diterima'] : null,
+            'referensi' => trim($b['referensi'] ?? '') ?: null,
+        ], $this->baris);
+
         try {
-            $trx = app(BillingService::class)->bayar(
-                $this->transaksi,
-                auth()->user(),
-                array_map(fn ($b) => [
-                    'metode' => $b['metode'],
-                    'jumlah' => (int) $b['jumlah'],
-                    'diterima' => $b['metode'] === 'tunai' ? (int) $b['diterima'] : null,
-                    'referensi' => trim($b['referensi'] ?? '') ?: null,
-                ], $this->baris)
-            );
+            if ($this->tagihanGabung->isNotEmpty()) {
+                // Bayar sekaligus: tagihan ini dulu, lalu tagihan lain yang dicentang
+                $semua = app(BillingService::class)->bayarGabungan(
+                    [$this->transaksi->id, ...$this->tagihanGabung->pluck('id')->all()], auth()->user(), $bayar
+                );
+                $trx = $semua->first();
+                $kembalian = (int) $semua->sum('kembalian');
+            } else {
+                $trx = app(BillingService::class)->bayar($this->transaksi, auth()->user(), $bayar);
+                $kembalian = (int) $trx->kembalian;
+            }
         } catch (BillingException $e) {
             $this->alert('Pembayaran gagal', $e->getMessage(), 'error');
 
@@ -348,8 +415,8 @@ class Pembayaran extends Component
         $this->buka = false;
         $this->dispatch('sesi-berubah');
 
-        $teks = $trx->kembalian > 0
-            ? 'Kembalian: Rp '.number_format($trx->kembalian, 0, ',', '.')
+        $teks = $kembalian > 0
+            ? 'Kembalian: Rp '.number_format($kembalian, 0, ',', '.')
             : 'Tanpa kembalian.';
 
         // Dialog sukses dengan tombol lihat struk (pratinjau dulu, cetak manual)

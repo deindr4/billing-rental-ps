@@ -6,7 +6,7 @@
 
             {{-- Total --}}
             <div class="text-center mb-4">
-                <div class="text-sm text-muted">Total tagihan</div>
+                <div class="text-sm text-muted">{{ $this->tagihanGabung->isNotEmpty() ? 'Total gabungan '.($this->tagihanGabung->count() + 1).' tagihan' : 'Total tagihan' }}</div>
                 <x-rupiah :nilai="$this->sisa" class="text-3xl font-semibold" />
                 <div class="text-xs text-muted num">{{ $trx->nomor }} · {{ $trx->pelanggan_nama ?: 'Tamu' }}</div>
             </div>
@@ -34,6 +34,36 @@
                     @endforeach
                 </ul>
             </details>
+
+            {{-- Bayar sekaligus dengan tagihan unit lain / POS (rombongan main di beberapa TV, bayar sekali) --}}
+            @if ($this->tagihanLain->isNotEmpty())
+                <details class="rounded-md border border-line mb-4 text-sm" @if ($this->tagihanGabung->isNotEmpty()) open @endif>
+                    <summary class="px-3 py-2 cursor-pointer select-none flex items-center justify-between gap-2">
+                        <span>Bayar sekaligus dengan tagihan lain</span>
+                        @if ($this->tagihanGabung->isNotEmpty())
+                            <span class="label text-accent">+{{ $this->tagihanGabung->count() }} tagihan</span>
+                        @endif
+                    </summary>
+                    <ul class="divide-y divide-line border-t border-line">
+                        @foreach ($this->tagihanLain as $lain)
+                            @php $dipilih = in_array($lain->id, $gabung, true); @endphp
+                            <li wire:key="gabung-{{ $lain->id }}">
+                                <label class="px-3 py-2 flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" class="size-4" @checked($dipilih) wire:click="toggleGabung('{{ $lain->id }}')">
+                                    <span class="min-w-0 flex-1">
+                                        <span class="block truncate font-medium">{{ $lain->unit?->nama ?? 'POS / F&B' }}</span>
+                                        <span class="block text-xs text-muted num">{{ $lain->nomor }}{{ $lain->pelanggan_nama ? ' · '.$lain->pelanggan_nama : '' }}</span>
+                                    </span>
+                                    <x-rupiah :nilai="$lain->sisaTagihan()" @class(['shrink-0', 'text-accent font-medium' => $dipilih]) />
+                                </label>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <p class="px-3 py-2 border-t border-line text-xs text-muted">
+                        Tiap unit tetap tercatat sendiri di laporan; struknya satu (gabungan). Hanya tagihan yang sesinya sudah selesai.
+                    </p>
+                </details>
+            @endif
 
             {{-- Member: pilih, saldo, tukar poin & stamp --}}
             @if ($this->programMemberAktif && $trx->jenis !== \App\Models\Transaksi::JENIS_TOP_UP)

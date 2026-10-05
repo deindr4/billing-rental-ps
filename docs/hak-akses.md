@@ -30,6 +30,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Rental: mulai, kelola & selesaikan sesi | ✅ | ✅ | ✅ | – |
 | POS: jual & tambah F&B ke tagihan | ✅ | ✅ | ✅ | – |
 | Terima pembayaran (termasuk Pembayaran online) | ✅ | ✅ | ✅ | – |
+| Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
 | Buka & tutup kas | ✅ | ✅ | ✅ | – |
 | **Transaksi** | | | | |
 | Lihat daftar transaksi | ✅ | ✅ | ✅ | – |
@@ -43,6 +44,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Lihat stok | ✅ | ✅ | ✅ | ✅ |
 | Catat stok masuk (belanja) | ✅ | ✅ | – | – |
 | Stok opname | ✅ | ✅ | – | – |
+| Koreksi harga pokok stok masuk (HPP dihitung ulang, Stok → Riwayat) | ✅ | – | – | – |
 | **Pengeluaran** | | | | |
 | Catat pengeluaran | ✅ | ✅ | ✅ | – |
 | Pengeluaran melebihi plafon | PIN | PIN | – | – |

@@ -18,7 +18,9 @@ use App\Models\User;
 use App\Services\Member\MemberService;
 use App\Support\Audit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Alur sesi billing: mulai, tambah waktu, pause, resume, pindah unit, selesai, bayar, batal.
@@ -733,6 +735,111 @@ final class BillingService
             }
 
             return $transaksi;
+        });
+    }
+
+    /**
+     * Bayar gabungan: beberapa tagihan (unit lain / POS) dibayar sekaligus. Tiap tagihan tetap dilunasi sendiri lewat
+     * bayar() (kas, status unit, log sesi, manfaat member per tagihan) — pembayaran dibagi berurutan ke tiap tagihan,
+     * kembalian tunai ikut tagihan terakhir. Semua diberi grup_bayar yang sama untuk satu struk gabungan.
+     *
+     * @param  array<int,string>  $transaksiIds  urutan = urutan pelunasan (tagihan utama dulu)
+     * @param  array<int, array{metode:string, jumlah:int, diterima?:int|null, referensi?:string|null}>  $bayar
+     * @return Collection<int, Transaksi>
+     */
+    public function bayarGabungan(array $transaksiIds, User $user, array $bayar): Collection
+    {
+        $transaksiIds = array_values(array_unique($transaksiIds));
+
+        if (count($transaksiIds) < 2) {
+            throw new BillingException('Pilih minimal dua tagihan untuk dibayar sekaligus.');
+        }
+
+        if (in_array('saldo', array_column($bayar, 'metode'), true)) {
+            throw new BillingException('Saldo member tidak bisa dipakai untuk bayar gabungan. Bayar tagihan member terpisah.');
+        }
+
+        return DB::transaction(function () use ($transaksiIds, $user, $bayar) {
+            $daftar = Transaksi::withoutGlobalScopes()->whereIn('id', $transaksiIds)->lockForUpdate()->get()->keyBy('id');
+            $utama = $daftar->get($transaksiIds[0]) ?? throw new BillingException('Tagihan tidak ditemukan.');
+            $urut = collect($transaksiIds)->map(fn ($id) => $daftar->get($id) ?? throw new BillingException('Ada tagihan yang tidak ditemukan.'));
+
+            foreach ($urut as $t) {
+                if ($t->tenant_id !== $utama->tenant_id || $t->cabang_id !== $utama->cabang_id) {
+                    throw new BillingException('Tagihan harus dari cabang yang sama.');
+                }
+
+                if ($t->isDibatalkan() || $t->isLunas() || $t->sisaTagihan() <= 0) {
+                    throw new BillingException("Tagihan {$t->nomor} sudah lunas / dibatalkan.");
+                }
+
+                $sesi = Sesi::withoutGlobalScopes()->where('transaksi_id', $t->id)->first();
+
+                if ($sesi?->isAktif()) {
+                    throw new BillingException("Unit di tagihan {$t->nomor} masih main. Selesaikan sesinya dulu.");
+                }
+            }
+
+            $total = (int) $urut->sum(fn (Transaksi $t) => $t->sisaTagihan());
+            $totalBayar = (int) array_sum(array_map(fn ($b) => (int) ($b['jumlah'] ?? 0), $bayar));
+
+            if ($totalBayar !== $total) {
+                throw new BillingException(sprintf('Total pembayaran Rp %s tidak sama dengan total gabungan Rp %s.',
+                    number_format($totalBayar, 0, ',', '.'), number_format($total, 0, ',', '.')));
+            }
+
+            $kembalian = 0;
+
+            foreach ($bayar as $b) {
+                if (($b['metode'] ?? '') === 'tunai') {
+                    $kembalian += max(0, (int) ($b['diterima'] ?? $b['jumlah']) - (int) $b['jumlah']);
+                }
+            }
+
+            // Bagi baris pembayaran berurutan ke tiap tagihan
+            $sisaBaris = array_map(fn ($b) => ['metode' => $b['metode'], 'sisa' => (int) $b['jumlah'], 'referensi' => $b['referensi'] ?? null], $bayar);
+            $alokasi = [];
+
+            foreach ($urut as $i => $t) {
+                $perlu = $t->sisaTagihan();
+                $alokasi[$i] = [];
+
+                foreach ($sisaBaris as &$sb) {
+                    $ambil = min($perlu, $sb['sisa']);
+
+                    if ($ambil > 0) {
+                        $alokasi[$i][] = ['metode' => $sb['metode'], 'jumlah' => $ambil, 'diterima' => $sb['metode'] === 'tunai' ? $ambil : null, 'referensi' => $sb['referensi']];
+                        $sb['sisa'] -= $ambil;
+                        $perlu -= $ambil;
+                    }
+                }
+                unset($sb);
+            }
+
+            // Kembalian tunai ikut potongan tunai terakhir (uang diterima = nominal + kembalian)
+            if ($kembalian > 0) {
+                foreach (array_reverse(array_keys($alokasi)) as $i) {
+                    $idx = array_key_last(array_filter($alokasi[$i], fn ($p) => $p['metode'] === 'tunai'));
+
+                    if ($idx !== null) {
+                        $alokasi[$i][$idx]['diterima'] += $kembalian;
+                        break;
+                    }
+                }
+            }
+
+            $grup = (string) Str::uuid7();
+            $hasil = collect();
+
+            foreach ($urut as $i => $t) {
+                $t->forceFill(['grup_bayar' => $grup])->save();
+                $hasil->push($this->bayar($t, $user, $alokasi[$i]));
+            }
+
+            Audit::catat('bayar_gabungan', 'Bayar gabungan '.$hasil->pluck('nomor')->implode(', ').' (Rp '.number_format($total, 0, ',', '.').')',
+                $utama, ['grup' => $grup, 'transaksi' => $hasil->pluck('nomor')->all(), 'total' => $total], userId: $user->id);
+
+            return $hasil;
         });
     }
 

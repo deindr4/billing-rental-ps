@@ -5,6 +5,20 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-05 (bayar gabungan antar unit + koreksi harga pokok)
+-----------------------------------------------------------------------------
+- Bayar sekaligus: di dialog Pembayaran ada bagian "Bayar sekaligus dengan tagihan lain". Centang tagihan unit lain /
+  POS yang belum dibayar (sesinya sudah selesai, tanpa member) -> total digabung, bayar sekali (tunai/QRIS/campuran,
+  bukan saldo member). Tiap unit tetap jadi transaksi sendiri di laporan & kas; pembayaran dibagi berurutan, kembalian
+  dicatat di tagihan tunai terakhir. Struknya satu: "Bayar gabungan N tagihan" berisi rincian per unit, total,
+  pembayaran & kembalian (cetak ulang dari salah satu tagihan = struk gabungan yang sama). Audit "Bayar gabungan".
+  Database: kolom baru transaksi.grup_bayar -> jalankan Update database + Pasang ulang trigger sinkron.
+- Koreksi harga pokok (khusus Owner/Super Admin): Stok -> Riwayat, kolom "Harga pokok" + tombol Koreksi di baris
+  stok masuk. Isi harga benar + alasan -> HPP rata-rata dihitung ulang dari riwayat, termasuk HPP penjualan sejak stok
+  masuk itu (laporan laba ikut benar). Catatan kas pengeluaran pembelian tidak diubah. Audit "Koreksi harga pokok".
+- Batal transaksi penuh tidak lagi mengembalikan stok dari item F&B yang sudah dibatalkan (qty 0).
+
+
 2026-10-05 (status server lokal di cloud)
 -----------------------------------------------------------------------------
 - Dasbor cloud: kartu "Server lokal (rental)" tidak lagi mencoba menghubungi alamat LAN (192.168.x.x - memang tidak

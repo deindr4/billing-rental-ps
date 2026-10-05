@@ -42,4 +42,8 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
   (`v0.6.5 · ●L 12ms · ●C 85ms`, titik hijau/kuning/merah), bisa dimatikan di Admin → Pengaturan Operasional.
 - Tambahan di luar desain — kartu unit kasir: remote daya dua tombol terpisah, ikon matahari (`bangun`, hijau)
   = Bangunkan TV dan ikon daya (oranye) = Matikan; TV offline/standby menampilkan "TV offline / standby" + Bangunkan.
+- Tambahan di luar desain — dialog Pembayaran: bagian lipat "Bayar sekaligus dengan tagihan lain" (daftar centang
+  tagihan unit/POS: nama unit, nomor, sisa) di atas bagian member; label total menjadi "Total gabungan N tagihan".
+- Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
+  "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

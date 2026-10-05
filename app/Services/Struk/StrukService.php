@@ -11,6 +11,7 @@ use App\Models\TransaksiItem;
 use App\Services\Billing\BillingService;
 use App\Services\Member\PengaturanMember;
 use App\Support\EscPos;
+use Illuminate\Support\Collection;
 
 /**
  * Menyusun isi struk sekali, lalu dirender ke:
@@ -56,6 +57,13 @@ final class StrukService
         $sesi = $transaksi->sesi()->withoutGlobalScopes()->first();
         $estimasi = $sesi ? app(BillingService::class)->estimasiSewaOpen($sesi) : null;
 
+        // Bayar gabungan antar unit: semua tagihan dalam grup dicetak dalam satu struk
+        $grup = $transaksi->grup_bayar
+            ? Transaksi::withoutGlobalScopes()->where('tenant_id', $transaksi->tenant_id)->where('grup_bayar', $transaksi->grup_bayar)
+                ->with(['items', 'diskon', 'unit:id,nama', 'pembayaran' => fn ($q) => $q->where('status', 'sukses')->orderBy('dibayar_pada')])
+                ->orderBy('dibayar_pada')->orderBy('nomor')->get()
+            : null;
+
         return [
             'trx' => $transaksi,
             'cabang' => $cabang,
@@ -64,6 +72,7 @@ final class StrukService
             'sisa' => $transaksi->isDibatalkan() ? 0 : $transaksi->sisaTagihan() + (int) $estimasi,
             'diskon' => $transaksi->diskon->where('nilai', '>', 0)->values(),
             'member' => $this->infoMember($transaksi),
+            'grup' => $grup && $grup->count() > 1 ? $grup : null,
         ];
     }
 
@@ -138,6 +147,13 @@ final class StrukService
         }
 
         $tambah($garis);
+
+        if ($grup = $d['grup'] ?? null) {
+            $this->barisGabungan($d, $grup, $kolom, $tambah, $kk, $rp, $garis); // menulis ke $b lewat $tambah
+
+            return $b;
+        }
+
         $kk('No', $trx->nomor);
         $kk('Tanggal', ($trx->dibayar_pada ?? $trx->created_at)->format('d/m/Y H:i'));
         $kk('Kasir', (string) $trx->user?->name);
@@ -248,6 +264,69 @@ final class StrukService
         $tambah('Dicetak '.now()->format('d/m/Y H:i'), 'tengah');
 
         return $b;
+    }
+
+    /**
+     * Struk bayar gabungan: tiap tagihan (unit / POS) dengan item & subtotalnya, lalu total & pembayaran gabungan.
+     *
+     * @param  Collection<int, Transaksi>  $grup
+     */
+    private function barisGabungan(array $d, Collection $grup, int $kolom, callable $tambah, callable $kk, callable $rp, string $garis): void
+    {
+        $trx = $d['trx'];
+        $kk('Bayar gabungan', $grup->count().' tagihan');
+        $kk('Tanggal', ($trx->dibayar_pada ?? $trx->created_at)->format('d/m/Y H:i'));
+        $kk('Kasir', (string) $trx->user?->name);
+
+        foreach ($grup as $t) {
+            $tambah($garis);
+            $tambah(($t->unit?->nama ?? 'POS / F&B').' · '.$t->nomor, 'kiri', true);
+
+            foreach ($t->items->where('qty', '>', 0) as $item) {
+                if ($item->qty > 1) {
+                    foreach ($this->bungkus($item->nama, $kolom) as $baris) {
+                        $tambah($baris);
+                    }
+                    $kk("  {$item->qty} x ".$rp($item->harga_satuan), $rp($item->subtotal));
+                } else {
+                    $kk($item->nama, $rp($item->subtotal));
+                }
+            }
+
+            foreach ($t->diskon->where('nilai', '>', 0) as $diskon) {
+                $kk($diskon->nama, $rp(-$diskon->nilai));
+            }
+
+            $kk('Subtotal', $rp($t->total));
+        }
+
+        $tambah($garis);
+        $kk('TOTAL', 'Rp '.$rp((int) $grup->sum('total')), true);
+
+        // Pembayaran digabung per metode (dibagi ke tiap tagihan saat dicatat)
+        $semua = $grup->flatMap->pembayaran;
+
+        foreach ($semua->groupBy('metode') as $metode => $daftar) {
+            $kk(self::METODE[$metode] ?? $metode, $rp((int) $daftar->sum('jumlah')));
+
+            if ($metode === 'tunai' && (int) $daftar->sum('diterima') > (int) $daftar->sum('jumlah')) {
+                $kk('  Diterima', $rp((int) $daftar->sum('diterima')));
+            }
+        }
+
+        if (($kembali = (int) $grup->sum('kembalian')) > 0) {
+            $kk('Kembalian', $rp($kembali), true);
+        }
+
+        $tambah($garis);
+
+        foreach (preg_split('/\R/', $d['setelan']['footer']) as $bagian) {
+            foreach ($this->bungkus($bagian, $kolom) as $baris) {
+                $tambah($baris, 'tengah');
+            }
+        }
+
+        $tambah('Dicetak '.now()->format('d/m/Y H:i'), 'tengah');
     }
 
     /** Perintah ESC/POS siap kirim ke printer */

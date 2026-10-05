@@ -241,11 +241,15 @@
                         <th class="px-3 py-2 font-medium">Produk</th>
                         <th class="px-3 py-2 font-medium">Jenis</th>
                         <th class="px-3 py-2 font-medium text-right">Qty</th>
+                        @if ($lihatHpp = $this->bolehLihatLaba())
+                            <th class="px-3 py-2 font-medium text-right">Harga pokok</th>
+                        @endif
                         <th class="px-3 py-2 font-medium hidden md:table-cell">Keterangan</th>
                         <th class="px-3 py-2 font-medium hidden md:table-cell">Oleh</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line">
+                    @php $bolehKoreksi = $this->bolehKoreksiHpp(); $kolom = $lihatHpp ? 7 : 6; @endphp
                     @forelse ($riwayat as $m)
                         <tr wire:key="mts-{{ $m->id }}">
                             <td class="px-3 py-2 num whitespace-nowrap text-muted">{{ $m->created_at->format('d/m H:i') }}</td>
@@ -254,11 +258,47 @@
                             <td @class(['px-3 py-2 text-right num', 'text-accent' => $m->qty > 0, 'text-danger' => $m->qty < 0])>
                                 {{ $m->qty > 0 ? '+'.$m->qty : $m->qty }}
                             </td>
+                            @if ($lihatHpp)
+                                <td class="px-3 py-2 text-right whitespace-nowrap">
+                                    @if ($m->jenis === 'masuk' && $m->harga_pokok !== null)
+                                        <x-rupiah :nilai="$m->harga_pokok" />
+                                        {{-- Owner: betulkan harga pokok salah input staf (HPP & laba dihitung ulang) --}}
+                                        @if ($bolehKoreksi && $koreksiId !== $m->id)
+                                            <button type="button" wire:click="mulaiKoreksi('{{ $m->id }}')" class="btn-tint tint-kuning h-7 px-2 text-xs ml-1">Koreksi</button>
+                                        @endif
+                                    @else
+                                        <span class="text-muted">–</span>
+                                    @endif
+                                </td>
+                            @endif
                             <td class="px-3 py-2 hidden md:table-cell text-muted">{{ $m->keterangan }}</td>
                             <td class="px-3 py-2 hidden md:table-cell text-muted">{{ $m->user?->name ?? 'Sistem' }}</td>
                         </tr>
+                        @if ($koreksiId === $m->id)
+                            <tr wire:key="koreksi-{{ $m->id }}" class="bg-accent/5">
+                                <td colspan="{{ $kolom }}" class="px-3 py-3">
+                                    <div class="text-sm font-medium mb-2">Koreksi harga pokok {{ $m->produk?->nama }} · {{ $m->qty }} pcs ({{ $m->created_at->format('d/m/Y H:i') }})</div>
+                                    <div class="flex flex-wrap items-start gap-2">
+                                        <div>
+                                            <input type="number" min="0" wire:model="koreksiHarga" class="input w-40 num" placeholder="Harga pokok / pcs">
+                                            @error('koreksiHarga') <div class="text-xs text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
+                                        <div class="flex-1 min-w-[220px]">
+                                            <input type="text" wire:model="koreksiAlasan" class="input w-full" placeholder="Alasan (mis. salah ketik, harga nota Rp 2.500)">
+                                            @error('koreksiAlasan') <div class="text-xs text-danger mt-1">{{ $message }}</div> @enderror
+                                        </div>
+                                        <button type="button" wire:click="simpanKoreksi" wire:loading.attr="disabled" class="btn btn-primary h-10 px-4">Simpan</button>
+                                        <button type="button" wire:click="batalKoreksi" class="btn h-10 px-4">Batal</button>
+                                    </div>
+                                    <p class="text-xs text-muted mt-2">
+                                        HPP rata-rata & HPP penjualan sejak stok ini masuk dihitung ulang (laporan laba ikut benar). Jumlah stok tidak berubah.
+                                        Bila belanja ini dibayar dari kas laci, catatan pengeluaran kas tidak ikut berubah.
+                                    </p>
+                                </td>
+                            </tr>
+                        @endif
                     @empty
-                        <tr><td colspan="6" class="px-3 py-8 text-center text-muted">Belum ada riwayat.</td></tr>
+                        <tr><td colspan="7" class="px-3 py-8 text-center text-muted">Belum ada riwayat.</td></tr>
                     @endforelse
                 </tbody>
             </table>

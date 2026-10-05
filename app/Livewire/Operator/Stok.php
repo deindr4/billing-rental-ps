@@ -8,6 +8,7 @@ use App\Models\Cabang;
 use App\Models\Produk;
 use App\Models\StokMutasi;
 use App\Services\Billing\InventoriService;
+use App\Services\Billing\StokService;
 use App\Support\Tenancy;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
@@ -54,6 +55,13 @@ class Stok extends Component
     // Riwayat
     public string $jenisRiwayat = '';
 
+    // Koreksi harga pokok stok masuk (owner)
+    public ?string $koreksiId = null;
+
+    public ?int $koreksiHarga = null;
+
+    public string $koreksiAlasan = '';
+
     public function mount(): void
     {
         if (! array_key_exists($this->tab, self::TAB)) {
@@ -92,6 +100,69 @@ class Stok extends Component
     public function bolehLihatLaba(): bool
     {
         return auth()->user()->can('laporan.laba');
+    }
+
+    /** Koreksi harga pokok mengubah laba yang sudah tercatat: khusus owner / super admin */
+    public function bolehKoreksiHpp(): bool
+    {
+        $user = auth()->user();
+
+        return $user->hasRole('Owner') || $user->isSuperAdmin();
+    }
+
+    public function mulaiKoreksi(string $mutasiId): void
+    {
+        $m = StokMutasi::query()->where('jenis', 'masuk')->find($mutasiId);
+
+        if (! $this->bolehKoreksiHpp() || ! $m) {
+            return;
+        }
+
+        $this->koreksiId = $m->id;
+        $this->koreksiHarga = (int) $m->harga_pokok;
+        $this->koreksiAlasan = '';
+        $this->resetValidation();
+    }
+
+    public function batalKoreksi(): void
+    {
+        $this->reset(['koreksiId', 'koreksiHarga', 'koreksiAlasan']);
+    }
+
+    public function simpanKoreksi(StokService $stok): void
+    {
+        if (! $this->bolehKoreksiHpp()) {
+            $this->alert('Akses ditolak', 'Koreksi harga pokok khusus owner.', 'error');
+
+            return;
+        }
+
+        $this->validate([
+            'koreksiHarga' => 'required|integer|min:0|max:100000000',
+            'koreksiAlasan' => 'required|string|min:3|max:200',
+        ], [
+            'koreksiHarga.required' => 'Isi harga pokok yang benar.',
+            'koreksiAlasan.required' => 'Tulis alasan koreksi.',
+        ]);
+
+        $m = StokMutasi::query()->where('jenis', 'masuk')->findOrFail($this->koreksiId);
+
+        try {
+            $hasil = $stok->koreksiHargaPokok($m, $this->koreksiHarga, auth()->user(), $this->koreksiAlasan);
+        } catch (BillingException $e) {
+            $this->alert('Gagal', $e->getMessage(), 'error');
+
+            return;
+        }
+
+        $this->batalKoreksi();
+        unset($this->daftarProduk);
+        $this->alert(
+            'Harga pokok dikoreksi',
+            'HPP rata-rata Rp '.number_format($hasil['hpp_lama'], 0, ',', '.').' → Rp '.number_format($hasil['hpp_baru'], 0, ',', '.')
+                .($hasil['item'] > 0 ? " · {$hasil['item']} penjualan ikut diperbaiki." : ''),
+            'success'
+        );
     }
 
     /* ---------------- Data ---------------- */

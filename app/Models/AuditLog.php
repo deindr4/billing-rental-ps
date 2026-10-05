@@ -31,6 +31,8 @@ class AuditLog extends Model
         'waktu_gratis' => 'Tambah waktu gratis',
         'batal_tambah_waktu' => 'Batal tambah waktu',
         'batal_fnb' => 'Batal F&B (salah order)',
+        'koreksi_hpp' => 'Koreksi harga pokok',
+        'bayar_gabungan' => 'Bayar gabungan antar unit',
         'bypass_tv' => 'Bypass TV',
         'kode_darurat' => 'Kode darurat TV',
         'koreksi_member' => 'Koreksi member',
