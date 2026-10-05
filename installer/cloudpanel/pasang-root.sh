@@ -6,11 +6,13 @@
 set -euo pipefail
 
 DOMAIN="${DOMAIN:-cloudbill.deltagamesbali.id}"
-# Site user = pemilik /home/<user>/htdocs/<domain> (dibuat CloudPanel saat Add Site)
-if [ -z "${SITE_USER:-}" ]; then
-    SITE_USER="$(ls -d /home/*/htdocs/"$DOMAIN" 2>/dev/null | head -1 | cut -d/ -f3)"
+# Folder site: /home/<folder>/htdocs/<domain>. Site user & grup = PEMILIK folder htdocs yang dibuat CloudPanel
+# (nama folder home tidak selalu sama dengan nama site user)
+SITE="${SITE:-$(ls -d /home/*/htdocs/"$DOMAIN" 2>/dev/null | head -1)}"
+if [ -z "${SITE_USER:-}" ] && [ -n "$SITE" ]; then
+    SITE_USER="$(stat -c %U "$(dirname "$SITE")")"
 fi
-SITE="/home/$SITE_USER/htdocs/$DOMAIN"
+SITE_GROUP="${SITE_GROUP:-$(id -gn "${SITE_USER:-root}" 2>/dev/null || echo "")}"
 PHP="${PHP:-/usr/bin/php8.4}"
 
 merah() { printf '\033[31m%s\033[0m\n' "$*"; }
@@ -18,11 +20,12 @@ hijau() { printf '\033[32m%s\033[0m\n' "$*"; }
 judul() { printf '\n\033[36m== %s ==\033[0m\n' "$*"; }
 
 [ "$(id -u)" -eq 0 ] || { merah "Jalankan sebagai root: sudo bash $0"; exit 1; }
-[ -n "$SITE_USER" ] && [ -d "$SITE" ] || { merah "Folder site /home/*/htdocs/$DOMAIN tidak ditemukan (atur DOMAIN / SITE_USER)"; exit 1; }
-hijau "Site: $SITE (user $SITE_USER)"
+[ -n "$SITE" ] && [ -d "$SITE" ] || { merah "Folder site /home/*/htdocs/$DOMAIN tidak ditemukan (atur DOMAIN / SITE)"; exit 1; }
+[ "$SITE_USER" != root ] && id "$SITE_USER" >/dev/null 2>&1 || { merah "Site user tidak dikenali ($SITE_USER). Atur: SITE_USER=nama bash $0"; exit 1; }
+hijau "Site: $SITE (user $SITE_USER, grup $SITE_GROUP)"
 
 # Semua file site milik site user (file yang dibuat / diunggah sebagai root membuat site user tidak bisa menulis)
-chown -R "$SITE_USER":"$SITE_USER" "$SITE"
+chown -R "$SITE_USER":"$SITE_GROUP" "$SITE"
 [ -x "$PHP" ] || { merah "PHP tidak ada di $PHP (atur PHP=/usr/bin/php8.x)"; exit 1; }
 
 judul "1. Database: log_bin_trust_function_creators"
@@ -48,7 +51,7 @@ if ! command -v supervisorctl >/dev/null; then
     hijau "Supervisor terpasang"
 fi
 systemctl enable --now supervisor >/dev/null 2>&1 || true
-mkdir -p "$SITE/storage/logs" && chown "$SITE_USER":"$SITE_USER" "$SITE/storage/logs"
+mkdir -p "$SITE/storage/logs" && chown "$SITE_USER":"$SITE_GROUP" "$SITE/storage/logs"
 
 cat > /etc/supervisor/conf.d/billingps.conf <<EOF
 [program:billingps-antrean]
