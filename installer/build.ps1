@@ -184,6 +184,8 @@ Copy-Item (Unduh $Bahan.cloudflared 'cloudflared.exe') (Join-Path $runtime 'clou
 # ---------------- 3. Skrip pengelola & templat ----------------
 Salin (Join-Path $Installer 'kelola') (Join-Path $Staging 'kelola')
 Salin (Join-Path $Installer 'templat') (Join-Path $Staging 'kelola\templat')
+# Lisensi untuk halaman persetujuan installer (UTF-8 ber-BOM agar tanda (c) terbaca Inno Setup)
+[IO.File]::WriteAllText((Join-Path $Staging 'LICENSE.txt'), [IO.File]::ReadAllText((Join-Path $Repo 'LICENSE')), (New-Object Text.UTF8Encoding $true))
 
 # ---------------- 4. APK TV ----------------
 $apk = Join-Path $Repo 'tv-agent\app\build\outputs\apk\debug\app-debug.apk'

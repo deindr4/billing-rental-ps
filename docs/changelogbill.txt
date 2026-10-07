@@ -9,6 +9,13 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 -----------------------------------------------------------------------------
 - "Copyright © deindr4" di kaki halaman kasir, login, booking publik & panel admin (teks di App\Support\HakCipta).
   APK TV 0.6.8: di sebelah versi pada kaki layar kunci.
+- Lisensi: LICENSE (MIT + syarat atribusi) - gratis dipakai/diubah/dibagikan, tulisan hak cipta wajib tetap tampil.
+  Installer Windows menampilkan halaman persetujuan lisensi.
+- Nama rental boleh ditambahkan di sebelahnya: Admin -> Pengaturan Tampilan -> "Kaki aplikasi"
+  (tampil "Copyright © deindr4 · <teks Anda>"). Tidak berlaku untuk APK TV.
+- Penjaga atribusi (middleware JagaHakCipta): kaki dihapus dari tampilan -> teks disisipkan otomatis; teks hak
+  cipta di kode diubah -> pita merah "Jangan mengganti Copyright tanpa seijin Pengembang". Aplikasi & data tetap
+  berjalan normal (tidak ada penguncian). Struk/nota cetak & billboard tidak disisipi.
 
 
 2026-10-06 (analisa pintar)

@@ -32,6 +32,8 @@ MinVersion=10.0
 OutputDir={#Keluaran}
 OutputBaseFilename=BillingPS-Setup-{#Versi}
 SetupIconFile={#Staging}\ikon.ico
+; Halaman lisensi (MIT + syarat atribusi hak cipta) saat pasang
+LicenseFile={#Staging}\LICENSE.txt
 UninstallDisplayIcon={app}\app\public\favicon.ico
 UninstallDisplayName=Billing Rental PS
 Compression=lzma2/max

@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Pengaturan;
 use App\Services\Tv\NotifikasiTv;
 use App\Support\Gambar;
+use App\Support\HakCipta;
 use App\Support\Tema;
 use App\Support\Tenancy;
 use BackedEnum;
@@ -56,6 +57,7 @@ class PengaturanTampilan extends Page implements HasSchemas
             'logo' => Pengaturan::ambil('tema.logo'),
             'wallpaper' => Pengaturan::ambil('tv.wallpaper'),
             'gelap_wallpaper' => (int) Pengaturan::ambil('tv.transparansi_lock', 70),
+            'footer_tambahan' => (string) Pengaturan::ambil('tema.footer_tambahan', ''),
         ]);
     }
 
@@ -95,6 +97,16 @@ class PengaturanTampilan extends Page implements HasSchemas
                             ->maxSize(2048)
                             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/webp'])
                             ->helperText('PNG/JPG/WebP, maks. 2 MB. Otomatis diperkecil & dikonversi ke WebP. Disarankan latar transparan.'),
+                    ]),
+
+                Section::make('Kaki aplikasi')
+                    ->description('Tampil di bawah halaman kasir, login, booking & admin, di sebelah "'.HakCipta::asli().'". '
+                        .'Teks hak cipta pengembang wajib tetap ada (lisensi); teks Anda ditambahkan di sebelahnya.')
+                    ->schema([
+                        TextInput::make('footer_tambahan')
+                            ->label('Teks tambahan di kaki aplikasi')
+                            ->placeholder('Delta Games Bali · IG @deltagames')
+                            ->maxLength(80),
                     ]),
 
                 Section::make('Layar kunci TV')
@@ -169,6 +181,7 @@ class PengaturanTampilan extends Page implements HasSchemas
 
         Pengaturan::simpan('tv.transparansi_lock', max(0, min(95, (int) $data['gelap_wallpaper'])));
 
+        Pengaturan::simpan('tema.footer_tambahan', trim(strip_tags((string) ($data['footer_tambahan'] ?? ''))));
         Pengaturan::simpan('tema.mode', $data['mode']);
         Pengaturan::simpan('tema.aksen', strtolower($data['aksen']));
         Pengaturan::simpan('tema.aksen_kontras', Tema::kontras($data['aksen']));

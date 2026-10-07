@@ -276,3 +276,13 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |
 | [docs/desain/README.md](docs/desain/README.md) | Desain Stitch (acuan semua tampilan) |
 | [docs/changelogbill.txt](docs/changelogbill.txt) · [docs/changelog.txt](docs/changelog.txt) | Catatan perubahan aplikasi & APK TV |
+
+---
+
+## Lisensi
+
+Gratis — [MIT + syarat atribusi](LICENSE). Boleh dipakai, diubah, dan dibagikan (termasuk untuk usaha rental),
+dengan syarat tulisan **"Copyright © deindr4"** di kaki aplikasi web tetap tampil dan tidak diubah. Nama / merek
+rental Anda boleh ditambahkan di sebelahnya lewat **Admin → Pengaturan Tampilan → Kaki aplikasi**.
+
+Copyright © deindr4

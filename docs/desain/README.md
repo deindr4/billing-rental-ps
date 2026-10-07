@@ -54,6 +54,9 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Tambahan di luar desain — Analisa Pintar (menu Operasional, ikon `analisa`, ungu): pola halaman Laporan
   (tombol periode, `kartu`, tabel). 3 kartu jumlah temuan (merah/kuning/biru), tab font-mono, daftar temuan memakai
   `kartu kartu-status` dengan garis warna tingkat + chip bagian; seluruh halaman `data-rahasia`.
+- Tambahan di luar desain — kaki aplikasi web: `<x-hak-cipta>` teks 11px `text-muted` di tengah, "Copyright © deindr4
+  · <teks tambahan rental>"; login: menempel di bawah layar; admin Filament: render hook FOOTER (gaya inline).
+  APK TV: di sebelah versi pada bar koneksi kaki layar.
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

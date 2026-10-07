@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
 use App\Http\Middleware\HeaderKeamanan;
+use App\Http\Middleware\JagaHakCipta;
 use App\Http\Middleware\SetTenancy;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -62,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('partials.sembunyi-uang'))
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.tombol-sembunyi-uang'))
             ->renderHook(PanelsRenderHook::FOOTER, fn () => new HtmlString(
-                '<div style="text-align:center;font-size:11px;opacity:.6;padding:1rem 0">'.e(HakCipta::TEKS).'</div>'
+                '<div style="text-align:center;font-size:11px;opacity:.6;padding:1rem 0">'.e(HakCipta::baris()).'</div>'
             ))
             ->navigationGroups([
                 'Rental',
@@ -80,6 +81,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 HeaderKeamanan::class,
+                JagaHakCipta::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
