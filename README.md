@@ -2,7 +2,7 @@
 
 # 🎮 Billing Rental PS
 
-**Aplikasi billing rental PlayStation lengkap — kasir, TV terkunci otomatis, F&B, booking, member, turnamen, laporan.**
+**Aplikasi billing rental PlayStation & PC lengkap — kasir, TV terkunci otomatis, F&B, booking, member, turnamen, laporan & analisa.**
 Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 
 [![Rilis terbaru](https://img.shields.io/github/v/release/deindr4/billing-rental-ps?label=rilis&color=0ea5e9)](https://github.com/deindr4/billing-rental-ps/releases/latest)
@@ -25,10 +25,12 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 - [Tampilan](#tampilan)
 - [Fitur](#fitur)
 - [Cara kerja](#cara-kerja)
+- [Kebutuhan sistem](#kebutuhan-sistem)
 - [Memasang](#memasang)
 - [Update](#update)
 - [Pengembangan](#pengembangan)
 - [Dokumentasi](#dokumentasi)
+- [Lisensi](#lisensi)
 
 ---
 
@@ -54,12 +56,19 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
     <td width="50%"><img src="docs/gambar/kasir-pos.webp" alt="POS F&B"><br><sub><b>POS F&B</b> — gabung ke tagihan unit, batalkan salah order (−1 / semua)</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/gambar/kasir-rental-pc.webp" alt="Rental PC"><br><sub><b>Rental PC</b> — menu terpisah dari Rental PS; tutup game hang, Task Manager sementara, kunci, log off, restart, nyalakan (Wake-on-LAN)</sub></td>
+    <td><img src="docs/gambar/kasir-analisa-pintar.webp" alt="Analisa Pintar"><br><sub><b>Analisa Pintar</b> — audit kecurangan kasir, titik impas, proyeksi akhir bulan, operasional & stok (tanpa AI, offline)</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/gambar/kasir-kelola-tv.webp" alt="Kelola TV"><br><sub><b>Kelola TV</b> — unlock / lock, bypass berdurasi, kode darurat, riwayat</sub></td>
     <td><img src="docs/gambar/kasir-turnamen-bagan.webp" alt="Turnamen"><br><sub><b>Turnamen</b> — gugur, gugur ganda, liga, fase grup + klasemen</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/gambar/kasir-sembunyi-nominal.webp" alt="Sembunyikan nominal"><br><sub><b>Tombol mata</b> — omzet, kas laci & laporan jadi <code>Rp *******</code> sebelum foto layar</sub></td>
     <td><img src="docs/gambar/kasir-matriks-terang.webp" alt="Mode terang"><br><sub>Mode terang · ikon & tombol berwarna per fungsi</sub></td>
-    <td align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="80%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="55%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
   </tr>
 </table>
 
@@ -107,6 +116,8 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 - **Pindah unit** tanpa kehilangan tagihan, **batal tambah waktu** & **batal sesi** (salah pencet / tidak jadi main).
 - Satu TV beberapa konsol: nama per **HDMI** (HDMI 1 = PS3, HDMI 2 = PS4 …), kasir memilih / memindah HDMI.
 - Tarif per tipe konsol, kategori unit (VIP / reguler), paket harga & aturan harga.
+- **Rental PC** di menu terpisah (tipe konsol berjenis PC), member & laporan tetap satu; server & admin siap untuk
+  agen kiosk Windows (proteksi, Task Manager sementara, Wake-on-LAN) — aplikasi agen PC menyusul.
 </details>
 
 <details>
@@ -127,8 +138,20 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 - Stok per cabang dengan HPP rata-rata, stok masuk, **opname**, mutasi.
 - **Shift kas**: buka / tutup kas, hitung pecahan, selisih kas tercatat; pengeluaran dengan batas & PIN.
 - Pembayaran: tunai, QRIS statis (nominal otomatis), transfer, saldo member, campuran.
+- **Bayar sekaligus** beberapa tagihan unit / POS dengan satu struk gabungan (tiap unit tetap tercatat sendiri).
+- **Koreksi harga pokok** stok masuk oleh owner — HPP & laba penjualan sejak itu dihitung ulang.
 - Struk printer Bluetooth (RawBT, 58 / 80 mm) & kirim struk lewat WhatsApp.
-- Aset & modal, maintenance unit, laporan omzet / laba / HPP / metode bayar / perbandingan cabang.
+- Aset & modal, maintenance unit, laporan omzet / laba / HPP / metode bayar / perbandingan cabang, Sewa PS & Sewa PC.
+- **Tombol mata**: sembunyikan nominal (omzet, kas laci, laporan, dasbor) sebelum foto layar.
+</details>
+
+<details>
+<summary><b>📊 Analisa pintar (tanpa AI, offline)</b></summary>
+
+- **Audit kecurangan kasir**: skor risiko 0–100 dari pembatalan, kas kurang, bonus waktu, bypass TV, batal F&B, diskon, PIN salah.
+- **Keuangan**: vs periode lalu, titik impas harian, proyeksi akhir bulan, margin, ROI aset, pengeluaran melonjak.
+- **Operasional**: utilisasi per unit, jam sepi, omzet per hari, paket terlaris, member yang lama tidak datang.
+- **Stok**: barang hilang saat opname, segera habis, dijual rugi, stok mati. Aturan: [docs/analisa-pintar.md](docs/analisa-pintar.md).
 </details>
 
 <details>
@@ -188,6 +211,53 @@ flowchart LR
 
 ---
 
+## Kebutuhan sistem
+
+### 🪟 Windows — server lokal di PC rental (installer `.exe`)
+
+| | Minimal | Disarankan |
+|---|---|---|
+| Sistem operasi | Windows 10 64-bit | Windows 10 / 11 64-bit, update terbaru |
+| Prosesor | 2 core 64-bit (Intel Core i3 / AMD Ryzen 3 generasi lama) | 4 core atau lebih |
+| RAM | 4 GB | 8 GB |
+| Penyimpanan | 3 GB kosong + ruang backup harian | **SSD**, 10 GB kosong |
+| Jaringan | LAN satu jaringan dengan TV & tablet kasir | Kabel LAN + **IP tetap** (reservasi DHCP di router) |
+| Akses | Akun **administrator** Windows untuk memasang | PC menyala selama jam buka (BIOS: *power on after power loss*) |
+| Internet | Tidak wajib untuk kasir & TV | Untuk sinkron cloud, pembayaran online, WhatsApp, cek update |
+
+Semua komponen **sudah termasuk** di installer, tidak perlu dipasang manual: PHP 8.4, Apache 2.4, MariaDB 10.11,
+Node.js 24 (WhatsApp), cloudflared, NSSM & Visual C++ Redistributable. Port dipilih otomatis bila bentrok
+(web 80, database 3306–3310, realtime 8080–8090); firewall hanya dibuka untuk jaringan lokal.
+
+### 🐧 Linux — server cloud (opsional, paket `.tar.gz`)
+
+| | Minimal | Disarankan |
+|---|---|---|
+| Sistem operasi | Ubuntu 22.04 / Debian 12 (64-bit) | Ubuntu 24.04 + **CloudPanel 2** |
+| CPU / RAM | 1 vCPU · 1 GB RAM | 2 vCPU · 2 GB RAM |
+| Penyimpanan | 5 GB kosong | 20 GB SSD |
+| PHP | **8.3** atau lebih baru | 8.4 |
+| Ekstensi PHP | ctype, curl, dom, fileinfo, gd (WebP), intl, mbstring, openssl, pdo_mysql, sodium, tokenizer, xml, zip | + opcache |
+| Database | MariaDB 10.6+ / MySQL 8.0+ dengan hak **TRIGGER** & `log_bin_trust_function_creators=1` | MariaDB 10.11+ |
+| Proses latar | **Supervisor** (antrean, realtime Reverb, jadwal) | — |
+| Web | Nginx / Apache + domain **HTTPS** | Cloudflare (Full strict) atau Cloudflare Tunnel |
+
+Node.js **tidak** dibutuhkan di server (aset sudah dibangun di paket). Skrip `installer/cloudpanel/pasang-root.sh`
+menyiapkan database & supervisor, `pasang-site.sh` memasang / memperbarui aplikasi — lihat [docs/cloudpanel.md](docs/cloudpanel.md).
+Shared hosting / cPanel juga bisa tanpa realtime TV: [docs/hosting.md](docs/hosting.md).
+
+### Perangkat lain
+
+| Perangkat | Kebutuhan |
+|---|---|
+| 📺 TV | **Android TV / Google TV 8.0+** (Xiaomi, TCL, dll. — sudah diuji Android TV 12 & 14), satu jaringan dengan PC rental |
+| 📱 Kasir | Tablet / PC / HP dengan browser modern (Chrome, Edge, Safari) |
+| 🖨️ Struk | Printer thermal Bluetooth 58 / 80 mm lewat aplikasi **RawBT** (Android) |
+| 💬 WhatsApp | Nomor WhatsApp khusus rental (login QR di admin) |
+| 🖥️ PC rental | Windows 10 / 11 — billing sudah bisa dipakai (mode manual); aplikasi agen kiosk menyusul |
+
+---
+
 ## Memasang
 
 ### PC rental (Windows 10 / 11, 64-bit)
@@ -202,7 +272,7 @@ yang menyala sendiri, firewall dibuka hanya untuk jaringan lokal. Panduan: [docs
 
 ### TV
 
-Di TV buka `http://IP-PC/apk` → pasang **TV Agent** → isi alamat server → masukkan kode pairing di Admin → Perangkat TV.
+Di TV buka `http://IP-PC/apk` → pasang **TV Agent** → isi alamat server → masukkan kode pairing di Admin → Perangkat TV & PC.
 Izin & mode kiosk: [tv-agent/README.md](tv-agent/README.md).
 
 ### Server cloud (opsional)
@@ -272,6 +342,8 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/pembayaran-online.md](docs/pembayaran-online.md) | Payment gateway & bayar mandiri QRIS di TV |
 | [docs/turnamen.md](docs/turnamen.md) | Format turnamen, bundling F&B, keuangan & hadiah |
 | [docs/tv-agent-api.md](docs/tv-agent-api.md) | Kontrak API server ↔ TV Agent |
+| [docs/pc-agent.md](docs/pc-agent.md) | Rental PC & kontrak agen kiosk Windows |
+| [docs/analisa-pintar.md](docs/analisa-pintar.md) | Aturan Analisa Pintar (skor risiko kasir, keuangan, operasional, stok) |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |
 | [docs/desain/README.md](docs/desain/README.md) | Desain Stitch (acuan semua tampilan) |
