@@ -16,6 +16,9 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 - Penjaga atribusi (middleware JagaHakCipta): kaki dihapus dari tampilan -> teks disisipkan otomatis; teks hak
   cipta di kode diubah -> pita merah "Jangan mengganti Copyright tanpa seijin Pengembang". Aplikasi & data tetap
   berjalan normal (tidak ada penguncian). Struk/nota cetak & billboard tidak disisipi.
+- Teks hak cipta di kaki web menjadi tautan ke https://github.com/deindr4.
+- Struk printer thermal (biasa & gabungan): 2 baris terakhir "Copyright (c) deindr4" + "github.com/deindr4"
+  (ASCII, karakter © tidak ada di printer). Nota A4/PDF: "Copyright © deindr4 · github.com/deindr4" di kaki.
 
 
 2026-10-06 (analisa pintar)

@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  * Menjaga syarat atribusi lisensi (LICENSE): teks hak cipta pengembang selalu tampil di halaman web.
  * - Kaki halaman dihapus dari tampilan → teks disisipkan otomatis sebelum </body>.
  * - Teks hak cipta di kode diubah → pita peringatan. Aplikasi & data tetap berjalan normal.
+ * Struk thermal & nota punya baris hak cipta sendiri (StrukService / struk.nota), jadi tidak disisipi di sini.
  */
 class JagaHakCipta
 {
@@ -42,7 +43,7 @@ class JagaHakCipta
                 .self::PESAN.' · Copyright &copy; deindr4</div>';
         } elseif (! str_contains($html, e(HakCipta::asli()))) {
             $sisip .= '<div style="text-align:center;font:11px/1.4 system-ui,sans-serif;opacity:.6;padding:12px 0 16px">'
-                .e(HakCipta::baris()).'</div>';
+                .HakCipta::html().'</div>';
         }
 
         if ($sisip !== '') {

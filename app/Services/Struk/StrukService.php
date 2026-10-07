@@ -11,6 +11,7 @@ use App\Models\TransaksiItem;
 use App\Services\Billing\BillingService;
 use App\Services\Member\PengaturanMember;
 use App\Support\EscPos;
+use App\Support\HakCipta;
 use Illuminate\Support\Collection;
 
 /**
@@ -262,8 +263,17 @@ final class StrukService
         }
 
         $tambah('Dicetak '.now()->format('d/m/Y H:i'), 'tengah');
+        $this->kakiHakCipta($tambah);
 
         return $b;
+    }
+
+    /** Hak cipta pengembang di akhir struk (syarat atribusi lisensi), ASCII untuk printer thermal */
+    private function kakiHakCipta(callable $tambah): void
+    {
+        foreach (HakCipta::struk() as $baris) {
+            $tambah($baris, 'tengah');
+        }
     }
 
     /**
@@ -327,6 +337,7 @@ final class StrukService
         }
 
         $tambah('Dicetak '.now()->format('d/m/Y H:i'), 'tengah');
+        $this->kakiHakCipta($tambah);
     }
 
     /** Perintah ESC/POS siap kirim ke printer */

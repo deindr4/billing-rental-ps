@@ -142,6 +142,7 @@
         <div class="kaki muted">
             {!! nl2br(e($setelan['footer'])) !!}
             <div style="font-size: 12px; margin-top: 4px;">Dicetak {{ now()->format('d/m/Y H:i') }}</div>
+            <div style="font-size: 11px; margin-top: 4px;">{!! \App\Support\HakCipta::html() !!} · {{ preg_replace('#^https?://#', '', \App\Support\HakCipta::URL) }}</div>
         </div>
     </div>
 </body>

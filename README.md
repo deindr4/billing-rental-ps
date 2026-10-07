@@ -284,5 +284,6 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 Gratis — [MIT + syarat atribusi](LICENSE). Boleh dipakai, diubah, dan dibagikan (termasuk untuk usaha rental),
 dengan syarat tulisan **"Copyright © deindr4"** di kaki aplikasi web tetap tampil dan tidak diubah. Nama / merek
 rental Anda boleh ditambahkan di sebelahnya lewat **Admin → Pengaturan Tampilan → Kaki aplikasi**.
+Struk printer & nota juga memuat baris hak cipta.
 
-Copyright © deindr4
+Copyright © [deindr4](https://github.com/deindr4)

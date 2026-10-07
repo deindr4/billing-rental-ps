@@ -67,6 +67,7 @@ class BonusWaktuTest extends TestCase
         $baris = collect(app(StrukService::class)->baris(app(StrukService::class)->data($trx->fresh()), 32))->pluck('t')->implode("\n");
         $this->assertStringContainsString('Sewa berjalan (perkiraan)', $baris);
         $this->assertStringContainsString('TOTAL SEMENTARA', $baris);
+        $this->assertStringEndsWith("Copyright (c) deindr4\ngithub.com/deindr4", $baris);
 
         // Perkiraan = kalkulator open billing untuk durasi setelah bonus (± 60 menit, bukan 90)
         $perkiraan = $this->billing->estimasiSewaOpen($sesi->fresh());

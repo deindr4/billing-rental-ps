@@ -93,6 +93,7 @@ class BayarGabunganTest extends TestCase
         $this->assertStringContainsString($pos->nomor, $struk);
         $this->assertStringContainsString(number_format($total, 0, ',', '.'), $struk);
         $this->assertStringContainsString('Kembalian', $struk);
+        $this->assertStringEndsWith("Copyright (c) deindr4\ngithub.com/deindr4", $struk);
     }
 
     public function test_sesi_masih_main_tidak_bisa_digabung_dan_saldo_ditolak(): void

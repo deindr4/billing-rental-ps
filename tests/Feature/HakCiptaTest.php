@@ -33,6 +33,12 @@ class HakCiptaTest extends TestCase
         Pengaturan::simpan('tema.footer_tambahan', 'Delta Games Bali');
 
         $this->assertSame('Copyright © deindr4 · Delta Games Bali', HakCipta::baris());
+        $this->assertStringEndsWith('Copyright © deindr4</a> · Delta Games Bali', HakCipta::html());
+    }
+
+    public function test_struk_thermal_memuat_hak_cipta_ascii(): void
+    {
+        $this->assertSame(['Copyright (c) deindr4', 'github.com/deindr4'], HakCipta::struk());
     }
 
     public function test_kaki_dihapus_dari_tampilan_tetap_disisipkan(): void
@@ -41,7 +47,8 @@ class HakCiptaTest extends TestCase
         Route::middleware('web')->get('/uji-json', fn () => response()->json(['ok' => true]));
 
         $html = $this->get('/uji-tanpa-kaki')->assertOk()->getContent();
-        $this->assertStringContainsString('Copyright © deindr4</div></body>', $html);
+        $this->assertStringContainsString('href="https://github.com/deindr4"', $html);
+        $this->assertStringContainsString('Copyright © deindr4</a></div></body>', $html);
         $this->assertStringNotContainsString(JagaHakCipta::PESAN, $html);
 
         // Selain halaman HTML tidak disentuh

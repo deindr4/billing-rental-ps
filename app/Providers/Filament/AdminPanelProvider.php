@@ -63,7 +63,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('partials.sembunyi-uang'))
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.tombol-sembunyi-uang'))
             ->renderHook(PanelsRenderHook::FOOTER, fn () => new HtmlString(
-                '<div style="text-align:center;font-size:11px;opacity:.6;padding:1rem 0">'.e(HakCipta::baris()).'</div>'
+                '<div style="text-align:center;font-size:11px;opacity:.6;padding:1rem 0">'.HakCipta::html().'</div>'
             ))
             ->navigationGroups([
                 'Rental',
