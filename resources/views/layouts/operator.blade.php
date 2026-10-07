@@ -195,6 +195,7 @@
 
         <main class="flex-1 px-4 lg:px-6 py-4 lg:py-5 pb-24 lg:pb-6">
             {{ $slot }}
+            <x-hak-cipta class="mt-8" />
         </main>
     </div>
 </div>

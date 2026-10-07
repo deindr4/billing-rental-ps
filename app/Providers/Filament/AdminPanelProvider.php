@@ -14,7 +14,9 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use App\Support\HakCipta;
 use Filament\View\PanelsRenderHook;
+use Illuminate\Support\HtmlString;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -59,6 +61,9 @@ class AdminPanelProvider extends PanelProvider
             // Sembunyikan nominal (foto layar): CSS + status di <head>, tombol mata sebelum menu profil
             ->renderHook(PanelsRenderHook::HEAD_END, fn () => view('partials.sembunyi-uang'))
             ->renderHook(PanelsRenderHook::USER_MENU_BEFORE, fn () => view('filament.tombol-sembunyi-uang'))
+            ->renderHook(PanelsRenderHook::FOOTER, fn () => new HtmlString(
+                '<div style="text-align:center;font-size:11px;opacity:.6;padding:1rem 0">'.e(HakCipta::TEKS).'</div>'
+            ))
             ->navigationGroups([
                 'Rental',
                 'F&B',

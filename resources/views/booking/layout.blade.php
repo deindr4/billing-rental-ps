@@ -16,6 +16,7 @@
 </head>
 <body class="min-h-screen bg-bg text-fg">
     {{ $slot }}
+    <x-hak-cipta class="py-4" />
     @livewireScripts
 </body>
 </html>

@@ -740,6 +740,7 @@ private fun BarKoneksi(k: Keadaan) {
         )
         // Versi APK terpasang (dicocokkan dengan Admin → Perangkat TV / Rilis APK)
         Text("v${BuildConfig.VERSION_NAME}", color = Warna.redup, fontSize = 10.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.sp)
+        Text("Copyright © deindr4", color = Warna.redup, fontSize = 10.sp, fontFamily = FontFamily.Monospace, letterSpacing = 1.sp, maxLines = 1)
     }
 }
 

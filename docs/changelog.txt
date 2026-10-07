@@ -6,6 +6,11 @@ Cara merilis, push update & rollback: docs/rilis-apk.md
 Setiap rilis diberi tag git "apk-<versi>" (dipakai untuk rollback).
 
 
+0.6.8 (kode 19) - 2026-10-07                                   [tag apk-0.6.8]
+-----------------------------------------------------------------------------
+- Kaki layar kunci / tagihan: "Copyright © deindr4" di sebelah versi APK.
+
+
 0.6.7 (kode 18) - 2026-10-04                                   [tag apk-0.6.7]
 -----------------------------------------------------------------------------
 - TV Agent kembali tampil saat TV dinyalakan dengan remote. TV seperti TCL hanya bangun dari standby (bukan boot),

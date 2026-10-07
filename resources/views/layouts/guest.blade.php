@@ -12,6 +12,7 @@
 </head>
 <body class="min-h-screen bg-bg text-fg">
     {{ $slot }}
+    <x-hak-cipta class="fixed bottom-3 inset-x-0 pointer-events-none" />
 
     @livewireScripts
 </body>
