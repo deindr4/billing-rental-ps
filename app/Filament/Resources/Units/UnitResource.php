@@ -10,6 +10,7 @@ use App\Models\Unit;
 use App\Support\Tenancy;
 use BackedEnum;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -76,6 +77,10 @@ class UnitResource extends Resource
                         ->numeric()
                         ->minValue(0)
                         ->default(0),
+                    ColorPicker::make('warna')
+                        ->label('Warna kartu')
+                        ->regex('/^#[0-9a-fA-F]{6}$/')
+                        ->helperText('Penanda unit di matriks kasir (strip kiri & kode). Kosongkan = otomatis dari palet sesuai urutan. Warna status tetap.'),
                 ]),
 
             Section::make('Kontrol TV / PC')
@@ -147,7 +152,9 @@ class UnitResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('kode')->searchable()->sortable(),
+                TextColumn::make('kode')->searchable()->sortable()
+                    ->icon('heroicon-s-stop')
+                    ->iconColor(fn (Unit $record) => \Filament\Support\Colors\Color::hex($record->warnaKartu())),
                 TextColumn::make('nama')->searchable(),
                 TextColumn::make('tipeKonsol.kode')->label('Konsol'),
                 TextColumn::make('kategori.nama')->label('Kategori')->placeholder('-'),

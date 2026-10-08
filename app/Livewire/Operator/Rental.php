@@ -8,6 +8,7 @@ use App\Models\Maintenance;
 use App\Models\Pengaturan;
 use App\Models\PerangkatTv;
 use App\Models\Sesi;
+use App\Models\SesiAksesori;
 use App\Models\TipeKonsol;
 use App\Models\Transaksi;
 use App\Models\Unit;
@@ -203,6 +204,11 @@ class Rental extends Component
 
         $sesiPerUnit = $this->sesiPerUnit($semuaUnit);
 
+        // Aksesori yang sedang disewa per sesi (chip di kartu unit)
+        $aksesoriPerSesi = SesiAksesori::query()->with('aksesori:id,nama')
+            ->whereIn('sesi_id', $sesiPerUnit->pluck('id'))->dipakai()->where('dibatalkan', false)
+            ->get()->groupBy('sesi_id');
+
         // TV Agent yang terpasang per unit (untuk indikator online/offline)
         $tvPerUnit = PerangkatTv::aktif()
             ->whereIn('unit_id', $semuaUnit->pluck('id'))
@@ -234,6 +240,7 @@ class Rental extends Component
             'jenis' => $this->jenis,
             'units' => $units,
             'sesiPerUnit' => $sesiPerUnit,
+            'aksesoriPerSesi' => $aksesoriPerSesi,
             'tvPerUnit' => $tvPerUnit,
             'bisaRemote' => (bool) auth()->user()?->can('tv.remote'),
             'tarif' => $tarif,

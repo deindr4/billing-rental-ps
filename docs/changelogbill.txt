@@ -5,6 +5,22 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-08 (sewa aksesori + warna kartu unit)
+-----------------------------------------------------------------------------
+- Sewa aksesori di lokasi (stik tambahan, headset, setir): Admin -> Rental -> "Aksesori sewa" (per cabang):
+  nama, harga, dihitung "flat per sesi" atau "per jam", jumlah yang dimiliki.
+  Kasir memilih di Mulai Rental atau Kelola Sesi -> "Sewa Aksesori" (− jumlah +, dibatasi stok tersedia).
+  Flat langsung masuk tagihan; per jam dihitung saat dikembalikan / sesi selesai dengan aturan open billing
+  (blok, toleransi, minimal) - disewa sejak awal = mengikuti lama main (tanpa pause & bonus).
+  Kelola Sesi: daftar "Aksesori disewa" + Kembalikan (per jam berhenti dihitung) & Batal (salah input <= 5 menit,
+  tanpa biaya, log aktivitas). Selesai sesi mengingatkan aksesori yang harus diambil kembali; stok tersedia lagi
+  otomatis saat sesi selesai / dibatalkan. Kartu unit menampilkan baris "Aksesori: Headset ×2, Stik".
+  Laporan: baris "Sewa aksesori"; TV & struk menampilkannya sebagai item tagihan.
+- Warna kartu unit: strip kiri & chip kode unit berwarna (garis atas tetap warna status). Otomatis dari palet sesuai
+  urutan unit; bisa diganti di Admin -> Unit -> "Warna kartu" (kosongkan = otomatis).
+- Database: tabel baru aksesori & sesi_aksesori, kolom units.warna -> Update database + Pasang ulang trigger sinkron.
+
+
 2026-10-07 (copyright)
 -----------------------------------------------------------------------------
 - "Copyright © deindr4" di kaki halaman kasir, login, booking publik & panel admin (teks di App\Support\HakCipta).

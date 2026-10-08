@@ -73,9 +73,10 @@
                 @php $sesi = $sesiPerUnit->get($unit->id); @endphp
 
                 <x-kartu-unit
-                    wire:key="unit-{{ $unit->id }}-{{ $unit->status }}-{{ $sesi?->versi_tagihan ?? 0 }}"
+                    wire:key="unit-{{ $unit->id }}-{{ $unit->status }}-{{ $sesi?->versi_tagihan ?? 0 }}-{{ $unit->warnaKartu() }}"
                     :unit="$unit"
                     :sesi="$sesi"
+                    :aksesori="$sesi ? $aksesoriPerSesi->get($sesi->id) : null"
                     :tv="$tvPerUnit->get($unit->id)"
                     :bisa-remote="$bisaRemote"
                     :tarif="$tarif[$unit->id] ?? null"

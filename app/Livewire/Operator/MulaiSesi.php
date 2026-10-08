@@ -5,6 +5,7 @@ namespace App\Livewire\Operator;
 use App\Exceptions\BillingException;
 use App\Livewire\Concerns\PilihMember;
 use App\Livewire\Concerns\WithAlert;
+use App\Models\Aksesori;
 use App\Models\PaketHarga;
 use App\Models\Pengaturan;
 use App\Models\PerangkatTv;
@@ -51,6 +52,9 @@ class MulaiSesi extends Component
     /** Input HDMI TV yang dibuka (TV berisi beberapa konsol); null = tetap HDMI tersimpan */
     public ?string $hdmi = null;
 
+    /** Sewa aksesori saat mulai: [aksesori_id => qty] */
+    public array $aksesori = [];
+
     #[On('buka-mulai-sesi')]
     /**
      * @param  string|null  $pelanggan  nama dari antrean lounge / booking
@@ -60,8 +64,9 @@ class MulaiSesi extends Component
     public function bukaUntuk(string $unitId, ?string $pelanggan = null, ?string $memberId = null, ?int $durasi = null, ?string $bookingId = null): void
     {
         $this->resetValidation();
-        $this->reset(['mode', 'paketId', 'durasiMenit', 'pelanggan']);
+        $this->reset(['mode', 'paketId', 'durasiMenit', 'pelanggan', 'aksesori']);
         $this->resetPilihMember();
+        unset($this->daftarAksesori);
         $this->pilihGame = $this->pilihGameDefault > 0 && (bool) Pengaturan::ambil('sesi.pilih_game_otomatis', true);
         $this->unitId = $unitId;
 
@@ -134,6 +139,38 @@ class MulaiSesi extends Component
         return $this->unit
             ? rescue(fn () => app(BillingService::class)->tarifPerJam($this->unit), null, false)
             : null;
+    }
+
+    /** Aksesori sewa aktif di cabang ini */
+    #[Computed]
+    public function daftarAksesori(): Collection
+    {
+        return Aksesori::aktif()->urut()->get();
+    }
+
+    public function ubahAksesori(string $id, int $ubah): void
+    {
+        $a = $this->daftarAksesori->firstWhere('id', $id);
+
+        if (! $a) {
+            return;
+        }
+
+        $qty = max(0, min($a->tersedia(), (int) ($this->aksesori[$id] ?? 0) + $ubah));
+
+        if ($qty > 0) {
+            $this->aksesori[$id] = $qty;
+        } else {
+            unset($this->aksesori[$id]);
+        }
+    }
+
+    /** Aksesori flat per sesi yang langsung masuk tagihan awal */
+    public function tagihanAksesori(): int
+    {
+        return (int) $this->daftarAksesori
+            ->filter(fn ($a) => $a->satuan === Aksesori::SATUAN_SESI && isset($this->aksesori[$a->id]))
+            ->sum(fn ($a) => $a->harga * $this->aksesori[$a->id]);
     }
 
     /** Menit waktu pilih game dari pengaturan cabang (0 = fitur mati) */
@@ -213,6 +250,7 @@ class MulaiSesi extends Component
                 'member_id' => $this->jenisPelanggan === 'member' ? $this->memberId : null,
                 'pelanggan_nama' => $this->jenisPelanggan === 'tamu' ? (trim($this->pelanggan) ?: null) : null,
                 'pilih_game_menit' => $this->pilihGame ? $this->pilihGameDefault : 0,
+                'aksesori' => $this->aksesori,
             ]);
         } catch (BillingException $e) {
             $this->alert('Tidak bisa memulai sesi', $e->getMessage(), 'error');

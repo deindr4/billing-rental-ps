@@ -56,6 +56,7 @@ final class LaporanService
             ->sum('transaksi_item.subtotal');
         $fnb = (int) ($perJenis['produk']->total ?? 0);
         $lainnya = (int) ($perJenis['lainnya']->total ?? 0);
+        $aksesori = (int) ($perJenis['aksesori']->total ?? 0);
         $hpp = (int) ($perJenis['produk']->hpp ?? 0);
 
         $pengeluaranAktif = Pengeluaran::query()
@@ -93,6 +94,7 @@ final class LaporanService
             'pendapatan_sewa_pc' => $sewaPc,
             'pendapatan_fnb' => $fnb,
             'pendapatan_lainnya' => $lainnya,
+            'pendapatan_aksesori' => $aksesori,
             'hpp' => $hpp,
             'laba_kotor' => $labaKotor,
             'beban' => $beban,

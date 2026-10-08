@@ -23,6 +23,9 @@ class TransaksiItem extends Model
 
     public const JENIS_LAINNYA = 'lainnya';
 
+    /** Sewa aksesori (stik tambahan, headset) — referensi = SesiAksesori */
+    public const JENIS_AKSESORI = 'aksesori';
+
     protected $table = 'transaksi_item';
 
     protected $fillable = [

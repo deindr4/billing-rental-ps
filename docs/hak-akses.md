@@ -29,6 +29,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | **Kasir** | | | | |
 | Rental: mulai, kelola & selesaikan sesi | ✅ | ✅ | ✅ | – |
 | POS: jual & tambah F&B ke tagihan | ✅ | ✅ | ✅ | – |
+| Sewa aksesori ke sesi, kembalikan, batal salah input (≤ 5 menit) | ✅ | ✅ | ✅ | – |
 | Terima pembayaran (termasuk Pembayaran online) | ✅ | ✅ | ✅ | – |
 | Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
 | Buka & tutup kas | ✅ | ✅ | ✅ | – |
@@ -78,7 +79,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Unlock TV, Tutup aplikasi TV, akses staf di TV (Home → OK → PIN), kode darurat | PIN | PIN | – | PIN |
 | **Admin** | | | | |
 | Masuk panel admin | ✅ | ✅ | – | – |
-| Kelola unit, paket harga, produk, iklan, perangkat TV | ✅ | ✅ | – | – |
+| Kelola unit (termasuk warna kartu), paket harga, aksesori sewa, produk, iklan, perangkat TV | ✅ | ✅ | – | – |
 | Kelola pengguna & role | ✅ | – | – | – |
 | Kelola pengaturan | ✅ | – | – | – |
 

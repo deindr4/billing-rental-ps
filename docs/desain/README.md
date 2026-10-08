@@ -57,6 +57,11 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Tambahan di luar desain — kaki aplikasi web: `<x-hak-cipta>` teks 11px `text-muted` di tengah, "Copyright © deindr4
   · <teks tambahan rental>"; login: menempel di bawah layar; admin Filament: render hook FOOTER (gaya inline).
   APK TV: di sebelah versi pada bar koneksi kaki layar.
+- Sewa aksesori (ada di desain 08 "aksesori (stik, headset)"): pemilih − jumlah + per aksesori (harga · tersedia N)
+  di Mulai Rental & panel Kelola Sesi → "Sewa Aksesori" (`btn-tint tint-ungu`, ikon `aksesori`); daftar "Aksesori
+  disewa" dengan tombol Kembalikan (teal) / Batal (merah); kartu unit: baris "Aksesori" di bawah Paket.
+- Tambahan di luar desain — warna penanda unit: `border-left: 4px` + chip kode (latar 16% warna unit) di kartu unit;
+  garis atas tetap warna status. Palet 12 warna (`Unit::PALET`), bisa diganti per unit di admin.
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.

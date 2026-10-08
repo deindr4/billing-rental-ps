@@ -123,6 +123,9 @@
                 <div class="flex justify-between"><dt class="text-muted">Sewa PS</dt><dd><x-rupiah :nilai="$r['pendapatan_sewa']" /></dd></div>
             @endif
             <div class="flex justify-between"><dt class="text-muted">F&amp;B</dt><dd><x-rupiah :nilai="$r['pendapatan_fnb']" /></dd></div>
+            @if (($r['pendapatan_aksesori'] ?? 0) > 0)
+                <div class="flex justify-between"><dt class="text-muted">Sewa aksesori</dt><dd><x-rupiah :nilai="$r['pendapatan_aksesori']" /></dd></div>
+            @endif
             @if ($r['pendapatan_lainnya'] > 0)
                 <div class="flex justify-between"><dt class="text-muted">Lainnya</dt><dd><x-rupiah :nilai="$r['pendapatan_lainnya']" /></dd></div>
             @endif

@@ -4,11 +4,13 @@ namespace App\Livewire\Operator;
 
 use App\Exceptions\BillingException;
 use App\Livewire\Concerns\WithAlert;
+use App\Models\Aksesori;
 use App\Models\Pengaturan;
 use App\Models\Sesi;
 use App\Models\SesiLog;
 use App\Models\Transaksi;
 use App\Models\Unit;
+use App\Services\Billing\AksesoriService;
 use App\Services\Billing\BillingService;
 use App\Services\PinService;
 use App\Support\Tenancy;
@@ -60,6 +62,9 @@ class KelolaSesi extends Component
 
     public bool $unitLamaServis = false;
 
+    /** Panel sewa aksesori: [aksesori_id => qty] */
+    public array $aksesori = [];
+
     // Batal sesi (tidak jadi main)
     public const ALASAN_BATAL_SESI = ['Tidak jadi main', 'Salah unit', 'Salah paket / durasi', 'Pelanggan pindah unit lain'];
 
@@ -89,8 +94,8 @@ class KelolaSesi extends Component
     public function kePanel(string $panel): void
     {
         $this->resetValidation();
-        $this->reset(['tambahMenit', 'gratis', 'alasanGratis', 'pinGratis', 'unitTujuanId', 'alasanPindah', 'unitLamaServis', 'bonusMenit', 'bonusAlasan', 'bonusPin']);
-        $this->panel = in_array($panel, ['utama', 'tambah', 'pindah', 'bonus'], true) ? $panel : 'utama';
+        $this->reset(['tambahMenit', 'gratis', 'alasanGratis', 'pinGratis', 'unitTujuanId', 'alasanPindah', 'unitLamaServis', 'bonusMenit', 'bonusAlasan', 'bonusPin', 'aksesori']);
+        $this->panel = in_array($panel, ['utama', 'tambah', 'pindah', 'bonus', 'aksesori'], true) ? $panel : 'utama';
         $this->segarkanData();
     }
 
@@ -285,6 +290,82 @@ class KelolaSesi extends Component
         }
     }
 
+    /* ---------------- Sewa aksesori ---------------- */
+
+    #[Computed]
+    public function daftarAksesori(): Collection
+    {
+        return Aksesori::aktif()->urut()->get();
+    }
+
+    /** Aksesori yang disewa sesi ini (belum dibatalkan) */
+    #[Computed]
+    public function aksesoriSesi(): Collection
+    {
+        return $this->sesiId ? app(AksesoriService::class)->untukSesi($this->sesiId) : collect();
+    }
+
+    public function ubahAksesori(string $id, int $ubah): void
+    {
+        $a = $this->daftarAksesori->firstWhere('id', $id);
+
+        if (! $a) {
+            return;
+        }
+
+        $qty = max(0, min($a->tersedia(), (int) ($this->aksesori[$id] ?? 0) + $ubah));
+
+        if ($qty > 0) {
+            $this->aksesori[$id] = $qty;
+        } else {
+            unset($this->aksesori[$id]);
+        }
+    }
+
+    public function sewaAksesori(): void
+    {
+        if ($this->aksesori === []) {
+            $this->addError('aksesori', 'Pilih aksesori yang disewa.');
+
+            return;
+        }
+
+        $this->jalankan(function () {
+            foreach ($this->aksesori as $id => $qty) {
+                $a = $this->daftarAksesori->firstWhere('id', $id) ?? throw new BillingException('Aksesori tidak ditemukan.');
+                app(AksesoriService::class)->sewa($this->sesi, $a, (int) $qty, auth()->user());
+            }
+        }, 'Aksesori ditambahkan ke tagihan');
+    }
+
+    /** Dikembalikan sebelum selesai: per jam berhenti dihitung sekarang */
+    public function kembalikanAksesori(string $id, array $konfirmasi = []): void
+    {
+        $sewa = $this->aksesoriSesi->firstWhere('id', $id);
+
+        if ($sewa) {
+            $this->jalankan(fn () => app(AksesoriService::class)->kembalikan($sewa, auth()->user()), 'Aksesori dikembalikan');
+        }
+    }
+
+    /** Salah input (≤ 5 menit): dibatalkan tanpa biaya */
+    public function batalAksesori(string $id, array $konfirmasi = []): void
+    {
+        $sewa = $this->aksesoriSesi->firstWhere('id', $id);
+
+        if ($sewa) {
+            $this->jalankan(fn () => app(AksesoriService::class)->batal($sewa, auth()->user()), 'Sewa aksesori dibatalkan');
+        }
+    }
+
+    /** "Stik tambahan ×2, Headset" — untuk pengingat pengembalian saat selesai */
+    public function aksesoriBelumKembali(): string
+    {
+        return $this->aksesoriSesi->whereNull('selesai_pada')
+            ->map(fn ($s) => ($s->aksesori?->nama ?? 'Aksesori').($s->qty > 1 ? " ×{$s->qty}" : ''))
+            ->implode(', ');
+    }
+
     /* ---------------- Batal tambah waktu & batal sesi ---------------- */
 
     /** Menit setelah aksi di mana pembuatnya boleh membatalkan tanpa PIN (salah pencet) */
@@ -443,7 +524,8 @@ class KelolaSesi extends Component
 
     private function segarkanData(): void
     {
-        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah, $this->estimasiSewa, $this->riwayatTambah, $this->batalSesiButuhPin);
+        unset($this->sesi, $this->unitKosong, $this->tarifPerJam, $this->hargaTambah, $this->estimasiSewa, $this->riwayatTambah, $this->batalSesiButuhPin,
+            $this->daftarAksesori, $this->aksesoriSesi);
     }
 
     private function billing(): BillingService

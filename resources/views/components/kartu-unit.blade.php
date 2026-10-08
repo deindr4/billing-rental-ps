@@ -1,6 +1,7 @@
 @props([
     'unit',
     'sesi' => null,
+    'aksesori' => null,
     'tv' => null,
     'bisaRemote' => false,
     'tarif' => null,
@@ -35,12 +36,15 @@
     };
 @endphp
 
-<div class="kartu kartu-status flex flex-col" style="--warna-status: {{ $warnaStatus }};">
+@php $warnaUnit = $unit->warnaKartu(); @endphp
+{{-- Garis atas = warna status (tetap); strip kiri & chip kode = warna penanda unit (Admin → Unit → Warna kartu) --}}
+<div class="kartu kartu-status flex flex-col" style="--warna-status: {{ $warnaStatus }}; border-left: 4px solid {{ $warnaUnit }};">
     {{-- Kepala --}}
     <div class="px-4 pt-3.5 pb-2.5 flex items-start justify-between gap-2">
         <div class="min-w-0">
             <div class="flex items-center gap-2">
-                <span class="text-lg font-semibold tracking-tight">{{ $unit->kode }}</span>
+                <span class="text-lg font-semibold tracking-tight rounded px-1.5 -ml-1.5"
+                      style="color: {{ $warnaUnit }}; background: color-mix(in srgb, {{ $warnaUnit }} 16%, transparent);">{{ $unit->kode }}</span>
                 @if ($unit->kategori)
                     <span class="chip">{{ $unit->kategori->nama }}</span>
                 @endif
@@ -130,6 +134,12 @@
                     <dt class="text-muted">Paket</dt>
                     <dd class="truncate">{{ $paket ? ($sesi->paketHarga?->nama ?? 'Durasi '.\App\Models\Sesi::formatDurasi($sesi->durasi_menit * 60)) : 'Open Billing' }}</dd>
                 </div>
+                @if ($aksesori && $aksesori->isNotEmpty())
+                    <div class="flex justify-between gap-2">
+                        <dt class="text-muted flex items-center gap-1"><x-ikon name="aksesori" size="13" class="text-ik-ungu" /> Aksesori</dt>
+                        <dd class="truncate">{{ $aksesori->map(fn ($s) => ($s->aksesori?->nama ?? '').($s->qty > 1 ? ' ×'.$s->qty : ''))->implode(', ') }}</dd>
+                    </div>
+                @endif
             </dl>
 
         @elseif ($unit->status === 'menunggu_bayar' && $trx)

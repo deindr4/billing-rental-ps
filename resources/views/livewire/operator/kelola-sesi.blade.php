@@ -122,7 +122,59 @@
                     </div>
                 @endif
 
+                {{-- Aksesori yang disewa: kembalikan lebih awal (per jam berhenti dihitung) / batal salah input --}}
+                @if ($this->aksesoriSesi->isNotEmpty())
+                    <div class="rounded-md border border-line mb-4">
+                        <div class="px-3 py-2 border-b border-line text-sm font-medium">Aksesori disewa</div>
+                        <ul class="divide-y divide-line text-sm">
+                            @foreach ($this->aksesoriSesi as $s)
+                                @php
+                                    $bolehBatal = ! $s->selesai_pada && $s->mulai_pada->gt(now()->subMinutes(\App\Services\Billing\AksesoriService::BATAS_BATAL_MENIT));
+                                    $perkiraan = app(\App\Services\Billing\AksesoriService::class)->perkiraan($s, $sesi);
+                                @endphp
+                                <li wire:key="sa-{{ $s->id }}" class="px-3 py-2 flex items-center justify-between gap-3">
+                                    <span class="min-w-0">
+                                        <span class="block">{{ $s->aksesori?->nama }}{{ $s->qty > 1 ? ' ×'.$s->qty : '' }}</span>
+                                        <span class="block text-xs text-muted">
+                                            sejak {{ $s->mulai_pada->format('H:i') }} ·
+                                            @if ($s->selesai_pada)
+                                                dikembalikan {{ $s->selesai_pada->format('H:i') }}
+                                            @elseif ($s->perJam())
+                                                per jam, perkiraan <x-rupiah :nilai="$perkiraan" />
+                                            @else
+                                                flat per sesi
+                                            @endif
+                                        </span>
+                                    </span>
+                                    @unless ($s->selesai_pada)
+                                        <span class="flex gap-1.5 shrink-0">
+                                            @if ($bolehBatal)
+                                                <x-confirm-button action="batalAksesori" :params="[$s->id]"
+                                                                  title="Batalkan sewa {{ $s->aksesori?->nama }}?"
+                                                                  text="Salah input: dihapus dari tagihan tanpa biaya."
+                                                                  confirm-text="Ya, batalkan"
+                                                                  class="btn-tint tint-merah h-8 px-3 text-xs">Batal</x-confirm-button>
+                                            @endif
+                                            <x-confirm-button action="kembalikanAksesori" :params="[$s->id]"
+                                                              title="{{ $s->aksesori?->nama }} dikembalikan?"
+                                                              :text="$s->perJam() ? 'Biaya per jam berhenti dihitung sekarang.' : 'Aksesori kembali tersedia untuk unit lain. Biaya flat tetap ditagih.'"
+                                                              confirm-text="Dikembalikan"
+                                                              class="btn-tint tint-teal h-8 px-3 text-xs">Kembalikan</x-confirm-button>
+                                        </span>
+                                    @endunless
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <div class="grid grid-cols-2 gap-2">
+                    @if ($this->daftarAksesori->isNotEmpty())
+                        <button type="button" wire:click="kePanel('aksesori')" class="btn btn-tint tint-ungu col-span-2">
+                            <x-ikon name="aksesori" size="16" /> Sewa Aksesori
+                        </button>
+                    @endif
+
                     @if ($sesi->isPaket())
                         <button type="button" wire:click="kePanel('tambah')" class="btn btn-tint tint-kuning">
                             <x-ikon name="jam" size="16" /> Tambah Waktu
@@ -151,9 +203,10 @@
                     <button type="button" class="btn btn-tint tint-teal"
                             wire:click="$dispatch('buka-pratinjau-struk', { transaksiId: '{{ $trx->id }}' })">Cetak Struk</button>
 
+                    @php $belumKembali = $this->aksesoriBelumKembali(); @endphp
                     <x-confirm-button action="selesai"
                                       title="Selesaikan sesi?"
-                                      text="TV akan dikunci dan tagihan ditampilkan."
+                                      :text="'TV akan dikunci dan tagihan ditampilkan.'.($belumKembali ? ' Jangan lupa ambil kembali aksesori: '.$belumKembali.'.' : '')"
                                       confirm-text="Ya, selesaikan"
                                       danger
                                       class="w-full col-span-2">
@@ -271,6 +324,20 @@
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="bonusWaktu">
                             Beri bonus {{ (int) $bonusMenit ?: '' }} menit
                         </button>
+                    </div>
+                </form>
+
+            {{-- ================= PANEL SEWA AKSESORI ================= --}}
+            @elseif ($panel === 'aksesori')
+                <form wire:submit="sewaAksesori" class="space-y-4">
+                    @include('livewire.operator.partials.pilih-aksesori', ['daftar' => $this->daftarAksesori, 'pilihan' => $aksesori])
+                    @error('aksesori') <p class="text-sm text-danger">{{ $message }}</p> @enderror
+                    <p class="text-xs text-muted">Masuk ke tagihan unit ini. Per jam dihitung sejak sekarang sampai dikembalikan / sesi selesai.</p>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" wire:click="kePanel('utama')" class="btn">Kembali</button>
+                        <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="sewaAksesori"
+                                @disabled($aksesori === [])>Tambahkan</button>
                     </div>
                 </form>
 

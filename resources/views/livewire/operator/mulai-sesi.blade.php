@@ -118,6 +118,11 @@
                     </div>
                 @endif
 
+                {{-- Sewa aksesori (stik tambahan, headset, …) --}}
+                @if ($this->daftarAksesori->isNotEmpty())
+                    @include('livewire.operator.partials.pilih-aksesori', ['daftar' => $this->daftarAksesori, 'pilihan' => $aksesori])
+                @endif
+
                 {{-- Waktu pilih game: TV terbuka, waktu sewa belum berjalan --}}
                 @if ($this->pilihGameDefault > 0)
                     <label class="flex items-start gap-3 rounded-md border border-line px-3 py-2.5 cursor-pointer">
@@ -143,7 +148,18 @@
                 @php
                     $tagihan = $this->tagihanAwal();
                     $diskonMember = $this->diskonMember();
+                    $aks = $this->tagihanAksesori();
                 @endphp
+                @if (count($aksesori) > 0)
+                    @php $adaPerJam = $this->daftarAksesori->whereIn('id', array_keys($aksesori))->contains('satuan', 'jam'); @endphp
+                    <div class="flex items-center justify-between gap-3 mb-1 text-sm">
+                        <span class="text-muted">Sewa aksesori</span>
+                        <span>
+                            @if ($aks > 0)+<x-rupiah :nilai="$aks" />@endif
+                            @if ($adaPerJam)<span class="text-xs text-muted">{{ $aks > 0 ? '+ ' : '' }}per jam dihitung saat selesai</span>@endif
+                        </span>
+                    </div>
+                @endif
                 @if ($diskonMember > 0)
                     <div class="flex items-center justify-between gap-3 mb-1 text-sm">
                         <span class="text-muted">Sewa</span>
@@ -157,7 +173,7 @@
                 <div class="flex items-center justify-between gap-3 mb-3 text-sm">
                     <span class="label">{{ $diskonMember > 0 ? 'Total estimasi' : 'Tagihan awal' }}</span>
                     @if ($tagihan)
-                        <x-rupiah :nilai="$tagihan - $diskonMember" class="text-xl font-semibold text-accent" />
+                        <x-rupiah :nilai="$tagihan - $diskonMember + $aks" class="text-xl font-semibold text-accent" />
                     @elseif ($this->member && $this->infoMember()['diskon'] > 0 && $jenisPelanggan === 'member')
                         <span class="text-muted">Dihitung saat selesai · diskon {{ $this->infoMember()['diskon'] }}%</span>
                     @else

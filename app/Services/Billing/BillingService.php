@@ -3,6 +3,7 @@
 namespace App\Services\Billing;
 
 use App\Exceptions\BillingException;
+use App\Models\Aksesori;
 use App\Models\Cabang;
 use App\Models\Member;
 use App\Models\PaketHarga;
@@ -162,6 +163,15 @@ final class BillingService
 
             $transaksi->hitungUlang();
             $unit->update(['status' => Unit::STATUS_MAIN]);
+
+            // Sewa aksesori saat mulai: [aksesori_id => qty]
+            foreach ((array) ($data['aksesori'] ?? []) as $aksesoriId => $qty) {
+                if ((int) $qty > 0) {
+                    $aksesori = Aksesori::withoutGlobalScopes()->where('cabang_id', $unit->cabang_id)->find($aksesoriId)
+                        ?? throw new BillingException('Aksesori tidak ditemukan.');
+                    app(AksesoriService::class)->sewa($sesi, $aksesori, (int) $qty, $user);
+                }
+            }
 
             $this->log($sesi, 'mulai', [
                 'mode' => $mode,
@@ -606,6 +616,9 @@ final class BillingService
                 );
             }
 
+            // Aksesori yang masih disewa dikembalikan sekarang (per jam dihitung sampai jam selesai)
+            app(AksesoriService::class)->akhiriSesi($sesi);
+
             $transaksi->hitungUlang();
 
             if ($transaksi->total === 0 || $transaksi->sisaTagihan() === 0) {
@@ -965,6 +978,9 @@ final class BillingService
 
                 $sesi->versi_tagihan = $sesi->versi_tagihan + 1;
                 $sesi->save();
+
+                // Aksesori yang disewa kembali tersedia
+                app(AksesoriService::class)->lepasSemua($sesi);
 
                 // Kosongkan unit hanya jika masih dipakai sesi ini. Sesi lama yang sudah selesai & lunas
                 // tidak boleh mengosongkan unit yang sekarang dipakai pelanggan lain.

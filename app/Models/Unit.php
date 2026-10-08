@@ -52,6 +52,12 @@ class Unit extends Model
         'kanan_bawah' => 'Kanan Bawah',
     ];
 
+    /** Palet warna penanda kartu unit (dipakai bergiliran menurut urutan bila warna unit kosong) */
+    public const PALET = [
+        '#38bdf8', '#f472b6', '#a78bfa', '#fbbf24', '#34d399', '#fb923c',
+        '#60a5fa', '#e879f9', '#2dd4bf', '#f87171', '#a3e635', '#c084fc',
+    ];
+
     protected $fillable = [
         'tenant_id',
         'cabang_id',
@@ -61,6 +67,7 @@ class Unit extends Model
         'nama',
         'lokasi',
         'urutan',
+        'warna',
         'status',
         'mode_kontrol',
         'tipe_perangkat',
@@ -128,6 +135,18 @@ class Unit extends Model
     public function scopeUrut(Builder $query): Builder
     {
         return $query->orderBy('urutan')->orderBy('kode');
+    }
+
+    /** Warna penanda kartu: pilihan admin, atau otomatis dari palet menurut urutan unit */
+    public function warnaKartu(): string
+    {
+        if ($this->warna && preg_match('/^#[0-9a-fA-F]{6}$/', $this->warna)) {
+            return $this->warna;
+        }
+
+        $indeks = $this->urutan > 0 ? $this->urutan - 1 : crc32((string) $this->kode);
+
+        return self::PALET[$indeks % count(self::PALET)];
     }
 
     /** Unit rental PS atau PC (dari jenis tipe konsolnya; tanpa tipe = PS) */

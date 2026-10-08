@@ -267,7 +267,7 @@ final class StatusTvService
     /** Rincian item untuk layar tagihan TV (desain Stitch 11) */
     private function itemTagihan(Transaksi $transaksi, string $zona): array
     {
-        $label = ['sewa' => 'Sewa', 'tambah_waktu' => 'Tambah waktu', 'produk' => 'F&B', 'lainnya' => 'Lainnya'];
+        $label = ['sewa' => 'Sewa', 'tambah_waktu' => 'Tambah waktu', 'produk' => 'F&B', 'aksesori' => 'Aksesori', 'lainnya' => 'Lainnya'];
 
         return TransaksiItem::withoutGlobalScopes()
             ->where('transaksi_id', $transaksi->id)
