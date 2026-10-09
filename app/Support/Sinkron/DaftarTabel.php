@@ -30,11 +30,11 @@ final class DaftarTabel
         'members', 'member_mutasi',
         'aset', 'maintenance', 'modal_mutasi',
         'antrean_lounge', 'booking', 'turnamen', 'turnamen_peserta', 'turnamen_pertandingan', 'iklan', 'pembayaran_online',
-        'audit_log',
+        'audit_log', 'notifikasi',
     ];
 
     /** Tabel yang hanya ditambah (tidak pernah diubah): dikirim dengan INSERT IGNORE */
-    public const HANYA_TAMBAH = ['audit_log'];
+    public const HANYA_TAMBAH = ['audit_log', 'notifikasi'];
 
     /**
      * Kolom yang berubah terus (heartbeat / status langsung): UPDATE yang HANYA mengubah kolom ini tidak masuk antrean.

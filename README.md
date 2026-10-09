@@ -78,6 +78,10 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
     <td align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="70%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/gambar/kasir-lonceng.webp" alt="Lonceng notifikasi"><br><sub><b>Lonceng notifikasi</b> — Playbox telat, pembatalan, booking online, selisih kas, stok, keamanan & sistem; klik → halaman terkait</sub></td>
+    <td><img src="docs/gambar/kasir-notifikasi.webp" alt="Riwayat notifikasi"><br><sub><b>Riwayat notifikasi</b> — 90 hari, filter kelompok / tingkat / belum dibaca; yang penting juga ke Telegram / WA</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/gambar/kasir-lisensi.webp" alt="Lisensi MIT"><br><sub><b>Lisensi MIT</b> — teks lisensi, kontak pengembang (Telegram), grup WhatsApp info pengembangan & GitHub</sub></td>
     <td><img src="docs/gambar/kasir-sambutan-lisensi.webp" alt="Sambutan Lisensi MIT"><br><sub><b>Sambutan pertama</b> — setelah pasang baru di Windows, popup Lisensi MIT + Telegram & grup WhatsApp tampil <b>sekali</b></sub></td>
   </tr>
@@ -189,6 +193,19 @@ Dipakai saat halaman billing tidak bisa dibuka atau terasa bermasalah — tanpa 
 - **Keuangan**: vs periode lalu, titik impas harian, proyeksi akhir bulan, margin, ROI aset, pengeluaran melonjak.
 - **Operasional**: utilisasi per unit, jam sepi, omzet per hari, paket terlaris, member yang lama tidak datang.
 - **Stok**: barang hilang saat opname, segera habis, dijual rugi, stok mati. Aturan: [docs/analisa-pintar.md](docs/analisa-pintar.md).
+</details>
+
+<details>
+<summary><b>🔔 Lonceng notifikasi</b></summary>
+
+- Ikon lonceng di pojok kanan atas (kasir & admin) dengan jumlah belum dibaca; klik → langsung ke halaman terkait.
+- **Sewa Playbox** (baru, jatuh tempo, **telat** — diulang tiap hari, kembali dengan denda), **pembatalan & koreksi**
+  (transaksi, F&B, tambah waktu, waktu gratis, HPP, member), **booking online** (baru, mulai 15 menit lagi, tidak datang),
+  **selisih kas**, bayar mandiri perlu tindakan, **stok** habis / menipis, **keamanan** (login / PIN gagal berulang,
+  kode darurat), **sistem** (backup tidak jalan, sinkron / antrean macet, disk penuh, versi baru), shift lupa ditutup,
+  TV offline saat sesi, unit maintenance.
+- Penerima sesuai izin role; tingkat **Penting** juga dikirim ke Telegram / WhatsApp (pilih per jenis).
+  Detail: [docs/notifikasi.md](docs/notifikasi.md).
 </details>
 
 <details>
@@ -404,6 +421,7 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/analisa-pintar.md](docs/analisa-pintar.md) | Aturan Analisa Pintar (skor risiko kasir, keuangan, operasional, stok) |
 | [docs/karyawan.md](docs/karyawan.md) | Satu laci & serah terima shift, data karyawan, jadwal & absensi (PIN + selfie), rekap gaji & bonus |
 | [public/tutorial/windows.html](public/tutorial/windows.html) · [PDF](public/tutorial/windows.pdf) | Panduan bergambar pasang di Windows A–Z: data unit, paket, F&B, kasir, TV, transaksi pertama |
+| [docs/notifikasi.md](docs/notifikasi.md) | Lonceng notifikasi: jenis, tingkat, penerima per izin, teruskan ke Telegram/WA |
 | [docs/playbox.md](docs/playbox.md) | Sewa Playbox bawa pulang: penyewa, jaminan, checklist, perpanjang, pengembalian, pengingat WA |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |

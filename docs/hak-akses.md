@@ -36,6 +36,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
 | Buka & tutup kas, serah terima laci ke kasir lain (penerima ketik PIN) | ✅ | ✅ | ✅ | – |
 | Menu Lisensi MIT (teks lisensi, kontak Telegram & grup WA pengembangan) | ✅ | ✅ | ✅ | ✅ |
+| Lonceng notifikasi — isi mengikuti izin lain di tabel ini (mis. pembatalan butuh `transaksi.batal`, sistem butuh `admin.pengaturan`); rincian: [notifikasi.md](notifikasi.md) | ✅ semua | sebagian | Playbox, booking, stok, TV offline | stok |
 | Halaman Absen di tablet (tiap karyawan absen dengan PIN + foto sendiri) | ✅ | ✅ | ✅ | – |
 | Ikut bertransaksi di laci kasir yang bertugas / serah terima atas namanya (`shift.bantu`) | ✅ | ✅ | – | – |
 | **Transaksi** | | | | |

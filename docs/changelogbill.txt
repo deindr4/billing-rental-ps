@@ -5,6 +5,27 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (lonceng notifikasi)
+-----------------------------------------------------------------------------
+- Ikon lonceng di pojok kanan atas aplikasi kasir (tablet, PC, HP) dan panel admin, dengan jumlah belum dibaca.
+  Klik -> 12 notifikasi terbaru, klik satu -> langsung ke halaman terkait. Halaman baru "Notifikasi" (/notifikasi):
+  riwayat 90 hari, filter kelompok / tingkat / belum dibaca, tandai semua dibaca.
+- Isi: Sewa Playbox (baru, perpanjang, kembali, kembali dengan denda/kerusakan, batal, segera jatuh tempo, TELAT
+  belum kembali - diulang tiap hari, penyewa daftar hitam), pembatalan & koreksi (transaksi, F&B, tambah waktu,
+  aksesori, pengeluaran, gaji, waktu gratis, member, HPP), booking online (baru, mulai 15 menit lagi, tidak datang),
+  selisih kas tutup kas / serah terima, bayar mandiri perlu tindakan, stok habis / menipis, keamanan (login gagal 5x,
+  PIN salah 3x, kode darurat, bypass TV), sistem (backup tidak jalan, database dipulihkan, sinkron / antrean macet,
+  disk hampir penuh, versi baru), shift lupa ditutup > 12 jam, TV / agen PC offline saat sesi, unit maintenance.
+- Penerima mengikuti izin role (kasir tidak melihat pembatalan, dll.); pelaku tidak diberi tahu kejadiannya sendiri.
+  Tingkat Penting / Peringatan baru muncul juga sebagai pesan pop-up di kasir.
+- Notifikasi PENTING ikut dikirim ke Telegram / WhatsApp cabang (Admin -> Notifikasi & Laporan -> Lonceng notifikasi,
+  pilih per jenis; bawaan semua yang penting).
+- Pemeriksaan berkala tiap 5 menit (php artisan notifikasi:periksa, hanya server lokal / VPS utama). Notifikasi ikut
+  tersinkron ke cloud; dihapus otomatis setelah 90 hari. Panduan: docs/notifikasi.md.
+- Database: tabel baru notifikasi, notifikasi_baca, notifikasi_pengguna -> Update database + Pasang ulang trigger sinkron
+  (installer / pasang-site.sh / pasang-vps.sh menjalankannya otomatis).
+
+
 2026-10-09 (popup Lisensi MIT sekali setelah pasang baru)
 -----------------------------------------------------------------------------
 - PC rental Windows: setelah pasang baru (atau pulihkan dari backup di PC baru), saat aplikasi kasir pertama kali

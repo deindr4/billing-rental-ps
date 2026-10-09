@@ -2,6 +2,7 @@
 
 use App\Models\Iklan;
 use App\Services\Gateway\BayarMandiriService;
+use App\Services\Notifikasi\PeriksaLonceng;
 use App\Services\Playbox\PlayboxService;
 use App\Services\Publik\BookingService;
 use App\Services\UpdateAplikasi;
@@ -45,6 +46,12 @@ Schedule::call(function () {
 // Sewa Playbox: pengingat WA ke penyewa sebelum jatuh tempo (hanya server lokal agar tidak dobel dengan cloud)
 Schedule::call(fn () => app(PlayboxService::class)->kirimPengingat())
     ->everyTenMinutes()->name('playbox-pengingat')->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
+
+// Lonceng notifikasi: Playbox jatuh tempo / telat, booking segera, stok, shift lupa ditutup, TV offline, kesehatan sistem
+Artisan::command('notifikasi:periksa', function () {
+    $this->info(app(PeriksaLonceng::class)->jalankan().' notifikasi baru.');
+})->purpose('Periksa kejadian berkala untuk lonceng notifikasi');
+Schedule::command('notifikasi:periksa')->everyFiveMinutes()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
 
 // Database tetap ringan: pangkas log lama, cache kedaluwarsa, antrean sinkron ganda; statistik index tiap Minggu
 Schedule::command('db:rapikan')->dailyAt('03:40')->withoutOverlapping(30);

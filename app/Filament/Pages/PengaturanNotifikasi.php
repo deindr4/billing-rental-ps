@@ -5,10 +5,12 @@ namespace App\Filament\Pages;
 use App\Jobs\KirimNotifikasi;
 use App\Models\Cabang;
 use App\Models\NotifikasiLog;
+use App\Services\Notifikasi\Lonceng;
 use App\Services\Notifikasi\PengaturanNotifikasi as Setelan;
 use App\Services\Notifikasi\WhatsappService;
 use App\Support\Tenancy;
 use BackedEnum;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -134,6 +136,16 @@ class PengaturanNotifikasi extends Page implements HasSchemas
                         Toggle::make('laporan_tutup_kas')->label('Kirim otomatis setiap tutup kas'),
                         Toggle::make('laporan_pdf')->label('Lampirkan PDF detail transaksi'),
                     ]),
+
+                Section::make('Lonceng notifikasi')
+                    ->description('Notifikasi PENTING di lonceng (pojok kanan atas) yang juga dikirim ke Telegram / WhatsApp di atas. Kosongkan semua untuk lonceng saja.')
+                    ->schema([
+                        CheckboxList::make('lonceng_teruskan')
+                            ->label('Teruskan ke Telegram / WhatsApp')
+                            ->options(collect(Lonceng::jenisPenting())->mapWithKeys(fn ($j) => [$j => Lonceng::label($j)]))
+                            ->columns(2)
+                            ->bulkToggleable(),
+                    ]),
             ])
             ->statePath('data');
     }
@@ -160,6 +172,7 @@ class PengaturanNotifikasi extends Page implements HasSchemas
         $setelan->simpan('wa.tujuan', trim((string) ($data['wa_tujuan'] ?? '')) ?: null);
         $setelan->simpan('laporan.tutup_kas', (bool) ($data['laporan_tutup_kas'] ?? false));
         $setelan->simpan('laporan.pdf', (bool) ($data['laporan_pdf'] ?? false));
+        $setelan->simpan('lonceng.teruskan', array_values(array_intersect((array) ($data['lonceng_teruskan'] ?? []), Lonceng::jenisPenting())));
 
         $this->muatCabang($data['cabang_id']);
 

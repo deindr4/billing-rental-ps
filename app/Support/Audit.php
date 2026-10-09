@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\AuditLog;
+use App\Services\Notifikasi\Lonceng;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Throwable;
@@ -42,7 +43,7 @@ final class Audit
             $tenancy = app(Tenancy::class);
             $request = app()->runningInConsole() ? null : request();
 
-            return AuditLog::create([
+            $log = AuditLog::create([
                 'tenant_id' => $tenantId ?? $subjek?->getAttribute('tenant_id') ?? $tenancy->tenantId(),
                 'cabang_id' => $cabangId ?? $subjek?->getAttribute('cabang_id') ?? $tenancy->cabangId(),
                 'user_id' => $userId ?? auth()->id(),
@@ -55,6 +56,11 @@ final class Audit
                 'ip' => $request?->ip(),
                 'user_agent' => $request ? Str::limit((string) $request->userAgent(), 250, '') : null,
             ]);
+
+            // Kejadian penting (pembatalan, selisih kas, keamanan, ...) juga masuk lonceng notifikasi
+            Lonceng::dariAudit($log);
+
+            return $log;
         } catch (Throwable $e) {
             report($e);
 

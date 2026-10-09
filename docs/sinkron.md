@@ -16,8 +16,11 @@ Cloud dipakai untuk: TV pindah otomatis saat server lokal mati, owner memantau d
    jadi penjualan / top up di dua server saat koneksi putus tetap terjumlah semua.
 5. Role & izin dicocokkan lewat **nama** (ID-nya berbeda di tiap server).
 6. Nomor transaksi berbeda per server (`BIL-DGH1-L-...` lokal, `...-V-...` cloud), jadi tidak bentrok.
+7. `audit_log` & `notifikasi` (lonceng) **hanya ditambah** (INSERT IGNORE). Notifikasi yang sama dari dua server
+   (kolom `kunci` sama) hanya tersimpan sekali — owner yang membuka panel cloud melihat lonceng yang sama.
 
-Tidak disinkronkan: sesi login, cache, antrean tugas, nomor urut, pairing TV, rilis APK, super admin platform.
+Tidak disinkronkan: sesi login, cache, antrean tugas, nomor urut, pairing TV, rilis APK, super admin platform,
+status baca lonceng (`notifikasi_baca`, `notifikasi_pengguna` — per server).
 
 ## Memasang
 

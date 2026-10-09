@@ -9,6 +9,7 @@ use App\Models\Maintenance;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Billing\PengeluaranService;
+use App\Services\Notifikasi\Lonceng;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -63,7 +64,7 @@ final class MaintenanceService
     /** Mulai dikerjakan: unit & aset jadi status servis */
     public function mulai(Maintenance $m, User $user): Maintenance
     {
-        return DB::transaction(function () use ($m) {
+        return DB::transaction(function () use ($m, $user) {
             $m = Maintenance::whereKey($m->id)->lockForUpdate()->firstOrFail();
 
             if ($m->status !== 'dijadwalkan') {
@@ -78,6 +79,8 @@ final class MaintenanceService
                 }
 
                 $unit->update(['status' => Unit::STATUS_SERVIS]);
+                Lonceng::kirim('unit_maintenance', "{$unit->nama} masuk maintenance", "{$m->judul} · oleh {$user->name}",
+                    subjek: $m, userId: $user->id);
             }
 
             if ($m->aset_id) {

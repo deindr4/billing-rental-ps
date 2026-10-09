@@ -89,10 +89,19 @@ final class PengaturanNotifikasi
         return (bool) $this->ambil('laporan.pdf', true);
     }
 
+    /* Lonceng */
+
+    /** Jenis notifikasi penting yang diteruskan ke Telegram / WhatsApp (bawaan: semua yang penting) */
+    public function loncengTeruskan(): array
+    {
+        return (array) $this->ambil('lonceng.teruskan', Lonceng::jenisPenting());
+    }
+
     /** Nilai mentah untuk form admin */
     public function nilaiForm(): array
     {
         return [
+            'lonceng_teruskan' => $this->loncengTeruskan(),
             'telegram_aktif' => (bool) $this->ambil('telegram.aktif', false),
             'telegram_token' => null,
             'telegram_chat_id' => $this->telegramChatId(),

@@ -16,6 +16,7 @@ use App\Services\Billing\BillingService;
 use App\Services\Billing\KasService;
 use App\Services\Billing\NomorTransaksi;
 use App\Services\Billing\ShiftService;
+use App\Services\Notifikasi\Lonceng;
 use App\Services\Notifikasi\PengaturanNotifikasi;
 use App\Support\Audit;
 use App\Support\FotoPrivat;
@@ -195,6 +196,10 @@ final class PlayboxService
                 Audit::catat('sewa_daftar_hitam', "Menyewakan {$playbox->kode} ke {$penyewa->nama} (daftar hitam)", $sewa, anomali: true, userId: $user->id);
             }
 
+            Lonceng::kirim('playbox_baru', "Sewa {$playbox->kode} · {$penyewa->nama}",
+                "{$jumlah} ".Playbox::SATUAN[$satuan].' · jatuh tempo '.$sewa->jatuh_tempo->format('d/m H:i')." · oleh {$user->name}",
+                subjek: $sewa, userId: $user->id);
+
             return $sewa;
         });
     }
@@ -228,6 +233,10 @@ final class PlayboxService
             $riwayat[] = ['satuan' => $satuan, 'jumlah' => $jumlah, 'harga' => $harga, 'dari' => $sewa->jatuh_tempo->toDateTimeString(),
                 'ke' => $baru->toDateTimeString(), 'transaksi_id' => $trx->id, 'oleh' => $user->name, 'pada' => now()->toDateTimeString()];
             $sewa->update(['jatuh_tempo' => $baru, 'perpanjangan' => $riwayat, 'diingatkan_pada' => null]);
+
+            Lonceng::kirim('playbox_perpanjang', "Perpanjang {$playbox->kode} · {$sewa->penyewa?->nama}",
+                "{$jumlah} ".Playbox::SATUAN[$satuan].' · jatuh tempo baru '.$baru->format('d/m H:i')." · oleh {$user->name}",
+                subjek: $sewa, userId: $user->id);
 
             return $trx;
         });
@@ -346,6 +355,12 @@ final class PlayboxService
             // Ada kelengkapan rusak / hilang → unit diperiksa dulu sebelum disewakan lagi
             $sewa->playbox->update(['status' => $adaRusak ? 'servis' : 'tersedia']);
 
+            $masalah = $denda > 0 || $kerusakan > 0 || $adaRusak;
+            Lonceng::kirim($masalah ? 'playbox_kembali_denda' : 'playbox_kembali', "{$sewa->playbox->kode} kembali · {$sewa->penyewa?->nama}",
+                $masalah ? 'Denda Rp '.number_format($denda, 0, ',', '.').' · kerusakan Rp '.number_format($kerusakan, 0, ',', '.')
+                    .($adaRusak ? ' · unit masuk servis' : '')." · oleh {$user->name}" : "Kondisi baik · oleh {$user->name}",
+                subjek: $sewa, userId: $user->id);
+
             return [
                 'sewa' => $sewa,
                 'transaksi' => $trx?->fresh(),
@@ -375,6 +390,8 @@ final class PlayboxService
 
             $sewa->update(['status' => 'batal', 'kembali_pada' => now(), 'catatan' => trim(($sewa->catatan ? $sewa->catatan."\n" : '').'Batal: '.$alasan)]);
             Playbox::withoutGlobalScopes()->whereKey($sewa->playbox_id)->update(['status' => 'tersedia']);
+
+            Lonceng::kirim('playbox_batal', "Sewa {$sewa->nomor} dibatalkan", "{$alasan} · oleh {$user->name}", subjek: $sewa, userId: $user->id);
         });
     }
 

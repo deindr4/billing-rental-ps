@@ -26,6 +26,7 @@ class RapikanDatabase extends Command
         'sync_log' => ['created_at', 30],          // riwayat proses sinkron
         'audit_log' => ['created_at', 400],        // log aktivitas & Analisa Pintar (lebih dari setahun)
         'failed_jobs' => ['failed_at', 30],
+        'notifikasi' => ['created_at', 90],        // lonceng notifikasi (status baca ikut terhapus)
     ];
 
     /** Tabel besar yang statistik index-nya diperbarui (--analisa) */

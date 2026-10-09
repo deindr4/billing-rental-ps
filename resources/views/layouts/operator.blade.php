@@ -184,6 +184,10 @@
                              setInterval(f, 1000);
                          },
                      }">
+                    {{-- Lonceng notifikasi (Playbox, pembatalan, booking, kas, stok, keamanan, sistem) --}}
+                    @if ($user->tenant_id)
+                        <livewire:operator.lonceng-notifikasi />
+                    @endif
                     <button type="button" class="btn btn-ghost btn-ikon text-muted"
                             x-data="{ tutup: document.documentElement.classList.contains('sembunyi-uang') }"
                             @sembunyi-uang.window="tutup = $event.detail"

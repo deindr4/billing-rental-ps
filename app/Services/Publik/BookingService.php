@@ -11,6 +11,7 @@ use App\Models\Sesi;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Billing\BillingService;
+use App\Services\Notifikasi\Lonceng;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -193,7 +194,7 @@ final class BookingService
             $tarif = rescue(fn () => app(BillingService::class)->tarifPerJam($unit), 0, false);
             $member = Member::withoutGlobalScopes()->where('tenant_id', $cabang->tenant_id)->where('telepon', $telepon)->where('is_active', true)->first();
 
-            return Booking::create([
+            $booking = Booking::create([
                 'tenant_id' => $cabang->tenant_id,
                 'cabang_id' => $cabang->id,
                 'unit_id' => $unit->id,
@@ -210,6 +211,15 @@ final class BookingService
                 'sumber' => $kasir ? 'kasir' : 'online',
                 'user_id' => $kasir?->id,
             ]);
+
+            if (! $kasir) {
+                Lonceng::kirim('booking_baru', "Booking {$booking->kode} · {$nama}",
+                    "{$unit->nama} · ".$mulai->translatedFormat('D d M H:i')." · {$durasi} menit"
+                    .($booking->status === 'menunggu' ? ' · menunggu konfirmasi' : ''),
+                    subjek: $booking, userId: null);
+            }
+
+            return $booking;
         });
     }
 
@@ -262,6 +272,9 @@ final class BookingService
             ->each(function (Booking $b) use (&$jumlah) {
                 if ($b->mulai_pada->copy()->addMinutes($this->aturan($b->cabang_id)['toleransi_menit'])->isPast()) {
                     $b->update(['status' => 'tidak_datang']);
+                    Lonceng::kirim('booking_tidak_datang', "Booking {$b->kode} · {$b->nama} tidak datang",
+                        'Jadwal '.$b->mulai_pada->translatedFormat('D d M H:i').' · slot unit dilepas', subjek: $b,
+                        kunci: "booking_tidak_datang:{$b->id}", userId: null);
                     $jumlah++;
                 }
             });

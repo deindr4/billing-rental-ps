@@ -142,6 +142,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', Laporan::class)->middleware('can:laporan.lihat')->name('laporan');
         Route::get('/analisa', AnalisaPintar::class)->middleware('can:laporan.laba')->name('analisa');
         Route::get('/lisensi', \App\Livewire\Operator\Lisensi::class)->name('lisensi');
+        Route::get('/notifikasi', \App\Livewire\Operator\DaftarNotifikasi::class)->name('notifikasi');
         Route::get('/pengeluaran', Pengeluaran::class)->middleware('can:pengeluaran.catat')->name('pengeluaran');
         Route::get('/member', Member::class)->middleware('can:member.kelola')->name('member');
         Route::get('/pembayaran-online', PembayaranOnlineKasir::class)->middleware('can:pembayaran.terima')->name('pembayaran-online');
