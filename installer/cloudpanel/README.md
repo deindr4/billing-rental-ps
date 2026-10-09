@@ -56,3 +56,24 @@ bash pasang-site.sh                 # paket BillingPS-cloud-*.tar.gz dicari otom
 wget -q https://raw.githubusercontent.com/deindr4/billing-rental-ps/master/installer/cloudpanel/pasang-root.sh
 bash pasang-root.sh
 ```
+
+## Update ke rilis baru (login sebagai root)
+
+`pasang-site.sh` tetap dijalankan sebagai **pemilik folder site** (bukan root) supaya file tidak menjadi milik root dan
+PHP-FPM tetap bisa menulis `storage`. Ganti `VER` dengan versi di halaman Releases.
+
+```bash
+VER=2026.10.09.1
+SITE=/home/delta/htdocs/cloudbill.deltagamesbali.id
+U=$(stat -c %U "$SITE")                       # pemilik folder site (user PHP-FPM)
+D=/tmp/billingps-update && rm -rf "$D" && install -d -o "$U" "$D" && cd "$D"
+wget -q https://github.com/deindr4/billing-rental-ps/releases/download/v$VER/BillingPS-cloud-$VER.tar.gz
+wget -q https://raw.githubusercontent.com/deindr4/billing-rental-ps/master/installer/cloudpanel/pasang-site.sh
+chown "$U" "$D"/*
+su -s /bin/bash "$U" -c "SITE=$SITE bash $D/pasang-site.sh $D/BillingPS-cloud-$VER.tar.gz"
+supervisorctl restart billingps-antrean billingps-realtime billingps-jadwal
+cd ~ && rm -rf "$D"
+```
+
+Mode update sudah menjalankan backup, migrasi, hak akses, pasang ulang trigger sinkron & optimize — tidak perlu
+langkah tambahan di web. Cek: `supervisorctl status | grep billingps` (semua RUNNING).

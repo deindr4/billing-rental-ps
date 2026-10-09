@@ -5,6 +5,12 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (panduan update cloud sebagai root)
+-----------------------------------------------------------------------------
+- installer/cloudpanel/README.md: langkah update CloudPanel bila login SSH sebagai root (pasang-site.sh tetap
+  dijalankan sebagai pemilik folder site lewat su, lalu restart supervisor). Hanya dokumentasi.
+
+
 2026-10-09 (tampilan daftar Rental PS / PC)
 -----------------------------------------------------------------------------
 - Rental PS & Rental PC: tombol tampilan Kotak / Daftar di kanan tab status (diingat per login). Daftar = satu baris
