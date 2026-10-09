@@ -32,7 +32,8 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Sewa aksesori ke sesi, kembalikan, batal salah input (≤ 5 menit) | ✅ | ✅ | ✅ | – |
 | Terima pembayaran (termasuk Pembayaran online) | ✅ | ✅ | ✅ | – |
 | Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
-| Buka & tutup kas | ✅ | ✅ | ✅ | – |
+| Buka & tutup kas, serah terima laci ke kasir lain (penerima ketik PIN) | ✅ | ✅ | ✅ | – |
+| Ikut bertransaksi di laci kasir yang bertugas / serah terima atas namanya (`shift.bantu`) | ✅ | ✅ | – | – |
 | **Transaksi** | | | | |
 | Lihat daftar transaksi | ✅ | ✅ | ✅ | – |
 | Batalkan transaksi | PIN | PIN | – | – |
@@ -117,7 +118,7 @@ Di server lokal rental (satu rental) Owner boleh semuanya kecuali mengelola rili
 |---|---|:-:|:-:|:-:|:-:|
 | Rental (grid unit), Jadwal & booking, Lounge/Billboard | Rental | ✅ | ✅ | ✅ | – |
 | POS | POS | ✅ | ✅ | ✅ | – |
-| Buka / tutup kas | Buka & tutup kas | ✅ | ✅ | ✅ | – |
+| Buka / tutup kas, Serah Terima, laporan shift | Buka & tutup kas | ✅ | ✅ | ✅ | – |
 | Pembayaran online (bayar mandiri) | Terima pembayaran | ✅ | ✅ | ✅ | – |
 | Transaksi | Lihat transaksi | ✅ | ✅ | ✅ | – |
 | Member | Kelola member | ✅ | ✅ | ✅ | – |
