@@ -25,6 +25,7 @@ final class DaftarTabel
         'kategori_produk', 'produk', 'produk_stok', 'stok_mutasi',
         'shifts', 'kas_mutasi', 'transaksi', 'transaksi_item', 'transaksi_diskon', 'pembayaran',
         'sesi', 'sesi_log', 'sesi_aksesori', 'pengeluaran', 'penggajian',
+        'playbox', 'penyewa', 'sewa_playbox',
         'perangkat_tv', 'log_tv', 'notifikasi_log',
         'members', 'member_mutasi',
         'aset', 'maintenance', 'modal_mutasi',

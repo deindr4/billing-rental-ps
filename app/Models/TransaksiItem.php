@@ -26,6 +26,9 @@ class TransaksiItem extends Model
     /** Sewa aksesori (stik tambahan, headset) — referensi = SesiAksesori */
     public const JENIS_AKSESORI = 'aksesori';
 
+    /** Sewa Playbox bawa pulang, perpanjangan & denda telat — referensi = SewaPlaybox */
+    public const JENIS_SEWA_LUAR = 'sewa_luar';
+
     protected $table = 'transaksi_item';
 
     protected $fillable = [

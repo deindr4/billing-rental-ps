@@ -16,6 +16,9 @@
         @if ($r['prive'] !== 0)
             <div class="flex justify-between"><dt class="text-muted">Prive owner</dt><dd class="text-danger"><x-rupiah :nilai="$r['prive']" /></dd></div>
         @endif
+        @if (($r['deposit'] ?? 0) !== 0)
+            <div class="flex justify-between"><dt class="text-muted">Deposit sewa Playbox (titipan)</dt><dd><x-rupiah :nilai="$r['deposit']" /></dd></div>
+        @endif
         @if ($r['pengeluaran'] !== 0)
             <div class="flex justify-between"><dt class="text-muted">Pengeluaran</dt><dd class="text-danger"><x-rupiah :nilai="$r['pengeluaran']" /></dd></div>
         @endif

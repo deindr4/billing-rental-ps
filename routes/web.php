@@ -89,6 +89,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/shift/tutup', TutupKas::class)->middleware('can:shift.kelola')->name('shift.tutup');
         Route::get('/shift/serah-terima', SerahTerima::class)->middleware('can:shift.kelola')->name('shift.serah');
         Route::get('/absen', Absen::class)->middleware('can:shift.kelola')->name('absen');
+
+        // Berkas privat (KTP, foto penyewa, kondisi barang sewa, tanda tangan): hanya tenant sendiri & berizin
+        Route::get('/berkas/{path}', function (string $path) {
+            $tenant = auth()->user()->tenant_id;
+            abort_unless(auth()->user()->can('playbox.kelola')
+                && preg_match('#^tenants/'.preg_quote((string) $tenant, '#').'/(penyewa|sewa|jaminan|tanda-tangan)/[\w/.-]+$#', $path)
+                && ! str_contains($path, '..'), 404);
+
+            return \Illuminate\Support\Facades\Storage::disk('local')->response($path, null, ['Cache-Control' => 'private, max-age=3600']);
+        })->where('path', '.*')->name('berkas.privat');
         Route::get('/gaji/{id}/slip', fn (string $id) => view('struk.slip-gaji', [
             'p' => \App\Models\Penggajian::query()->with('karyawan')->findOrFail($id),
             'tenant' => auth()->user()->tenant?->nama,

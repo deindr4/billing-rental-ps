@@ -68,6 +68,7 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Rental',
                 'F&B',
+                'Sewa Playbox',
                 'Karyawan',
                 'Pengaturan',
             ])

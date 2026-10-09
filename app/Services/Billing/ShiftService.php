@@ -269,6 +269,8 @@ final class ShiftService
             'modal' => (int) ($mutasi['modal'] ?? 0),
             'prive' => (int) ($mutasi['prive'] ?? 0),
             'pengeluaran' => (int) ($mutasi['pengeluaran'] ?? 0),
+            // Deposit sewa Playbox: titipan penyewa di laci (masuk saat sewa, keluar saat kembali), bukan omzet
+            'deposit' => (int) ($mutasi['deposit_masuk'] ?? 0) + (int) ($mutasi['deposit_keluar'] ?? 0),
             'seharusnya' => (int) $mutasi->sum(),
             'qris' => (int) ($perMetode['qris']->total ?? 0),
             'transfer' => (int) ($perMetode['transfer']->total ?? 0),

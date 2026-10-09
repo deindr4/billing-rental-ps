@@ -53,6 +53,8 @@ class PengaturanOperasional extends Page implements HasSchemas
     private const KUNCI = [
         'pengeluaran.plafon_shift' => ['batas_pengeluaran', PengeluaranService::PLAFON_DEFAULT],
         'kas.modal_tetap' => ['modal_tetap', ShiftService::MODAL_TETAP_DEFAULT],
+        'playbox.toleransi_menit' => ['playbox_toleransi', 30],
+        'playbox.pengingat_jam' => ['playbox_pengingat', 3],
         'open_billing.blok_menit' => ['blok_menit', 15],
         'open_billing.toleransi_menit' => ['toleransi_menit', 5],
         'open_billing.minimal_menit' => ['minimal_menit', 60],
@@ -102,6 +104,7 @@ class PengaturanOperasional extends Page implements HasSchemas
         $isi['server_cloud'] = $cabangId ? (string) Pengaturan::ambil('server.url_cloud', '', $cabangId) : '';
         $isi['pilih_game_otomatis'] = $cabangId ? (bool) Pengaturan::ambil('sesi.pilih_game_otomatis', true, $cabangId) : true;
         $isi['pc'] = PengaturanPc::ambil($cabangId);
+        $isi['playbox_syarat'] = (string) Pengaturan::ambil('playbox.syarat', \App\Services\Playbox\PlayboxService::SYARAT_DEFAULT, $cabangId);
 
         $isi['qris_aktif'] = $cabangId ? (bool) Pengaturan::ambil('qris.aktif', false, $cabangId) : false;
         $isi['qris_payload'] = $cabangId ? (string) Pengaturan::ambil('qris.payload', '', $cabangId) : '';
@@ -282,6 +285,18 @@ class PengaturanOperasional extends Page implements HasSchemas
                             ->helperText('Satu pesan per baris (maks. 150 karakter, emoji boleh). Muncul sebagai pilihan di tombol Pemberitahuan kasir. Kosongkan untuk pesan bawaan.')
                             ->rows(5)
                             ->columnSpanFull(),
+                    ]),
+
+                Section::make('Sewa Playbox (bawa pulang)')
+                    ->columns(2)
+                    ->collapsed()
+                    ->schema([
+                        TextInput::make('playbox_toleransi')->label('Toleransi telat')->numeric()->minValue(0)->maxValue(1440)
+                            ->suffix('menit')->required()->helperText('Lewat dari ini sesudah jatuh tempo → denda.'),
+                        TextInput::make('playbox_pengingat')->label('Pengingat WA sebelum jatuh tempo')->numeric()->minValue(0)->maxValue(72)
+                            ->suffix('jam')->required()->helperText('0 = tanpa pengingat. Butuh WhatsApp tersambung (Pengaturan Notifikasi).'),
+                        Textarea::make('playbox_syarat')->label('Syarat & ketentuan sewa (tercetak di surat sewa)')
+                            ->rows(6)->maxLength(3000)->columnSpanFull(),
                     ]),
 
                 Section::make('Rental PC (agen kiosk Windows)')
@@ -478,6 +493,7 @@ class PengaturanOperasional extends Page implements HasSchemas
             $data['tv_aplikasi'] ?? []
         )), $cabangId);
         PengaturanPc::simpan($data['pc'] ?? [], $cabangId);
+        Pengaturan::simpan('playbox.syarat', trim((string) ($data['playbox_syarat'] ?? '')), $cabangId);
         Pengaturan::simpan('struk.lebar', (int) ($data['struk_lebar'] ?? 58), $cabangId);
         Pengaturan::simpan('struk.header', trim((string) ($data['struk_header'] ?? '')), $cabangId);
         Pengaturan::simpan('struk.footer', trim((string) ($data['struk_footer'] ?? '')), $cabangId);

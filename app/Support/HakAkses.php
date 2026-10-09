@@ -20,6 +20,7 @@ final class HakAkses
             'pembayaran.terima' => 'Terima pembayaran',
             'shift.kelola' => 'Buka & tutup kas',
             'shift.bantu' => 'Ikut bertransaksi di shift kasir lain (satu laci) & serah terima atas namanya',
+            'playbox.kelola' => 'Sewa Playbox bawa pulang: sewa, perpanjang, terima kembali, lihat data penyewa',
         ],
         'Transaksi' => [
             'transaksi.lihat' => 'Lihat daftar transaksi',
@@ -73,7 +74,7 @@ final class HakAkses
     /** Izin bawaan per role (Owner selalu semua izin) */
     public const BAWAAN = [
         'Supervisor' => [
-            'rental.kelola', 'pos.jual', 'pembayaran.terima', 'shift.kelola', 'shift.bantu',
+            'rental.kelola', 'pos.jual', 'pembayaran.terima', 'shift.kelola', 'shift.bantu', 'playbox.kelola',
             'transaksi.lihat', 'transaksi.batal', 'sesi.gratis',
             'member.kelola', 'member.topup', 'member.koreksi',
             'stok.lihat', 'stok.masuk', 'stok.opname',
@@ -84,7 +85,7 @@ final class HakAkses
             'admin.akses', 'admin.master',
         ],
         'Kasir' => [
-            'rental.kelola', 'pos.jual', 'pembayaran.terima', 'shift.kelola',
+            'rental.kelola', 'pos.jual', 'pembayaran.terima', 'shift.kelola', 'playbox.kelola',
             'transaksi.lihat',
             'member.kelola', 'member.topup',
             'stok.lihat',

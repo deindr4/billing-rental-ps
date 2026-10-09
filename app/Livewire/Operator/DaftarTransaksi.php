@@ -22,6 +22,7 @@ class DaftarTransaksi extends Component
         'pos' => 'POS',
         'top_up' => 'Top-up',
         'turnamen' => 'Turnamen',
+        'sewa_luar' => 'Sewa Playbox',
     ];
 
     public const STATUS = [

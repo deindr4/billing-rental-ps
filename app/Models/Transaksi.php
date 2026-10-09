@@ -23,6 +23,9 @@ class Transaksi extends Model
 
     public const JENIS_TOP_UP = 'top_up';
 
+    /** Sewa Playbox bawa pulang (sewa awal, perpanjangan, denda & ganti rugi saat kembali) */
+    public const JENIS_SEWA_LUAR = 'sewa_luar';
+
     public const JENIS_TURNAMEN = 'turnamen';
 
     public const STATUS_BELUM_BAYAR = 'belum_bayar';

@@ -42,6 +42,7 @@ class AuditLog extends Model
         'serah_terima_shift' => 'Serah terima shift',
         'selisih_serah_terima' => 'Selisih serah terima',
         'batal_gaji' => 'Batal rekap gaji',
+        'sewa_daftar_hitam' => 'Sewa Playbox ke penyewa daftar hitam',
         'modal' => 'Suntikan modal',
         'prive' => 'Prive owner',
         'backup' => 'Backup',
