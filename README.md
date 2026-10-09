@@ -136,7 +136,10 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 
 - POS F&B: jual langsung atau **gabung ke tagihan unit**, scan barcode, batal salah order (stok kembali).
 - Stok per cabang dengan HPP rata-rata, stok masuk, **opname**, mutasi.
-- **Shift kas**: buka / tutup kas, hitung pecahan, selisih kas tercatat; pengeluaran dengan batas & PIN.
+- **Shift kas**: satu laci per cabang, **serah terima** antar kasir (modal tetap ditinggal, sisanya disetor, PIN
+  penerima), selisih kas tercatat; pengeluaran dengan batas & PIN.
+- **Karyawan**: data & PIN, jadwal mingguan, **absen PIN + foto selfie** (terlambat, lama kerja), **rekap gaji**
+  (pokok, upah hadir/jam, bonus target omzet, potongan selisih disetujui owner) & slip gaji.
 - Pembayaran: tunai, QRIS statis (nominal otomatis), transfer, saldo member, campuran.
 - **Bayar sekaligus** beberapa tagihan unit / POS dengan satu struk gabungan (tiap unit tetap tercatat sendiri).
 - **Koreksi harga pokok** stok masuk oleh owner — HPP & laba penjualan sejak itu dihitung ulang.
@@ -344,6 +347,7 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/tv-agent-api.md](docs/tv-agent-api.md) | Kontrak API server ↔ TV Agent |
 | [docs/pc-agent.md](docs/pc-agent.md) | Rental PC & kontrak agen kiosk Windows |
 | [docs/analisa-pintar.md](docs/analisa-pintar.md) | Aturan Analisa Pintar (skor risiko kasir, keuangan, operasional, stok) |
+| [docs/karyawan.md](docs/karyawan.md) | Satu laci & serah terima shift, data karyawan, jadwal & absensi (PIN + selfie), rekap gaji & bonus |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |
 | [docs/desain/README.md](docs/desain/README.md) | Desain Stitch (acuan semua tampilan) |
