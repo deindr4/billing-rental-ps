@@ -81,7 +81,7 @@ final class BatasLogin
 
     public static function pesan(int $detik): string
     {
-        return 'Terlalu banyak percobaan login gagal. Coba lagi dalam '.max(1, (int) ceil($detik / 60)).' menit.';
+        return __('Terlalu banyak percobaan login gagal. Coba lagi dalam :n menit.', ['n' => max(1, (int) ceil($detik / 60))]);
     }
 
     private static function kunci(Request $r): string

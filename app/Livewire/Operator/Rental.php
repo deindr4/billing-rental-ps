@@ -105,7 +105,7 @@ class Rental extends Component
         }
 
         if (! str_starts_with($perintah, 'volume_')) {
-            $this->success(TvRemoteService::PERINTAH[$perintah].' dikirim');
+            $this->success(__(':perintah dikirim', ['perintah' => __(TvRemoteService::PERINTAH[$perintah])]));
         }
     }
 
@@ -114,7 +114,7 @@ class Rental extends Component
     {
         $this->aksiPc($unitId, function (PerangkatTv $pc, TvRemoteService $remote) {
             $menit = $remote->izinTaskManager($pc, auth()->user());
-            $this->success("Task Manager di {$pc->unit?->nama} terbuka {$menit} menit");
+            $this->success(__('Task Manager di :unit terbuka :menit menit', ['unit' => $pc->unit?->nama, 'menit' => $menit]));
         });
     }
 
@@ -123,7 +123,9 @@ class Rental extends Component
     {
         $this->aksiPc($unitId, function (PerangkatTv $pc, TvRemoteService $remote) {
             $lewat = $remote->bangunkanPc($pc, auth()->user());
-            $this->success('Perintah nyala dikirim'.($lewat === 'server' ? '' : " lewat {$lewat}").'. Tunggu ±1 menit.');
+            $this->success($lewat === 'server'
+                ? __('Perintah nyala dikirim. Tunggu ±1 menit.')
+                : __('Perintah nyala dikirim lewat :pc. Tunggu ±1 menit.', ['pc' => $lewat]));
         });
     }
 
@@ -207,7 +209,7 @@ class Rental extends Component
             $unit->update(['status' => Unit::STATUS_KOSONG]);
         }
 
-        $this->success("{$unit->nama} siap dipakai");
+        $this->success(__(':unit siap dipakai', ['unit' => $unit->nama]));
         $this->dispatch('sesi-berubah');
     }
 

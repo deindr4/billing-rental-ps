@@ -27,8 +27,8 @@ class Login extends Component
             'login' => 'required|string',
             'password' => 'required|string',
         ], [
-            'login.required' => 'Email atau username wajib diisi.',
-            'password.required' => 'Password wajib diisi.',
+            'login.required' => __('Email atau username wajib diisi.'),
+            'password.required' => __('Password wajib diisi.'),
         ]);
 
         // IP publik: 3x gagal -> diblokir 15 menit (localhost & LAN dikecualikan, lihat BatasLogin)
@@ -43,7 +43,7 @@ class Login extends Component
 
         if (RateLimiter::tooManyAttempts($key, 5)) {
             $detik = RateLimiter::availableIn($key);
-            $this->addError('login', "Terlalu banyak percobaan. Coba lagi dalam {$detik} detik.");
+            $this->addError('login', __('Terlalu banyak percobaan. Coba lagi dalam :n detik.', ['n' => $detik]));
 
             return;
         }
@@ -61,7 +61,7 @@ class Login extends Component
             BatasLogin::gagal(request());
 
             $detik = BatasLogin::sisaBlokir(request());
-            $this->addError('login', $detik ? BatasLogin::pesan($detik) : 'Email/username atau password salah.');
+            $this->addError('login', $detik ? BatasLogin::pesan($detik) : __('Email/username atau password salah.'));
 
             return;
         }

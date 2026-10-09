@@ -138,12 +138,12 @@ document.addEventListener('livewire:init', () => {
     // Pelanggan menekan "Panggil Kasir" di TV: bunyi + notifikasi
     window.Livewire.on('ui:panggil-kasir', ({ unit }) => {
         bunyiPanggilan();
-        alert({ icon: 'info', title: `${unit} memanggil kasir`, text: 'Pelanggan meminta bantuan di unit tersebut.' });
+        alert({ icon: 'info', title: window.t(':unit memanggil kasir', { unit }), text: window.t('Pelanggan meminta bantuan di unit tersebut.') });
     });
 
     // Pembayaran sukses: tawarkan pratinjau struk, cetak dari panel pratinjau
     window.Livewire.on('ui:bayar-berhasil', async ({ title, text, transaksiId }) => {
-        const lihat = await confirm({ icon: 'success', title, text, confirmText: 'Lihat struk', cancelText: 'Tutup' });
+        const lihat = await confirm({ icon: 'success', title, text, confirmText: window.t('Lihat struk'), cancelText: window.t('Tutup') });
 
         if (lihat) {
             window.Livewire.dispatch('buka-pratinjau-struk', { transaksiId });
@@ -156,17 +156,17 @@ document.addEventListener('livewire:init', () => {
             preventDefault();
 
             if (status === 419) {
-                alert({ icon: 'warning', title: 'Sesi berakhir', text: 'Silakan muat ulang halaman.' })
+                alert({ icon: 'warning', title: window.t('Sesi berakhir'), text: window.t('Silakan muat ulang halaman.') })
                     .then(() => window.location.reload());
                 return;
             }
 
             if (status === 403) {
-                alert({ icon: 'error', title: 'Akses ditolak', text: 'Anda tidak punya izin untuk aksi ini.' });
+                alert({ icon: 'error', title: window.t('Akses ditolak'), text: window.t('Anda tidak punya izin untuk aksi ini.') });
                 return;
             }
 
-            alert({ icon: 'error', title: 'Terjadi kesalahan', text: `Kode ${status}. Coba lagi.` });
+            alert({ icon: 'error', title: window.t('Terjadi kesalahan'), text: window.t('Kode :kode. Coba lagi.', { kode: status }) });
         });
     });
 });

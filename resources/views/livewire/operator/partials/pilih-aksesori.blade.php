@@ -3,7 +3,7 @@
     Komponen wajib punya method ubahAksesori(string $id, int $ubah).
 --}}
 <div>
-    <div class="label mb-2">Sewa aksesori <span class="normal-case tracking-normal">(opsional)</span></div>
+    <div class="label mb-2">{{ __('Sewa aksesori') }} <span class="normal-case tracking-normal">({{ __('opsional') }})</span></div>
     <div class="space-y-1.5">
         @foreach ($daftar as $a)
             @php
@@ -16,13 +16,13 @@
                     <div class="font-medium truncate">{{ $a->nama }}</div>
                     <div class="text-xs text-muted">
                         <span class="num">{{ $a->labelHarga() }}</span> ·
-                        <span @class(['text-danger' => $sisa === 0])>{{ $sisa === 0 ? 'habis disewa' : "tersedia {$sisa}" }}</span>
+                        <span @class(['text-danger' => $sisa === 0])>{{ $sisa === 0 ? __('habis disewa') : __('tersedia :n', ['n' => $sisa]) }}</span>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5 shrink-0">
-                    <button type="button" wire:click="ubahAksesori('{{ $a->id }}', -1)" class="btn btn-ikon h-8 w-8" @disabled($qty === 0) aria-label="Kurangi">−</button>
+                    <button type="button" wire:click="ubahAksesori('{{ $a->id }}', -1)" class="btn btn-ikon h-8 w-8" @disabled($qty === 0) aria-label="{{ __('Kurangi') }}">−</button>
                     <span class="num w-6 text-center">{{ $qty }}</span>
-                    <button type="button" wire:click="ubahAksesori('{{ $a->id }}', 1)" class="btn btn-ikon h-8 w-8" @disabled($qty >= $sisa) aria-label="Tambah">+</button>
+                    <button type="button" wire:click="ubahAksesori('{{ $a->id }}', 1)" class="btn btn-ikon h-8 w-8" @disabled($qty >= $sisa) aria-label="{{ __('Tambah') }}">+</button>
                 </div>
             </div>
         @endforeach

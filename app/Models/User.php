@@ -36,6 +36,7 @@ class User extends Authenticatable implements FilamentUser
         // is_super_admin sengaja TIDAK fillable: hanya lewat forceFill (php artisan superadmin / installer)
         'is_active',
         'last_login_at',
+        'locale', // bahasa pilihan (App\Support\Bahasa), null = ikut cabang
     ];
 
     protected $hidden = [

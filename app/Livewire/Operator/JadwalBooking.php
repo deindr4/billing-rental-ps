@@ -146,7 +146,7 @@ class JadwalBooking extends Component
 
     public function konfirmasi(string $id): void
     {
-        $this->jalankan(fn (BookingService $s) => $s->konfirmasi(Booking::findOrFail($id), auth()->user()), 'Booking dikonfirmasi');
+        $this->jalankan(fn (BookingService $s) => $s->konfirmasi(Booking::findOrFail($id), auth()->user()), __('Booking dikonfirmasi'));
     }
 
     public function batal(string $id, array $konfirmasi = []): void
@@ -159,12 +159,12 @@ class JadwalBooking extends Component
             return;
         }
 
-        $this->jalankan(fn (BookingService $s) => $s->batal(Booking::findOrFail($id), $alasan, auth()->user()), 'Booking dibatalkan');
+        $this->jalankan(fn (BookingService $s) => $s->batal(Booking::findOrFail($id), $alasan, auth()->user()), __('Booking dibatalkan'));
     }
 
     public function tidakDatang(string $id, array $konfirmasi = []): void
     {
-        $this->jalankan(fn (BookingService $s) => $s->tidakDatang(Booking::findOrFail($id)), 'Ditandai tidak datang');
+        $this->jalankan(fn (BookingService $s) => $s->tidakDatang(Booking::findOrFail($id)), __('Ditandai tidak datang'));
     }
 
     /** Pindahkan booking ke unit lain (misal unit semula masih dipakai / rusak) */
@@ -257,7 +257,7 @@ class JadwalBooking extends Component
         $this->formBuka = false;
         $this->tanggal = $b->mulai_pada->toDateString();
         $this->segarkan();
-        $this->success("Booking {$b->kode} dibuat");
+        $this->success(__('Booking :kode dibuat', ['kode' => $b->kode]));
     }
 
     private function jalankan(callable $aksi, string $pesan): void

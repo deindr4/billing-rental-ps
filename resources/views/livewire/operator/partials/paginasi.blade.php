@@ -1,11 +1,11 @@
-{{-- Paginasi ringkas tampilan daftar. Variabel: $p (LengthAwarePaginator), $satuan (mis. 'unit', 'sewa') --}}
+{{-- Paginasi ringkas tampilan daftar. Variabel: $p (LengthAwarePaginator), $satuan (mis. __('unit'), __('sewa')) --}}
 @if ($p->hasPages())
     <div class="flex flex-wrap items-center justify-between gap-2 mt-3">
         <span class="text-xs text-muted">
-            {{ $p->firstItem() }}–{{ $p->lastItem() }} dari {{ $p->total() }} {{ $satuan }}
+            {{ __(':dari–:sampai dari :total :satuan', ['dari' => $p->firstItem(), 'sampai' => $p->lastItem(), 'total' => $p->total(), 'satuan' => $satuan]) }}
         </span>
         <div class="flex items-center gap-1">
-            <button type="button" wire:click="previousPage" class="btn h-9 px-3 text-sm" @disabled($p->onFirstPage())>‹ Sebelumnya</button>
+            <button type="button" wire:click="previousPage" class="btn h-9 px-3 text-sm" @disabled($p->onFirstPage())>‹ {{ __('Sebelumnya') }}</button>
             @foreach (range(1, $p->lastPage()) as $n)
                 @if ($n === 1 || $n === $p->lastPage() || abs($n - $p->currentPage()) <= 1)
                     <button type="button" wire:click="gotoPage({{ $n }})"
@@ -14,7 +14,7 @@
                     <span class="px-1 text-muted">…</span>
                 @endif
             @endforeach
-            <button type="button" wire:click="nextPage" class="btn h-9 px-3 text-sm" @disabled(! $p->hasMorePages())>Berikutnya ›</button>
+            <button type="button" wire:click="nextPage" class="btn h-9 px-3 text-sm" @disabled(! $p->hasMorePages())>{{ __('Berikutnya') }} ›</button>
         </div>
     </div>
 @endif

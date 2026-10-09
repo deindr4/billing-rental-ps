@@ -101,12 +101,11 @@ class TutupKas extends Component
 
         $this->flashAlert(
             'Shift ditutup',
-            sprintf(
-                'Kas fisik Rp %s · Selisih Rp %s · Disetor Rp %s',
-                number_format($shift->kas_fisik, 0, ',', '.'),
-                number_format($shift->selisih, 0, ',', '.'),
-                number_format((int) $shift->setoran, 0, ',', '.')
-            ),
+            __('Kas fisik Rp :fisik · Selisih Rp :selisih · Disetor Rp :setor', [
+                'fisik' => number_format($shift->kas_fisik, 0, ',', '.'),
+                'selisih' => number_format($shift->selisih, 0, ',', '.'),
+                'setor' => number_format((int) $shift->setoran, 0, ',', '.'),
+            ]),
             'success'
         );
 

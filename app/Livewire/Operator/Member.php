@@ -215,7 +215,7 @@ class Member extends Component
             } else {
                 $tenancy = app(Tenancy::class);
                 $member = $service->daftar($tenancy->tenantId(), $tenancy->cabangId(), $data);
-                $this->success("Member {$member->kode} terdaftar");
+                $this->success(__('Member :kode terdaftar', ['kode' => $member->kode]));
             }
         } catch (BillingException $e) {
             $this->addError('form.telepon', $e->getMessage());
@@ -286,10 +286,10 @@ class Member extends Component
         $this->topupBuka = false;
         unset($this->terpilih, $this->riwayat);
 
-        $teks = 'Saldo sekarang Rp '.number_format($this->terpilih->saldo, 0, ',', '.')
-            .($trx->kembalian > 0 ? ' · Kembalian Rp '.number_format($trx->kembalian, 0, ',', '.') : '');
+        $teks = __('Saldo sekarang :nominal', ['nominal' => 'Rp '.number_format($this->terpilih->saldo, 0, ',', '.')])
+            .($trx->kembalian > 0 ? ' · '.__('Kembalian :nominal', ['nominal' => 'Rp '.number_format($trx->kembalian, 0, ',', '.')]) : '');
 
-        $this->dispatch('ui:bayar-berhasil', title: 'Top up berhasil', text: $teks, transaksiId: $trx->id);
+        $this->dispatch('ui:bayar-berhasil', title: __('Top up berhasil'), text: $teks, transaksiId: $trx->id);
     }
 
     /* ---------------- Koreksi ---------------- */

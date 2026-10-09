@@ -148,8 +148,11 @@ class PlayboxSewa extends Component
     /** Link wa.me berisi ringkasan sewa (dibuka di HP / WA Web kasir) */
     public static function linkWa(SewaPlaybox $s): string
     {
-        $teks = "Halo {$s->penyewa?->nama}, sewa {$s->playbox?->kode} ({$s->nomor}) jatuh tempo "
-            .$s->jatuh_tempo->translatedFormat('l, d F Y \p\u\k\u\l H.i').'. Mohon dikembalikan tepat waktu ya. Terima kasih 🙏';
+        // Pesan ke penyewa memakai bahasa cabang (bukan bahasa kasir)
+        $teks = \App\Support\Bahasa::dengan(\App\Support\Bahasa::cabang($s->cabang_id), fn () => __(
+            'Halo :nama, sewa :kode (:nomor) jatuh tempo :waktu. Mohon dikembalikan tepat waktu ya. Terima kasih 🙏',
+            ['nama' => $s->penyewa?->nama, 'kode' => $s->playbox?->kode, 'nomor' => $s->nomor, 'waktu' => $s->jatuh_tempo->translatedFormat('l, d F Y H.i')]
+        ));
 
         return 'https://wa.me/'.$s->penyewa?->telepon.'?text='.rawurlencode($teks);
     }

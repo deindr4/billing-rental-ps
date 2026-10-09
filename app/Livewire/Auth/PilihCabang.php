@@ -23,7 +23,7 @@ class PilihCabang extends Component
         $cabang = auth()->user()->cabangTersedia()->whereKey($cabangId)->first();
 
         if (! $cabang) {
-            $this->addError('cabang', 'Cabang tidak tersedia untuk akun Anda.');
+            $this->addError('cabang', __('Cabang tidak tersedia untuk akun Anda.'));
 
             return;
         }

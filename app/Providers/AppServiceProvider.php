@@ -42,6 +42,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Terjemahan aplikasi per area (kunci = teks Indonesia): lang/app/{area}/{kode}.json — lihat App\Support\Bahasa
+        foreach (glob(lang_path('app/*'), GLOB_ONLYDIR) ?: [] as $folder) {
+            $this->app['translator']->addJsonPath($folder);
+        }
+        \App\Support\Bahasa::terapkan(\App\Support\Bahasa::bawaan());
+
         // Di belakang Cloudflare / reverse proxy: baca IP asli & skema https dari header X-Forwarded-*
         // TRUSTED_PROXIES boleh berisi kata "cloudflare" (= semua rentang IP Cloudflare), mis. "cloudflare,127.0.0.1"
         if ($proxy = config('billing.proxy_tepercaya')) {

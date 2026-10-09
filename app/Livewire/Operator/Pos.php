@@ -202,7 +202,7 @@ class Pos extends Component
         $this->tambah($produk->id);
         $this->cari = '';
         unset($this->produk);
-        $this->toast($produk->nama.' ditambahkan', 'success');
+        $this->toast(__(':nama ditambahkan', ['nama' => $produk->nama]), 'success');
     }
 
     /* ---------------- Proses ---------------- */
@@ -221,7 +221,7 @@ class Pos extends Component
 
                 $pos->tambahKeTagihan($sesi->transaksi, auth()->user(), $this->keranjang);
 
-                $this->success('Ditambahkan ke tagihan '.$sesi->unit->nama);
+                $this->success(__('Ditambahkan ke tagihan :unit', ['unit' => $sesi->unit->nama]));
                 $this->kosongkan();
                 $this->tujuanUnitId = '';
                 $this->dispatch('sesi-berubah');
@@ -276,7 +276,7 @@ class Pos extends Component
             return;
         }
 
-        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: 'Salah order';
+        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: __('Salah order');
 
         try {
             if ($this->batalButuhPin($item)) {
@@ -291,7 +291,7 @@ class Pos extends Component
             return;
         }
 
-        $this->success("{$qty}× {$item->nama} dibatalkan");
+        $this->success(__(':qty× :nama dibatalkan', ['qty' => $qty, 'nama' => $item->nama]));
         $this->dispatch('sesi-berubah');
     }
 

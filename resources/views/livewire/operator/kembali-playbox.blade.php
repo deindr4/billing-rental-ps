@@ -7,91 +7,91 @@
 
     <div class="mb-4 flex items-end justify-between gap-3">
         <div>
-            <div class="label">Terima kembali · <span class="num">{{ $s->nomor }}</span></div>
+            <div class="label">{{ __('Terima kembali') }} · <span class="num">{{ $s->nomor }}</span></div>
             <h1 class="text-xl font-semibold tracking-tight">{{ $s->playbox->kode }} · {{ $s->penyewa?->nama }}</h1>
-            <p class="text-sm text-muted">{{ $s->labelDurasi() }} · jatuh tempo {{ $s->jatuh_tempo->format('d/m H:i') }}
-                @if ($menitTelat > 0) · <span class="text-danger">telat {{ intdiv($menitTelat, 60) }} j {{ $menitTelat % 60 }} m</span>@endif
+            <p class="text-sm text-muted">{{ $s->labelDurasi() }} · {{ __('jatuh tempo :waktu', ['waktu' => $s->jatuh_tempo->format('d/m H:i')]) }}
+                @if ($menitTelat > 0) · <span class="text-danger">{{ __('telat :j j :m m', ['j' => intdiv($menitTelat, 60), 'm' => $menitTelat % 60]) }}</span>@endif
             </p>
         </div>
-        <a href="{{ route('playbox') }}" wire:navigate class="btn h-9 px-3 text-sm">Kembali</a>
+        <a href="{{ route('playbox') }}" wire:navigate class="btn h-9 px-3 text-sm">{{ __('Kembali') }}</a>
     </div>
 
     @if ($hasil)
         <div class="surface p-5 space-y-3">
-            <div class="text-lg font-semibold text-st-kosong">Playbox diterima kembali</div>
+            <div class="text-lg font-semibold text-st-kosong">{{ __('Playbox diterima kembali') }}</div>
             <dl class="text-sm space-y-1.5">
-                <div class="flex justify-between"><dt class="text-muted">Tagihan denda & ganti rugi</dt><dd><x-rupiah :nilai="$hasil['tagihan']" /></dd></div>
+                <div class="flex justify-between"><dt class="text-muted">{{ __('Tagihan denda & ganti rugi') }}</dt><dd><x-rupiah :nilai="$hasil['tagihan']" /></dd></div>
                 @if ($s->deposit)
-                    <div class="flex justify-between font-semibold text-base"><dt>Deposit dikembalikan ke penyewa</dt><dd><x-rupiah :nilai="$hasil['deposit_kembali']" /></dd></div>
+                    <div class="flex justify-between font-semibold text-base"><dt>{{ __('Deposit dikembalikan ke penyewa') }}</dt><dd><x-rupiah :nilai="$hasil['deposit_kembali']" /></dd></div>
                 @endif
                 @if ($hasil['sisa'] > 0)
-                    <div class="flex justify-between text-danger"><dt>Sisa tagihan (bayar di dialog Pembayaran)</dt><dd><x-rupiah :nilai="$hasil['sisa']" /></dd></div>
+                    <div class="flex justify-between text-danger"><dt>{{ __('Sisa tagihan (bayar di dialog Pembayaran)') }}</dt><dd><x-rupiah :nilai="$hasil['sisa']" /></dd></div>
                 @endif
-                <div class="flex justify-between"><dt class="text-muted">Status unit</dt><dd>{{ \App\Models\Playbox::STATUS[$hasil['status_unit']] ?? $hasil['status_unit'] }}</dd></div>
+                <div class="flex justify-between"><dt class="text-muted">{{ __('Status unit') }}</dt><dd>{{ __(\App\Models\Playbox::STATUS[$hasil['status_unit']] ?? $hasil['status_unit']) }}</dd></div>
             </dl>
-            <p class="text-sm text-muted">Kembalikan juga jaminan: {{ collect($s->jaminan)->map(fn ($j) => \App\Models\SewaPlaybox::JAMINAN[$j['jenis']].($j['keterangan'] ? ' ('.$j['keterangan'].')' : ''))->implode(', ') ?: '-' }}.</p>
+            <p class="text-sm text-muted">{{ __('Kembalikan juga jaminan: :daftar.', ['daftar' => collect($s->jaminan)->map(fn ($j) => __(\App\Models\SewaPlaybox::JAMINAN[$j['jenis']]).($j['keterangan'] ? ' ('.$j['keterangan'].')' : ''))->implode(', ') ?: '-']) }}</p>
             <div class="flex gap-2">
                 @if ($hasil['sisa'] > 0)
-                    <button type="button" wire:click="$dispatch('buka-pembayaran', { transaksiId: '{{ $hasil['transaksi_id'] }}' })" class="btn btn-primary flex-1 h-11">Bayar sisa</button>
+                    <button type="button" wire:click="$dispatch('buka-pembayaran', { transaksiId: '{{ $hasil['transaksi_id'] }}' })" class="btn btn-primary flex-1 h-11">{{ __('Bayar sisa') }}</button>
                 @endif
-                <a href="{{ route('playbox') }}" wire:navigate class="btn flex-1 h-11">Selesai</a>
+                <a href="{{ route('playbox') }}" wire:navigate class="btn flex-1 h-11">{{ __('Selesai') }}</a>
             </div>
         </div>
     @else
         <div class="surface p-4 space-y-4">
             <div>
-                <div class="text-sm font-medium mb-2">Checklist kembali <span class="text-muted font-normal">(dibandingkan saat keluar)</span></div>
+                <div class="text-sm font-medium mb-2">{{ __('Checklist kembali') }} <span class="text-muted font-normal">({{ __('dibandingkan saat keluar') }})</span></div>
                 <div class="space-y-1.5">
                     @foreach ($checklist as $i => $c)
                         <div wire:key="ck-{{ $i }}" @class(['grid grid-cols-12 items-center gap-2 rounded-md px-2 py-1.5', 'bg-danger/10' => $c['kondisi'] !== 'baik'])>
-                            <span class="col-span-4 text-sm truncate">{{ $c['nama'] }} <span class="text-muted">· keluar {{ $c['keluar'] }}</span></span>
-                            <input type="number" min="0" wire:model.live="checklist.{{ $i }}.jumlah" class="input num col-span-2 h-9" title="Jumlah kembali">
+                            <span class="col-span-4 text-sm truncate">{{ $c['nama'] }} <span class="text-muted">· {{ __('keluar :n', ['n' => $c['keluar']]) }}</span></span>
+                            <input type="number" min="0" wire:model.live="checklist.{{ $i }}.jumlah" class="input num col-span-2 h-9" title="{{ __('Jumlah kembali') }}">
                             <select wire:model.live="checklist.{{ $i }}.kondisi" class="input col-span-3 h-9">
-                                @foreach (\App\Models\SewaPlaybox::KONDISI as $k => $l)<option value="{{ $k }}">{{ $l }}</option>@endforeach
+                                @foreach (\App\Models\SewaPlaybox::KONDISI as $k => $l)<option value="{{ $k }}">{{ __($l) }}</option>@endforeach
                             </select>
-                            <input type="number" min="0" step="1000" wire:model.live="checklist.{{ $i }}.biaya" class="input num col-span-3 h-9" title="Biaya ganti" @disabled($c['kondisi'] === 'baik')>
+                            <input type="number" min="0" step="1000" wire:model.live="checklist.{{ $i }}.biaya" class="input num col-span-3 h-9" title="{{ __('Biaya ganti') }}" @disabled($c['kondisi'] === 'baik')>
                         </div>
                     @endforeach
                 </div>
-                <p class="text-xs text-muted mt-1">Biaya bawaan dari harga ganti kelengkapan (Admin → Playbox), bisa diubah.</p>
+                <p class="text-xs text-muted mt-1">{{ __('Biaya bawaan dari harga ganti kelengkapan (Admin → Playbox), bisa diubah.') }}</p>
             </div>
 
             <div>
-                <label class="block text-sm mb-1.5">Foto kondisi saat kembali</label>
-                <x-input-foto wire:model="fotoKondisi" :nilai="$fotoKondisi" kamera="environment" multiple label="Foto kondisi unit" />
+                <label class="block text-sm mb-1.5">{{ __('Foto kondisi saat kembali') }}</label>
+                <x-input-foto wire:model="fotoKondisi" :nilai="$fotoKondisi" kamera="environment" multiple :label="__('Foto kondisi unit')" />
             </div>
 
             <div class="grid gap-3 sm:grid-cols-2">
                 <div>
-                    <label class="block text-sm mb-1.5">Denda telat {{ $menitTelat > 0 ? '(otomatis)' : '' }}</label>
+                    <label class="block text-sm mb-1.5">{{ __('Denda telat') }} {{ $menitTelat > 0 ? '('.__('otomatis').')' : '' }}</label>
                     <input type="number" min="0" step="1000" wire:model.live="denda" class="input num">
                 </div>
                 <div>
-                    <label class="block text-sm mb-1.5">Catatan</label>
+                    <label class="block text-sm mb-1.5">{{ __('Catatan') }}</label>
                     <input type="text" wire:model="catatan" class="input" maxlength="300">
                 </div>
             </div>
 
             <dl class="rounded-md border border-line px-3 py-2 text-sm space-y-1.5">
-                <div class="flex justify-between"><dt>Tagihan denda & ganti rugi</dt><dd><x-rupiah :nilai="$tagihan" class="font-semibold" /></dd></div>
+                <div class="flex justify-between"><dt>{{ __('Tagihan denda & ganti rugi') }}</dt><dd><x-rupiah :nilai="$tagihan" class="font-semibold" /></dd></div>
                 @if ($s->deposit)
-                    <div class="flex justify-between"><dt class="text-muted">Deposit penyewa</dt><dd><x-rupiah :nilai="$s->deposit" /></dd></div>
-                    <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="potongDeposit"> Potong tagihan dari deposit</label>
-                    <div class="flex justify-between font-semibold"><dt>Deposit dikembalikan</dt><dd><x-rupiah :nilai="$s->deposit - $potong" /></dd></div>
+                    <div class="flex justify-between"><dt class="text-muted">{{ __('Deposit penyewa') }}</dt><dd><x-rupiah :nilai="$s->deposit" /></dd></div>
+                    <label class="flex items-center gap-2"><input type="checkbox" wire:model.live="potongDeposit"> {{ __('Potong tagihan dari deposit') }}</label>
+                    <div class="flex justify-between font-semibold"><dt>{{ __('Deposit dikembalikan') }}</dt><dd><x-rupiah :nilai="$s->deposit - $potong" /></dd></div>
                 @endif
                 @if ($potong > 0 && $tagihan > $potong)
                     <div class="flex items-center justify-between gap-2 text-danger">
-                        <dt>Sisa <x-rupiah :nilai="$tagihan - $potong" /> dibayar</dt>
+                        <dt>{{ __('Sisa') }} <x-rupiah :nilai="$tagihan - $potong" /> {{ __('dibayar') }}</dt>
                         <dd><select wire:model="metodeSisa" class="input h-8 w-32">
-                            <option value="tunai">Tunai</option><option value="qris">QRIS</option><option value="transfer">Transfer</option>
+                            <option value="tunai">{{ __('Tunai') }}</option><option value="qris">QRIS</option><option value="transfer">{{ __('Transfer') }}</option>
                         </select></dd>
                     </div>
                 @endif
             </dl>
 
-            <x-confirm-button action="simpan" title="Terima kembali {{ $s->playbox->kode }}?"
-                              text="Sewa selesai, tagihan dibuat & deposit diselesaikan. Pastikan jaminan dikembalikan ke penyewa."
-                              confirm-text="Ya, terima" class="btn-primary w-full h-11">Terima kembali</x-confirm-button>
+            <x-confirm-button action="simpan" :title="__('Terima kembali :kode?', ['kode' => $s->playbox->kode])"
+                              :text="__('Sewa selesai, tagihan dibuat & deposit diselesaikan. Pastikan jaminan dikembalikan ke penyewa.')"
+                              :confirm-text="__('Ya, terima')" class="btn-primary w-full h-11">{{ __('Terima kembali') }}</x-confirm-button>
         </div>
     @endif
 

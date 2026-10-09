@@ -3,21 +3,21 @@
     <div class="min-w-0">
         <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
             <div class="flex items-center gap-2">
-                <h1 class="text-xl font-semibold">POS</h1>
-                <a href="{{ route('stok') }}" wire:navigate class="btn btn-ghost h-8 px-3 text-sm text-muted">Kelola Stok</a>
+                <h1 class="text-xl font-semibold">{{ __('POS') }}</h1>
+                <a href="{{ route('stok') }}" wire:navigate class="btn btn-ghost h-8 px-3 text-sm text-muted">{{ __('Kelola Stok') }}</a>
             </div>
             <input type="search"
                    wire:model.live.debounce.250ms="cari"
                    wire:keydown.enter.prevent="scan"
                    class="input sm:w-72"
-                   placeholder="Cari / scan barcode lalu Enter"
+                   placeholder="{{ __('Cari / scan barcode lalu Enter') }}"
                    autofocus>
         </div>
 
         {{-- Kategori --}}
         <div class="flex gap-2 overflow-x-auto pb-1 mb-3">
             <button type="button" wire:click="$set('kategoriId', '')"
-                    @class(['btn h-8 px-3 text-sm shrink-0', 'btn-primary' => $kategoriId === ''])>Semua</button>
+                    @class(['btn h-8 px-3 text-sm shrink-0', 'btn-primary' => $kategoriId === ''])>{{ __('Semua') }}</button>
             @foreach ($this->kategori as $k)
                 <button type="button" wire:key="kat-{{ $k->id }}" wire:click="$set('kategoriId', '{{ $k->id }}')"
                         @class(['btn h-8 px-3 text-sm shrink-0', 'btn-primary' => $kategoriId === $k->id])>{{ $k->nama }}</button>
@@ -26,7 +26,7 @@
 
         {{-- Grid produk --}}
         @if ($this->produk->isEmpty())
-            <div class="surface p-8 text-center text-muted">Produk tidak ditemukan.</div>
+            <div class="surface p-8 text-center text-muted">{{ __('Produk tidak ditemukan.') }}</div>
         @else
             <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2">
                 @foreach ($this->produk as $p)
@@ -48,7 +48,7 @@
                                 'text-st-hampir' => ! $habis && $p->stokMenipis(),
                                 'text-muted' => ! $p->stokMenipis(),
                             ])>
-                                {{ $habis ? 'Stok habis' : 'Stok '.$p->sisaStok() }}
+                                {{ $habis ? __('Stok habis') : __('Stok :n', ['n' => $p->sisaStok()]) }}
                             </span>
                         @endif
                     </button>
@@ -60,7 +60,7 @@
     {{-- ============ Kanan: keranjang (desktop) ============ --}}
     <aside class="hidden lg:block">
         <div class="surface p-4 sticky top-18">
-            <h2 class="font-semibold mb-3">Keranjang</h2>
+            <h2 class="font-semibold mb-3">{{ __('Keranjang') }}</h2>
             @include('livewire.operator.partials.keranjang')
         </div>
     </aside>
@@ -71,11 +71,11 @@
             <button type="button" wire:click="$set('keranjangBuka', true)"
                     class="btn btn-primary w-full h-12 justify-between">
                 @if ($this->jumlahItem > 0)
-                    <span>Keranjang · <span class="num">{{ $this->jumlahItem }}</span> item</span>
+                    <span>{{ __('Keranjang · :n item', ['n' => $this->jumlahItem]) }}</span>
                     <x-rupiah :nilai="$this->total" class="font-semibold" />
                 @else
                     {{-- Dari Kelola Sesi: lihat dulu isi tagihan unit --}}
-                    <span>Lihat tagihan {{ $this->sesiTujuan->unit->nama }}</span>
+                    <span>{{ __('Lihat tagihan :unit', ['unit' => $this->sesiTujuan->unit->nama]) }}</span>
                     <x-rupiah :nilai="$this->tagihanTujuan?->total ?? 0" class="font-semibold" />
                 @endif
             </button>
@@ -83,7 +83,7 @@
     @endif
 
     <div class="lg:hidden">
-        <x-sheet wire:model="keranjangBuka" judul="Keranjang">
+        <x-sheet wire:model="keranjangBuka" :judul="__('Keranjang')">
             @include('livewire.operator.partials.keranjang')
         </x-sheet>
     </div>

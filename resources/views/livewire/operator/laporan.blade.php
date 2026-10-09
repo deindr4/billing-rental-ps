@@ -1,7 +1,7 @@
 <div data-rahasia>
     {{-- Judul + periode --}}
     <div class="mb-4">
-        <div class="label">Periode laporan</div>
+        <div class="label">{{ __('Periode laporan') }}</div>
         <h1 class="text-xl font-semibold tracking-tight">
             @if ($dariTgl->isSameDay($sampaiTgl))
                 {{ $dariTgl->translatedFormat('l, d F Y') }}
@@ -18,7 +18,7 @@
                         'btn h-8 px-3 text-xs font-mono uppercase tracking-wider',
                         'btn-primary' => $periode === $kode,
                         'text-muted' => $periode !== $kode,
-                    ])>{{ $nama }}</button>
+                    ])>{{ __($nama) }}</button>
         @endforeach
 
         @if ($periode === 'custom')
@@ -27,7 +27,7 @@
             <input type="date" wire:model.live="sampai" class="input num w-auto h-8">
         @endif
 
-        <span wire:loading class="label ml-2">Memuat...</span>
+        <span wire:loading class="label ml-2">{{ __('Memuat...') }}</span>
     </div>
 
     @include('laporan.isi')

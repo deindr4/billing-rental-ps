@@ -112,8 +112,9 @@ class Absen extends Component
         }
 
         $pesan = $jenis === 'masuk'
-            ? "{$k->nama} masuk {$a->masuk_pada->format('H:i')}".($a->terlambat_menit > 0 ? " · terlambat {$a->terlambat_menit} menit" : '')
-            : "{$k->nama} pulang {$a->pulang_pada->format('H:i')} · kerja ".Absensi::formatMenit($a->menit_kerja);
+            ? __(':nama masuk :jam', ['nama' => $k->nama, 'jam' => $a->masuk_pada->format('H:i')])
+                .($a->terlambat_menit > 0 ? ' · '.__('terlambat :n menit', ['n' => $a->terlambat_menit]) : '')
+            : __(':nama pulang :jam · kerja :lama', ['nama' => $k->nama, 'jam' => $a->pulang_pada->format('H:i'), 'lama' => Absensi::formatMenit($a->menit_kerja)]);
 
         $this->success($pesan);
         $this->reset(['karyawanId', 'pin', 'foto']);

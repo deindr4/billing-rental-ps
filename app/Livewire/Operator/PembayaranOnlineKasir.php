@@ -105,7 +105,7 @@ class PembayaranOnlineKasir extends Component
 
         $this->segarkan();
         $p->status === 'selesai'
-            ? $this->success("Sesi dimulai di {$unit->nama}")
+            ? $this->success(__('Sesi dimulai di :unit', ['unit' => $unit->nama]))
             : $this->alert('Belum berhasil', (string) $p->catatan, 'warning');
         $this->dispatch('sesi-berubah');
     }
@@ -121,7 +121,7 @@ class PembayaranOnlineKasir extends Component
         }
 
         $p = PembayaranOnline::findOrFail($id);
-        $p->update(['status' => 'selesai', 'catatan' => mb_substr(($p->catatan ? $p->catatan.' · ' : '').'Diurus kasir: '.$alasan, 0, 255), 'diproses_pada' => now()]);
+        $p->update(['status' => 'selesai', 'catatan' => mb_substr(($p->catatan ? $p->catatan.' · ' : '').__('Diurus kasir: :alasan', ['alasan' => $alasan]), 0, 255), 'diproses_pada' => now()]);
         $this->segarkan();
         $this->success('Ditandai selesai');
     }

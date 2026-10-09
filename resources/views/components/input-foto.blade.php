@@ -5,10 +5,11 @@
     kamera: user (depan) | environment (belakang) | kosong = boleh pilih dari galeri
     lama: path foto privat yang sudah tersimpan (ditampilkan bila belum ada foto baru)
 --}}
-@props(['label' => 'Ambil foto', 'kamera' => null, 'multiple' => false, 'lama' => null, 'nilai' => null])
+@props(['label' => null, 'kamera' => null, 'multiple' => false, 'lama' => null, 'nilai' => null])
 
 @php
     $model = $attributes->wire('model')->value();
+    $label ??= __('Ambil foto');
     $daftar = array_values(array_filter(is_array($nilai) ? $nilai : [$nilai]));
     $bisaLihat = fn ($f) => is_object($f) && method_exists($f, 'isPreviewable') && $f->isPreviewable();
 @endphp
@@ -19,9 +20,9 @@
                    'border-line text-fg hover:border-accent hover:text-accent' => $daftar === []])>
         <x-ikon name="kamera" size="18" />
         <span wire:loading.remove wire:target="{{ $model }}">
-            {{ $daftar === [] ? $label : ($multiple ? count($daftar).' foto · ambil ulang' : 'Ganti foto') }}
+            {{ $daftar === [] ? $label : ($multiple ? __(':n foto · ambil ulang', ['n' => count($daftar)]) : __('Ganti foto')) }}
         </span>
-        <span wire:loading wire:target="{{ $model }}">Mengunggah…</span>
+        <span wire:loading wire:target="{{ $model }}">{{ __('Mengunggah…') }}</span>
         <input type="file" accept="image/*" class="sr-only" wire:model="{{ $model }}"
                @if ($kamera) capture="{{ $kamera }}" @endif @if ($multiple) multiple @endif>
     </label>

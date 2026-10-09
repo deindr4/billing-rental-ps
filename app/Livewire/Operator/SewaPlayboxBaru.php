@@ -233,7 +233,7 @@ class SewaPlayboxBaru extends Component
                 $jaminan[] = ['jenis' => 'barang', 'keterangan' => $this->barangKet, 'foto' => $this->keFile($this->fotoBarang)];
             }
             if ($this->jaminan['deposit']) {
-                $jaminan[] = ['jenis' => 'deposit', 'keterangan' => 'Uang deposit', 'nomor' => ''];
+                $jaminan[] = ['jenis' => 'deposit', 'keterangan' => __('Uang deposit'), 'nomor' => ''];
             }
 
             $sewa = $layanan->sewa($this->unit, $penyewa, auth()->user(), [
@@ -260,7 +260,7 @@ class SewaPlayboxBaru extends Component
         }
 
         $layanan->kirimRingkasan($sewa);
-        $this->flashSuccess("Sewa {$sewa->nomor} dibuat · lanjutkan pembayaran");
+        $this->flashSuccess(__('Sewa :nomor dibuat · lanjutkan pembayaran', ['nomor' => $sewa->nomor]));
 
         return $this->redirectRoute('playbox', ['bayar' => $sewa->transaksi_id], navigate: true);
     }

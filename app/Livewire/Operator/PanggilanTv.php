@@ -38,8 +38,8 @@ class PanggilanTv extends Component
         $booking = Booking::query()->where('sumber', 'online')->where('created_at', '>', $batas)->orderBy('created_at')->get();
 
         foreach ($booking as $b) {
-            $this->dispatch('ui:alert', icon: 'info', title: 'Booking online baru',
-                text: "{$b->nama} · ".$b->mulai_pada->translatedFormat('D d M H:i')." ({$b->kode}). Buka menu Jadwal & Booking.");
+            $this->dispatch('ui:alert', icon: 'info', title: __('Booking online baru'),
+                text: "{$b->nama} · ".$b->mulai_pada->translatedFormat('D d M H:i')." ({$b->kode}). ".__('Buka menu Jadwal & Booking.'));
         }
 
         // Bayar mandiri QRIS di TV: berhasil (info) atau perlu tindakan kasir (peringatan)
@@ -50,9 +50,9 @@ class PanggilanTv extends Component
             $rp = 'Rp '.number_format($p->nominal, 0, ',', '.');
 
             $p->status === 'perlu_tindakan'
-                ? $this->dispatch('ui:alert', icon: 'warning', title: 'Bayar mandiri perlu tindakan',
-                    text: "{$p->unit?->nama} · {$rp}: {$p->catatan} Buka menu Pembayaran online.")
-                : $this->dispatch('ui:toast', icon: 'success', title: "{$p->unit?->nama}: bayar mandiri {$rp}");
+                ? $this->dispatch('ui:alert', icon: 'warning', title: __('Bayar mandiri perlu tindakan'),
+                    text: "{$p->unit?->nama} · {$rp}: {$p->catatan} ".__('Buka menu Pembayaran online.'))
+                : $this->dispatch('ui:toast', icon: 'success', title: __(':unit: bayar mandiri :nominal', ['unit' => $p->unit?->nama, 'nominal' => $rp]));
         }
 
         $this->sejak = max(

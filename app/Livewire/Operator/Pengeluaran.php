@@ -177,7 +177,7 @@ class Pengeluaran extends Component
 
             return;
         } catch (Throwable $e) {
-            $this->addError('foto', 'Foto gagal diproses: '.$e->getMessage());
+            $this->addError('foto', __('Foto gagal diproses: :pesan', ['pesan' => $e->getMessage()]));
 
             return;
         }
@@ -186,7 +186,7 @@ class Pengeluaran extends Component
         $this->tanggal = today()->toDateString();
         unset($this->daftar, $this->plafon, $this->totalHari);
 
-        $this->success("Pengeluaran {$hasil->nomor} tersimpan");
+        $this->success(__('Pengeluaran :nomor tersimpan', ['nomor' => $hasil->nomor]));
         $this->dispatch('transaksi-berubah');
     }
 

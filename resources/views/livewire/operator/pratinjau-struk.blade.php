@@ -1,5 +1,5 @@
 <div>
-    <x-sheet wire:model="buka" judul="Pratinjau Struk">
+    <x-sheet wire:model="buka" :judul="__('Pratinjau Struk')">
         @if ($this->transaksi)
             @php $struk = $this->struk; @endphp
 
@@ -21,14 +21,14 @@
             </div>
 
             <p class="text-xs text-muted text-center mt-3">
-                Kertas {{ $struk['lebar'] }} mm · Cetak lewat aplikasi RawBT ke printer Bluetooth
+                {{ __('Kertas :lebar mm · Cetak lewat aplikasi RawBT ke printer Bluetooth', ['lebar' => $struk['lebar']]) }}
             </p>
 
             <x-slot:footer>
                 <div class="grid grid-cols-3 gap-2">
-                    <button type="button" class="btn" @click="buka = false">Tutup</button>
-                    <a href="{{ route('struk.nota', $this->transaksi->id) }}" target="_blank" class="btn btn-tint tint-biru">Nota A4</a>
-                    <a href="{{ route('struk.thermal', $this->transaksi->id) }}" class="btn btn-primary">Cetak</a>
+                    <button type="button" class="btn" @click="buka = false">{{ __('Tutup') }}</button>
+                    <a href="{{ route('struk.nota', $this->transaksi->id) }}" target="_blank" class="btn btn-tint tint-biru">{{ __('Nota A4') }}</a>
+                    <a href="{{ route('struk.thermal', $this->transaksi->id) }}" class="btn btn-primary">{{ __('Cetak') }}</a>
                 </div>
             </x-slot:footer>
         @endif

@@ -17,16 +17,23 @@
     $menu = \App\Support\MenuOperator::tersedia();
     $menuBawah = \App\Support\MenuOperator::bawah();
     $inisial = collect(explode(' ', $user?->name ?? '?'))->map(fn ($k) => mb_substr($k, 0, 1))->take(2)->implode('');
+
+    $infoShift = match (true) {
+        ! $shiftAktif => __('Shift belum dibuka'),
+        $shiftAktif->user_id !== $user->id => __('Shift :jam · laci :nama', ['jam' => $shiftAktif->dibuka_pada->format('H:i'), 'nama' => $shiftAktif->user?->name]),
+        default => __('Shift :jam', ['jam' => $shiftAktif->dibuka_pada->format('H:i')]),
+    };
 @endphp
 <!DOCTYPE html>
-<html lang="id" data-theme="{{ $temaMode }}" style="--accent: {{ $temaAksen }}; --accent-contrast: {{ $temaKontras }};">
+<html lang="{{ \App\Support\Bahasa::html() }}" data-theme="{{ $temaMode }}" style="--accent: {{ $temaAksen }}; --accent-contrast: {{ $temaKontras }};">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Rental' }} · {{ config('app.name') }}</title>
+    <title>{{ __($title ?? 'Rental') }} · {{ config('app.name') }}</title>
     <x-ikon-aplikasi />
     @include('partials.sembunyi-uang')
+    @include('partials.teks-js')
 
     @vite(['resources/css/operator.css', 'resources/js/operator.js'])
     @livewireStyles
@@ -60,11 +67,11 @@
         {{-- Menu --}}
         <nav class="flex-1 overflow-y-auto px-2 py-3">
             @foreach ($menu as $grup => $items)
-                <div class="label px-3 mt-3 mb-1.5 first:mt-0" x-show="! ciut">{{ $grup }}</div>
+                <div class="label px-3 mt-3 mb-1.5 first:mt-0" x-show="! ciut">{{ __($grup) }}</div>
                 <div class="h-px bg-line mx-2 my-3" x-show="ciut" x-cloak></div>
 
                 @foreach ($items as $item)
-                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ $item['label'] }}"
+                    <a href="{{ route($item['route']) }}" wire:navigate title="{{ __($item['label']) }}"
                        @class([
                            'relative flex items-center gap-3 h-10 px-3 rounded-md text-sm',
                            'bg-surface-2 text-fg font-medium' => $item['aktif'],
@@ -75,20 +82,20 @@
                             <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-full bg-accent"></span>
                         @endif
                         <x-ikon :name="$item['ikon']" size="18" class="shrink-0 {{ $item['warna'] }}" />
-                        <span class="truncate" x-show="! ciut">{{ $item['label'] }}</span>
+                        <span class="truncate" x-show="! ciut">{{ __($item['label']) }}</span>
                     </a>
                 @endforeach
             @endforeach
 
             {{-- Panel admin (owner / supervisor dengan izin admin.akses) --}}
             @if ($bisaAdmin)
-                <div class="label px-3 mt-3 mb-1.5" x-show="! ciut">Pengelolaan</div>
+                <div class="label px-3 mt-3 mb-1.5" x-show="! ciut">{{ __('Pengelolaan') }}</div>
                 <div class="h-px bg-line mx-2 my-3" x-show="ciut" x-cloak></div>
-                <a href="{{ url('/admin') }}" title="Panel Admin"
+                <a href="{{ url('/admin') }}" title="{{ __('Panel Admin') }}"
                    class="flex items-center gap-3 h-10 px-3 rounded-md text-sm text-muted hover:text-fg hover:bg-surface-2"
                    :class="ciut && 'justify-center px-0'">
                     <x-ikon name="admin" size="18" class="shrink-0 text-ik-indigo" />
-                    <span class="truncate" x-show="! ciut">Panel Admin</span>
+                    <span class="truncate" x-show="! ciut">{{ __('Panel Admin') }}</span>
                 </a>
             @endif
         </nav>
@@ -104,32 +111,33 @@
                     </span>
                     <span class="min-w-0 flex-1" x-show="! ciut">
                         <span class="block text-sm font-medium truncate">{{ $user?->name }}</span>
-                        <span class="block label truncate">
-                            {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i').($shiftAktif->user_id !== $user->id ? ' · laci '.$shiftAktif->user?->name : '') : 'Shift belum dibuka' }}
-                        </span>
+                        <span class="block label truncate">{{ $infoShift }}</span>
                     </span>
                     <x-ikon name="chevron" size="16" class="text-muted shrink-0" x-show="! ciut" />
                 </button>
 
                 <div x-show="menuUser" x-transition.opacity.duration.150ms x-cloak
-                     class="surface absolute bottom-full left-0 mb-2 w-56 p-1 shadow-xl z-40">
+                     class="surface absolute bottom-full left-0 mb-2 w-60 p-1 shadow-xl z-40">
                     @if ($shiftAktif)
                         <a href="{{ route('shift.serah') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
-                            <x-ikon name="member" size="16" class="text-ik-teal" /> Serah Terima (ganti kasir)
+                            <x-ikon name="member" size="16" class="text-ik-teal" /> {{ __('Serah Terima (ganti kasir)') }}
                         </a>
                         <a href="{{ route('shift.tutup') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
-                            <x-ikon name="kas" size="16" class="text-ik-kuning" /> Tutup Kas
+                            <x-ikon name="kas" size="16" class="text-ik-kuning" /> {{ __('Tutup Kas') }}
                         </a>
                     @endif
                     @if ($bisaGantiCabang)
                         <a href="{{ route('pilih-cabang') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
-                            <x-ikon name="cabang" size="16" class="text-ik-biru" /> Ganti Cabang
+                            <x-ikon name="cabang" size="16" class="text-ik-biru" /> {{ __('Ganti Cabang') }}
                         </a>
                     @endif
+                    <div class="px-3 py-2">
+                        @include('partials.pilih-bahasa', ['id' => 'sidebar', 'kelas' => 'input h-8 text-sm py-0 flex-1'])
+                    </div>
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="w-full flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm text-danger">
-                            <x-ikon name="keluar" size="16" /> Keluar
+                            <x-ikon name="keluar" size="16" /> {{ __('Keluar') }}
                         </button>
                     </form>
                 </div>
@@ -144,7 +152,7 @@
         <header class="sticky top-0 z-30 border-b border-line bg-surface/95 backdrop-blur">
             <div class="h-16 px-4 lg:px-6 flex items-center gap-4">
                 {{-- Ciutkan sidebar (desktop) --}}
-                <button type="button" class="hidden lg:inline-flex btn btn-ghost btn-ikon text-muted" @click="ubahCiut()" title="Ciutkan / lebarkan menu">
+                <button type="button" class="hidden lg:inline-flex btn btn-ghost btn-ikon text-muted" @click="ubahCiut()" title="{{ __('Ciutkan / lebarkan menu') }}">
                     <x-ikon name="sidebar" size="18" />
                 </button>
 
@@ -152,7 +160,7 @@
                 <div class="lg:hidden min-w-0">
                     <div class="font-semibold leading-tight truncate">{{ $cabangAktif?->nama ?? config('app.name') }}</div>
                     <div class="label truncate">
-                        {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i').' · laci '.($shiftAktif->user?->name ?? $user->name) : 'Shift belum dibuka' }}
+                        {{ $shiftAktif ? __('Shift :jam · laci :nama', ['jam' => $shiftAktif->dibuka_pada->format('H:i'), 'nama' => $shiftAktif->user?->name ?? $user->name]) : __('Shift belum dibuka') }}
                     </div>
                 </div>
 
@@ -170,7 +178,7 @@
                          init() {
                              const f = () => {
                                  const now = window.jamServer ? window.jamServer.sekarang() : Date.now();
-                                 this.teks = new Date(now).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                                 this.teks = new Date(now).toLocaleTimeString(@js(\App\Support\Bahasa::html()), { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
                              };
                              f();
                              setInterval(f, 1000);
@@ -180,13 +188,13 @@
                             x-data="{ tutup: document.documentElement.classList.contains('sembunyi-uang') }"
                             @sembunyi-uang.window="tutup = $event.detail"
                             @click="ubahSembunyiUang()"
-                            :title="tutup ? 'Tampilkan nominal' : 'Sembunyikan nominal (untuk foto layar)'"
-                            aria-label="Sembunyikan / tampilkan nominal">
+                            :title="tutup ? @js(__('Tampilkan nominal')) : @js(__('Sembunyikan nominal (untuk foto layar)'))"
+                            aria-label="{{ __('Sembunyikan / tampilkan nominal') }}">
                         <x-ikon name="mata" size="18" x-show="! tutup" />
                         <x-ikon name="mata-tutup" size="18" x-show="tutup" x-cloak />
                     </button>
                     <span class="hidden sm:inline-flex items-center gap-1.5 label">
-                        <span class="dot text-st-kosong"></span> Online
+                        <span class="dot text-st-kosong"></span> {{ __('Online') }}
                     </span>
                     <span class="num font-semibold text-lg" x-text="teks"></span>
                     @if ($zona)
@@ -215,12 +223,12 @@
                    'text-muted' => ! $item['aktif'],
                ])>
                 <x-ikon :name="$item['ikon']" size="20" class="{{ $item['warna'] }}" />
-                {{ $item['label'] }}
+                {{ __($item['label']) }}
             </a>
         @endforeach
         <button type="button" @click="lainnya = true" class="flex flex-col items-center gap-1 py-2 text-[11px] text-muted">
             <x-ikon name="lainnya" size="20" />
-            Lainnya
+            {{ __('Lainnya') }}
         </button>
     </div>
 </nav>
@@ -243,14 +251,14 @@
                 <div class="font-semibold">{{ $user?->name }}</div>
                 <div class="label">{{ $cabangAktif?->nama }}</div>
             </div>
-            <button type="button" class="btn btn-ghost btn-ikon text-muted" @click="lainnya = false" aria-label="Tutup">
+            <button type="button" class="btn btn-ghost btn-ikon text-muted" @click="lainnya = false" aria-label="{{ __('Tutup') }}">
                 <x-ikon name="tutup" size="18" />
             </button>
         </div>
 
         <div class="p-3">
             @foreach ($menu as $grup => $items)
-                <div class="label px-2 mt-3 mb-1.5 first:mt-0">{{ $grup }}</div>
+                <div class="label px-2 mt-3 mb-1.5 first:mt-0">{{ __($grup) }}</div>
                 <div class="grid grid-cols-3 gap-2">
                     @foreach ($items as $item)
                         <a href="{{ route($item['route']) }}" wire:navigate @click="lainnya = false"
@@ -259,36 +267,39 @@
                                'text-accent border-accent' => $item['aktif'],
                            ])>
                             <x-ikon :name="$item['ikon']" size="20" class="{{ $item['warna'] }}" />
-                            {{ $item['label'] }}
+                            {{ __($item['label']) }}
                         </a>
                     @endforeach
                 </div>
             @endforeach
 
-            <div class="label px-2 mt-4 mb-1.5">Akun</div>
+            <div class="label px-2 mt-4 mb-1.5">{{ __('Akun') }}</div>
             <div class="kartu divide-y divide-line">
                 @if ($bisaAdmin)
                     <a href="{{ url('/admin') }}" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="admin" size="18" class="text-ik-indigo" /> Panel Admin
+                        <x-ikon name="admin" size="18" class="text-ik-indigo" /> {{ __('Panel Admin') }}
                     </a>
                 @endif
                 @if ($shiftAktif)
                     <a href="{{ route('shift.serah') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="member" size="18" class="text-ik-teal" /> Serah Terima (ganti kasir)
+                        <x-ikon name="member" size="18" class="text-ik-teal" /> {{ __('Serah Terima (ganti kasir)') }}
                     </a>
                     <a href="{{ route('shift.tutup') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="kas" size="18" class="text-ik-kuning" /> Tutup Kas
+                        <x-ikon name="kas" size="18" class="text-ik-kuning" /> {{ __('Tutup Kas') }}
                     </a>
                 @endif
                 @if ($bisaGantiCabang)
                     <a href="{{ route('pilih-cabang') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
-                        <x-ikon name="cabang" size="18" class="text-ik-biru" /> Ganti Cabang
+                        <x-ikon name="cabang" size="18" class="text-ik-biru" /> {{ __('Ganti Cabang') }}
                     </a>
                 @endif
+                <div class="px-3 py-3">
+                    @include('partials.pilih-bahasa', ['id' => 'hp', 'kelas' => 'input h-9 text-sm py-0 flex-1'])
+                </div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit" class="w-full flex items-center gap-3 px-3 py-3 text-sm text-danger">
-                        <x-ikon name="keluar" size="18" /> Keluar
+                        <x-ikon name="keluar" size="18" /> {{ __('Keluar') }}
                     </button>
                 </form>
             </div>

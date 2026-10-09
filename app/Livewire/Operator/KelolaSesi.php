@@ -177,7 +177,7 @@ class KelolaSesi extends Component
 
         $this->jalankan(
             fn () => $this->billing()->tambahWaktu($this->sesi, auth()->user(), $menit, $this->gratis, $alasan),
-            "Waktu ditambah {$menit} menit"
+            __('Waktu ditambah :n menit', ['n' => $menit])
         );
     }
 
@@ -227,7 +227,7 @@ class KelolaSesi extends Component
 
         if ($this->jalankan(
             fn () => $this->billing()->bonusWaktu($this->sesi, auth()->user(), $menit, $alasan),
-            $paket ? "Bonus {$menit} menit: waktu selesai diundur" : "Bonus {$menit} menit: tidak ditagih"
+            $paket ? __('Bonus :n menit: waktu selesai diundur', ['n' => $menit]) : __('Bonus :n menit: tidak ditagih', ['n' => $menit])
         )) {
             $this->bonusAlasan = '';
             $this->bonusPin = '';
@@ -236,12 +236,12 @@ class KelolaSesi extends Component
 
     public function pause(): void
     {
-        $this->jalankan(fn () => $this->billing()->pause($this->sesi, auth()->user()), 'Sesi dijeda');
+        $this->jalankan(fn () => $this->billing()->pause($this->sesi, auth()->user()), __('Sesi dijeda'));
     }
 
     public function resume(): void
     {
-        $this->jalankan(fn () => $this->billing()->resume($this->sesi, auth()->user()), 'Sesi dilanjutkan');
+        $this->jalankan(fn () => $this->billing()->resume($this->sesi, auth()->user()), __('Sesi dilanjutkan'));
     }
 
     public function pindah(): void
@@ -265,7 +265,7 @@ class KelolaSesi extends Component
 
         $this->jalankan(
             fn () => $this->billing()->pindahUnit($this->sesi, $tujuan, auth()->user(), trim($this->alasanPindah), $this->unitLamaServis),
-            "Sesi dipindah ke {$tujuan->nama}"
+            __('Sesi dipindah ke :unit', ['unit' => $tujuan->nama])
         );
     }
 
@@ -276,7 +276,7 @@ class KelolaSesi extends Component
 
         $berhasil = $this->jalankan(
             fn () => $this->billing()->selesai($this->sesi, auth()->user()),
-            'Sesi selesai',
+            __('Sesi selesai'),
             tutup: true
         );
 
@@ -335,7 +335,7 @@ class KelolaSesi extends Component
                 $a = $this->daftarAksesori->firstWhere('id', $id) ?? throw new BillingException('Aksesori tidak ditemukan.');
                 app(AksesoriService::class)->sewa($this->sesi, $a, (int) $qty, auth()->user());
             }
-        }, 'Aksesori ditambahkan ke tagihan');
+        }, __('Aksesori ditambahkan ke tagihan'));
     }
 
     /** Dikembalikan sebelum selesai: per jam berhenti dihitung sekarang */
@@ -344,7 +344,7 @@ class KelolaSesi extends Component
         $sewa = $this->aksesoriSesi->firstWhere('id', $id);
 
         if ($sewa) {
-            $this->jalankan(fn () => app(AksesoriService::class)->kembalikan($sewa, auth()->user()), 'Aksesori dikembalikan');
+            $this->jalankan(fn () => app(AksesoriService::class)->kembalikan($sewa, auth()->user()), __('Aksesori dikembalikan'));
         }
     }
 
@@ -354,7 +354,7 @@ class KelolaSesi extends Component
         $sewa = $this->aksesoriSesi->firstWhere('id', $id);
 
         if ($sewa) {
-            $this->jalankan(fn () => app(AksesoriService::class)->batal($sewa, auth()->user()), 'Sewa aksesori dibatalkan');
+            $this->jalankan(fn () => app(AksesoriService::class)->batal($sewa, auth()->user()), __('Sewa aksesori dibatalkan'));
         }
     }
 
@@ -421,7 +421,7 @@ class KelolaSesi extends Component
             return;
         }
 
-        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: 'Salah input';
+        $alasan = trim((string) ($konfirmasi['reason'] ?? '')) ?: __('Salah input');
 
         if ($riwayat['butuhPin']) {
             try {
@@ -437,7 +437,7 @@ class KelolaSesi extends Component
 
         $this->jalankan(
             fn () => $this->billing()->batalTambahWaktu($this->sesi, $logId, auth()->user(), $alasan),
-            "Tambah waktu {$riwayat['menit']} menit dibatalkan"
+            __('Tambah waktu :n menit dibatalkan', ['n' => $riwayat['menit']])
         );
     }
 
@@ -485,7 +485,7 @@ class KelolaSesi extends Component
 
         $this->jalankan(
             fn () => $this->billing()->batalSesi($this->sesi, auth()->user(), $alasan),
-            "Sesi {$unit} dibatalkan, unit kosong & TV terkunci",
+            __('Sesi :unit dibatalkan, unit kosong & TV terkunci', ['unit' => $unit]),
             tutup: true
         );
     }

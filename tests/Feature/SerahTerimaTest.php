@@ -160,7 +160,7 @@ class SerahTerimaTest extends TestCase
 
         // Laporan: setoran Rp8.000, penerima Budi, Andi ditawari keluar
         $this->actingAs($andi)->get(route('shift.laporan', ['id' => $lama->id]))->assertOk()
-            ->assertSee('Diserahkan ke Budi')->assertSee('Keluar & ganti kasir', false)->assertSee('Rp 8.000');
+            ->assertSee('Diserahkan ke Budi')->assertSee('Keluar & ganti kasir')->assertSee('Rp 8.000');
 
         // Akhir hari: Budi tutup kas, tinggal Rp150.000 untuk besok
         Livewire::actingAs($budi)->test(TutupKas::class)

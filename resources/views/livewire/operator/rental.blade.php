@@ -2,37 +2,37 @@
     {{-- Judul + cari --}}
     <div class="flex flex-wrap items-end justify-between gap-3 mb-4">
         <div>
-            <div class="label">{{ $jenis === 'pc' ? 'Rental PC' : 'Rental PS' }}</div>
-            <h1 class="text-xl font-semibold tracking-tight">Matriks Unit</h1>
+            <div class="label">{{ $jenis === 'pc' ? __('Rental PC') : __('Rental PS') }}</div>
+            <h1 class="text-xl font-semibold tracking-tight">{{ __('Matriks Unit') }}</h1>
         </div>
         <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
             {{-- Pesan ke semua TV & running text promo --}}
-            <button type="button" wire:click="$dispatch('buka-pemberitahuan')" title="Pemberitahuan ke semua TV"
+            <button type="button" wire:click="$dispatch('buka-pemberitahuan')" title="{{ __('Pemberitahuan ke semua TV') }}"
                     class="btn btn-tint tint-pink h-9 px-3 text-sm">
-                <x-ikon name="pengumuman" size="16" /> <span class="hidden min-[420px]:inline">Pemberitahuan</span>
+                <x-ikon name="pengumuman" size="16" /> <span class="hidden min-[420px]:inline">{{ __('Pemberitahuan') }}</span>
             </button>
-            <button type="button" wire:click="$dispatch('buka-running-text')" title="Running text di TV"
+            <button type="button" wire:click="$dispatch('buka-running-text')" title="{{ __('Running text di TV') }}"
                     @class(['btn h-9 px-3 text-sm', 'btn-tint tint-hijau' => $runningText, 'btn-tint tint-teal' => ! $runningText])>
                 @if ($runningText)
                     <span class="titik-w" style="--w: var(--ikon-hijau)"></span>
                 @else
                     <x-ikon name="teks-jalan" size="16" />
                 @endif
-                <span class="hidden min-[420px]:inline">Running text{{ $runningText ? ' · ON' : '' }}</span>
+                <span class="hidden min-[420px]:inline">{{ __('Running text') }}{{ $runningText ? ' · ON' : '' }}</span>
             </button>
             <input type="search" wire:model.live.debounce.300ms="cari"
-                   class="input flex-1 sm:w-64 sm:flex-none" placeholder="Cari unit...">
+                   class="input flex-1 sm:w-64 sm:flex-none" placeholder="{{ __('Cari unit...') }}">
         </div>
     </div>
 
     {{-- Filter status --}}
     @php
         $tab = [
-            'semua' => 'Semua Unit',
-            'kosong' => 'Ready',
-            'main' => 'Terisi',
-            'menunggu_bayar' => 'Menunggu Bayar',
-            'servis' => 'Maintenance',
+            'semua' => __('Semua Unit'),
+            'kosong' => __('Ready'),
+            'main' => __('Terisi'),
+            'menunggu_bayar' => __('Menunggu Bayar'),
+            'servis' => __('Maintenance'),
         ];
         // Warna titik = warna status unit di kartu
         $warnaTab = [
@@ -60,7 +60,7 @@
     </div>
         {{-- Tampilan kotak / daftar (diingat per login) --}}
         <div class="ml-auto shrink-0 flex rounded-md border border-line overflow-hidden mb-1">
-            @foreach (['kotak' => 'Tampilan kotak', 'daftar' => 'Tampilan daftar'] as $k => $l)
+            @foreach (['kotak' => __('Tampilan kotak'), 'daftar' => __('Tampilan daftar')] as $k => $l)
                 <button type="button" wire:click="$set('tampilan', '{{ $k }}')" title="{{ $l }}" aria-label="{{ $l }}"
                         @class(['h-8 w-9 grid place-items-center', 'bg-accent text-[var(--accent-contrast)]' => $tampilan === $k, 'text-muted hover:text-fg' => $tampilan !== $k])>
                     <x-ikon :name="$k" size="16" />
@@ -73,9 +73,9 @@
     @if ($units->isEmpty())
         <div class="kartu p-10 text-center text-muted">
             @if ($jenis === 'pc' && $ringkasan['semua'] === 0)
-                Belum ada unit PC. Buat tipe konsol berjenis <b>PC</b> di Admin → Tipe Konsol, lalu tambahkan unit dengan tipe itu.
+                {{ __('Belum ada unit PC. Buat tipe konsol berjenis PC di Admin → Tipe Konsol, lalu tambahkan unit dengan tipe itu.') }}
             @else
-                Tidak ada unit yang cocok.
+                {{ __('Tidak ada unit yang cocok.') }}
             @endif
         </div>
     @elseif ($tampilan === 'daftar')
@@ -96,7 +96,7 @@
                 </x-baris-unit>
             @endforeach
         </div>
-        @include('livewire.operator.partials.paginasi', ['p' => $units, 'satuan' => 'unit'])
+        @include('livewire.operator.partials.paginasi', ['p' => $units, 'satuan' => __('unit')])
     @else
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             @foreach ($units as $unit)

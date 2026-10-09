@@ -90,7 +90,7 @@ class KirimPemberitahuan extends Component
             : PerangkatTv::aktif()->where('unit_id', $this->unitId)->get();
 
         if ($tujuan->isEmpty()) {
-            $this->error($this->semua ? 'Belum ada TV di cabang ini' : 'Unit ini belum punya TV');
+            $this->error($this->semua ? __('Belum ada TV di cabang ini') : __('Unit ini belum punya TV'));
 
             return;
         }
@@ -107,7 +107,7 @@ class KirimPemberitahuan extends Component
 
         $this->buka = false;
         $this->reset('teks');
-        $this->success("Pemberitahuan tampil di {$n} TV");
+        $this->success(__('Pemberitahuan tampil di :n TV', ['n' => $n]));
     }
 
     private function isi(): array

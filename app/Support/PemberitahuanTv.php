@@ -37,7 +37,8 @@ final class PemberitahuanTv
     {
         $daftar = Pengaturan::ambil('tv.pesan_cepat', null, $cabangId);
 
-        return is_array($daftar) && $daftar !== [] ? array_values($daftar) : self::PESAN_BAWAAN;
+        // Bawaan ikut bahasa aktif; isian admin dipakai apa adanya
+        return is_array($daftar) && $daftar !== [] ? array_values($daftar) : array_map(fn ($p) => __($p), self::PESAN_BAWAAN);
     }
 
     /** Validasi & rapikan isi pemberitahuan sebelum dikirim ke TV */

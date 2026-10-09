@@ -147,7 +147,7 @@ trait PilihMember
             return;
         }
 
-        $this->success("Member {$member->kode} terdaftar");
+        $this->success(__('Member :kode terdaftar', ['kode' => $member->kode]));
         $this->pilihMember($member->id);
     }
 

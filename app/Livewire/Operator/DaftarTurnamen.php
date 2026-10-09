@@ -253,7 +253,7 @@ class DaftarTurnamen extends Component
 
         $this->reset(['pesertaNama', 'pesertaTelepon']);
         $this->segarkan();
-        $this->success($p->nama.' terdaftar');
+        $this->success(__(':nama terdaftar', ['nama' => $p->nama]));
 
         if ($p->status === 'terdaftar') {
             $this->bukaBayar($p->id);
@@ -301,7 +301,7 @@ class DaftarTurnamen extends Component
         $this->bayarId = null;
         $this->bayarBuka = false;
         $this->segarkan();
-        $this->dispatch('ui:bayar-berhasil', title: 'Pendaftaran lunas', text: $trx->kembalian > 0 ? 'Kembalian Rp '.number_format($trx->kembalian, 0, ',', '.') : $p->nama, transaksiId: $trx->id);
+        $this->dispatch('ui:bayar-berhasil', title: __('Pendaftaran lunas'), text: $trx->kembalian > 0 ? __('Kembalian :nominal', ['nominal' => 'Rp '.number_format($trx->kembalian, 0, ',', '.')]) : $p->nama, transaksiId: $trx->id);
     }
 
     public function hapusPeserta(string $id, TurnamenService $service): void

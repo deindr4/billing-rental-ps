@@ -265,7 +265,7 @@ class MulaiSesi extends Component
         }
 
         $this->buka = false;
-        $this->success('Sesi dimulai di '.$this->unit->nama);
+        $this->success(__('Sesi dimulai di :unit', ['unit' => $this->unit->nama]));
         $this->dispatch('sesi-berubah');
     }
 

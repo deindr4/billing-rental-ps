@@ -99,7 +99,7 @@ class DaftarMaintenance extends Component
             'unit_id' => $unitId ?? (string) $aset?->unit_id,
             'aset_id' => (string) $aset?->id,
             'jenis' => $aset ? 'servis_rutin' : 'perbaikan',
-            'judul' => $aset ? 'Servis berkala '.$aset->nama : '',
+            'judul' => $aset ? __('Servis berkala :aset', ['aset' => $aset->nama]) : '',
             'deskripsi' => '',
             'vendor' => '',
             'dijadwalkan_pada' => today()->toDateString(),

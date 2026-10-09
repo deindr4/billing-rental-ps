@@ -14,14 +14,16 @@
 
     Method Livewire menerima parameter tambahan terakhir berisi hasil konfirmasi:
     public function batalkanTransaksi(string $id, array $confirm = []) { $confirm['reason'], $confirm['pin'] }
+
+    Teks diterjemahkan oleh pemanggil: :title="__('Batalkan :nomor?', ['nomor' => $x])" (bawaan: Yakin? / Ya, lanjutkan)
 --}}
 
 @props([
     'action',
     'params' => [],
-    'title' => 'Yakin?',
+    'title' => null,
     'text' => '',
-    'confirmText' => 'Ya, lanjutkan',
+    'confirmText' => null,
     'danger' => false,
     'pin' => false,
     'reason' => false,
@@ -33,9 +35,9 @@
     x-data
     x-on:click="
         const result = await $confirm(@js([
-            'title' => $title,
+            'title' => $title ?? __('Yakin?'),
             'text' => $text,
-            'confirmText' => $confirmText,
+            'confirmText' => $confirmText ?? __('Ya, lanjutkan'),
             'danger' => (bool) $danger,
             'pin' => (bool) $pin,
             'reason' => (bool) $reason,

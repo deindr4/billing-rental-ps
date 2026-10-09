@@ -3,6 +3,7 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\Login;
+use App\Http\Middleware\AturBahasa;
 use App\Http\Middleware\HeaderKeamanan;
 use App\Http\Middleware\JagaHakCipta;
 use App\Http\Middleware\SetTenancy;
@@ -82,6 +83,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                AturBahasa::class,
                 HeaderKeamanan::class,
                 JagaHakCipta::class,
             ])

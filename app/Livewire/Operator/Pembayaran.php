@@ -192,7 +192,7 @@ class Pembayaran extends Component
 
         $this->poinDitukar = null;
         $this->segarkanTagihan();
-        $this->success('Potongan poin Rp '.number_format($nilai, 0, ',', '.'));
+        $this->success(__('Potongan poin :nominal', ['nominal' => 'Rp '.number_format($nilai, 0, ',', '.')]));
     }
 
     public function tukarStamp(): void
@@ -206,7 +206,7 @@ class Pembayaran extends Component
         }
 
         $this->segarkanTagihan();
-        $this->success('Potongan stamp Rp '.number_format($nilai, 0, ',', '.'));
+        $this->success(__('Potongan stamp :nominal', ['nominal' => 'Rp '.number_format($nilai, 0, ',', '.')]));
     }
 
     public function batalTukar(string $diskonId): void
@@ -375,7 +375,7 @@ class Pembayaran extends Component
 
         foreach ($this->baris as $i => $b) {
             if ($b['metode'] === 'tunai' && (int) ($b['diterima'] ?? 0) < (int) $b['jumlah']) {
-                $this->addError("baris.$i.diterima", 'Uang diterima kurang dari nominal tunai.');
+                $this->addError("baris.$i.diterima", __('Uang diterima kurang dari nominal tunai.'));
 
                 return;
             }
@@ -416,11 +416,11 @@ class Pembayaran extends Component
         $this->dispatch('sesi-berubah');
 
         $teks = $kembalian > 0
-            ? 'Kembalian: Rp '.number_format($kembalian, 0, ',', '.')
-            : 'Tanpa kembalian.';
+            ? __('Kembalian: :nominal', ['nominal' => 'Rp '.number_format($kembalian, 0, ',', '.')])
+            : __('Tanpa kembalian.');
 
         // Dialog sukses dengan tombol lihat struk (pratinjau dulu, cetak manual)
-        $this->dispatch('ui:bayar-berhasil', title: 'Pembayaran berhasil', text: $teks, transaksiId: $trx->id);
+        $this->dispatch('ui:bayar-berhasil', title: __('Pembayaran berhasil'), text: $teks, transaksiId: $trx->id);
     }
 
     private function barisBaru(string $metode, ?int $jumlah): array

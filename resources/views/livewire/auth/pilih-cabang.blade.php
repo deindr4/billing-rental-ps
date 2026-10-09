@@ -1,8 +1,8 @@
 <div class="min-h-screen grid place-items-center p-4">
     <div class="w-full max-w-md">
         <div class="mb-6">
-            <h1 class="text-xl font-semibold">Pilih Cabang</h1>
-            <p class="text-sm text-muted">Halo {{ auth()->user()->name }}, pilih cabang yang akan dibuka.</p>
+            <h1 class="text-xl font-semibold">{{ __('Pilih Cabang') }}</h1>
+            <p class="text-sm text-muted">{{ __('Halo :nama, pilih cabang yang akan dibuka.', ['nama' => auth()->user()->name]) }}</p>
         </div>
 
         @error('cabang')
@@ -26,7 +26,7 @@
 
         <form method="POST" action="{{ route('logout') }}" class="mt-6">
             @csrf
-            <button type="submit" class="btn btn-ghost w-full text-muted">Keluar</button>
+            <button type="submit" class="btn btn-ghost w-full text-muted">{{ __('Keluar') }}</button>
         </form>
     </div>
 </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AturBahasa;
 use App\Http\Middleware\AutentikasiTv;
 use App\Http\Middleware\EnsureShiftAktif;
 use App\Http\Middleware\HeaderKeamanan;
@@ -24,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'shift' => EnsureShiftAktif::class,
             'tv' => AutentikasiTv::class,
         ]);
+        $middleware->appendToGroup('web', AturBahasa::class);
         $middleware->appendToGroup('web', HeaderKeamanan::class);
         $middleware->appendToGroup('web', JagaHakCipta::class);
     })

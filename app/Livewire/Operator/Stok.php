@@ -159,8 +159,8 @@ class Stok extends Component
         unset($this->daftarProduk);
         $this->alert(
             'Harga pokok dikoreksi',
-            'HPP rata-rata Rp '.number_format($hasil['hpp_lama'], 0, ',', '.').' → Rp '.number_format($hasil['hpp_baru'], 0, ',', '.')
-                .($hasil['item'] > 0 ? " · {$hasil['item']} penjualan ikut diperbaiki." : ''),
+            __('HPP rata-rata :lama → :baru', ['lama' => 'Rp '.number_format($hasil['hpp_lama'], 0, ',', '.'), 'baru' => 'Rp '.number_format($hasil['hpp_baru'], 0, ',', '.')])
+                .($hasil['item'] > 0 ? ' · '.__(':n penjualan ikut diperbaiki.', ['n' => $hasil['item']]) : ''),
             'success'
         );
     }
@@ -287,7 +287,7 @@ class Stok extends Component
 
         $this->alert(
             'Opname tersimpan',
-            $hasil['jumlah'] > 0 ? "{$hasil['jumlah']} produk disesuaikan ({$hasil['nomor']})." : 'Semua stok sudah cocok, tidak ada perubahan.',
+            $hasil['jumlah'] > 0 ? __(':n produk disesuaikan (:nomor).', ['n' => $hasil['jumlah'], 'nomor' => $hasil['nomor']]) : __('Semua stok sudah cocok, tidak ada perubahan.'),
             'success'
         );
     }

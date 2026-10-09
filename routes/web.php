@@ -51,6 +51,17 @@ Route::get('/apk', function () {
     ]);
 })->middleware('throttle:20,1')->name('apk');
 
+// Ganti bahasa: tersimpan di akun (bila login) atau di sesi (halaman login / publik)
+Route::post('/bahasa', function (\Illuminate\Http\Request $request) {
+    $kode = (string) $request->input('kode');
+    abort_unless(\App\Support\Bahasa::valid($kode), 422);
+
+    $request->session()->put('bahasa', $kode);
+    $request->user()?->update(['locale' => $kode]);
+
+    return back();
+})->middleware('throttle:30,1')->name('bahasa');
+
 // Panduan pasang Windows A–Z (file statis public/tutorial/windows.html & .pdf)
 Route::redirect('/tutorial-windows', '/tutorial/windows.html')->name('tutorial.windows');
 

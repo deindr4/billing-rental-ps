@@ -217,14 +217,14 @@ class AsetModal extends Component
 
             return;
         } catch (Throwable $e) {
-            $this->addError('foto', 'Foto gagal diproses: '.$e->getMessage());
+            $this->addError('foto', __('Foto gagal diproses: :pesan', ['pesan' => $e->getMessage()]));
 
             return;
         }
 
         $this->formBuka = false;
         $this->segarkan();
-        $this->success($this->editId ? 'Aset disimpan' : 'Aset ditambahkan');
+        $this->success($this->editId ? __('Aset disimpan') : __('Aset ditambahkan'));
     }
 
     public function hapus(string $id, array $konfirmasi = []): void
@@ -321,7 +321,7 @@ class AsetModal extends Component
 
         $this->modalBuka = false;
         $this->segarkan();
-        $this->success(ModalMutasi::JENIS[$this->modalJenis].' dicatat');
+        $this->success(__(':jenis dicatat', ['jenis' => __(ModalMutasi::JENIS[$this->modalJenis])]));
     }
 
     public function batalModal(string $id, array $konfirmasi = []): void

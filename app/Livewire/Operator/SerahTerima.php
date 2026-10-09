@@ -143,7 +143,7 @@ class SerahTerima extends Component
         // Laporan shift yang diserahkan ke Telegram / WhatsApp (bila diaktifkan)
         BuatLaporanTutupKas::dispatch($lama->id);
 
-        $this->flashSuccess("Laci diserahkan ke {$penerima->name}");
+        $this->flashSuccess(__('Laci diserahkan ke :nama', ['nama' => $penerima->name]));
 
         return $this->redirectRoute('shift.laporan', ['id' => $lama->id], navigate: true);
     }

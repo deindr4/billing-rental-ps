@@ -72,7 +72,7 @@ class PilihHdmiTv extends Component
 
         $this->buka = false;
         unset($this->perangkat);
-        $this->success("TV {$this->unit?->nama} memakai {$label}");
+        $this->success(__('TV :unit memakai :hdmi', ['unit' => $this->unit?->nama, 'hdmi' => $label]));
         $this->dispatch('sesi-berubah');
     }
 

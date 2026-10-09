@@ -1,12 +1,12 @@
 <div>
-    <x-sheet wire:model="buka" :judul="$this->unit ? 'Mulai Rental · '.$this->unit->nama : 'Mulai Rental'">
+    <x-sheet wire:model="buka" :judul="$this->unit ? __('Mulai Rental · :unit', ['unit' => $this->unit->nama]) : __('Mulai Rental')">
         @if ($this->unit)
             <form id="form-mulai-sesi" wire:submit="simpan" class="space-y-5">
 
                 {{-- Data pelanggan: tamu / member --}}
                 @if ($this->programMemberAktif)
                     <div>
-                        <div class="label mb-2">Data pelanggan</div>
+                        <div class="label mb-2">{{ __('Data pelanggan') }}</div>
                         @include('livewire.operator.partials.pilih-member')
                         @error('memberId') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
                     </div>
@@ -20,17 +20,17 @@
                                     'h-9 rounded text-sm font-medium',
                                     'bg-surface-2 text-fg border border-line' => $mode === $kode,
                                     'text-muted' => $mode !== $kode,
-                                ])>{{ $nama }}</button>
+                                ])>{{ __($nama) }}</button>
                     @endforeach
                 </div>
 
                 {{-- ============ DURASI ============ --}}
                 @if ($mode === 'durasi')
                     @if (! $this->tarifPerJam)
-                        <p class="text-sm text-danger">Tarif per jam unit ini belum diatur. Atur di Admin → Paket Harga (jenis Tarif per jam).</p>
+                        <p class="text-sm text-danger">{{ __('Tarif per jam unit ini belum diatur. Atur di Admin → Paket Harga (jenis Tarif per jam).') }}</p>
                     @else
                         <div>
-                            <div class="label mb-2">Pilih durasi</div>
+                            <div class="label mb-2">{{ __('Pilih durasi') }}</div>
                             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
                                 @foreach (\App\Livewire\Operator\MulaiSesi::PILIHAN_DURASI as $m)
                                     <button type="button" wire:click="$set('durasiMenit', {{ $m }})"
@@ -48,12 +48,12 @@
                             <div class="flex items-center gap-2 mt-3">
                                 <input type="number" inputmode="numeric" min="15" max="720" step="15"
                                        wire:model.live.debounce.300ms="durasiMenit" class="input num w-28">
-                                <span class="text-sm text-muted">menit (durasi lain)</span>
+                                <span class="text-sm text-muted">{{ __('menit (durasi lain)') }}</span>
                             </div>
                             @error('durasiMenit') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
 
                             <p class="text-xs text-muted mt-2">
-                                Tarif <x-rupiah :nilai="$this->tarifPerJam" class="text-fg" /> / jam. Timer hitung mundur, bisa ditambah waktu.
+                                {{ __('Tarif') }} <x-rupiah :nilai="$this->tarifPerJam" class="text-fg" /> / {{ __('jam') }}. {{ __('Timer hitung mundur, bisa ditambah waktu.') }}
                             </p>
                         </div>
                     @endif
@@ -61,7 +61,7 @@
                 {{-- ============ PAKET ============ --}}
                 @elseif ($mode === 'paket')
                     @if ($this->paketTersedia->isEmpty())
-                        <p class="text-sm text-muted">Belum ada paket untuk unit ini. Buat di Admin → Paket Harga (jenis Paket), atau pakai mode Durasi.</p>
+                        <p class="text-sm text-muted">{{ __('Belum ada paket untuk unit ini. Buat di Admin → Paket Harga (jenis Paket), atau pakai mode Durasi.') }}</p>
                     @else
                         <div class="space-y-2">
                             @foreach ($this->paketTersedia as $paket)
@@ -91,16 +91,16 @@
                 @else
                     <div class="rounded-md border border-line px-3 py-2.5 text-sm space-y-1">
                         <div class="flex justify-between gap-2">
-                            <span class="text-muted">Tarif</span>
+                            <span class="text-muted">{{ __('Tarif') }}</span>
                             @if ($this->tarifPerJam)
-                                <span><x-rupiah :nilai="$this->tarifPerJam" /> / jam</span>
+                                <span><x-rupiah :nilai="$this->tarifPerJam" /> / {{ __('jam') }}</span>
                             @else
-                                <span class="text-danger">Belum diatur</span>
+                                <span class="text-danger">{{ __('Belum diatur') }}</span>
                             @endif
                         </div>
                         <p class="text-xs text-muted">
-                            Timer hitung maju. Dihitung per {{ $this->aturanOpen['blok'] }} menit, minimal {{ $this->aturanOpen['minimal'] }} menit.
-                            Main {{ $this->aturanOpen['toleransi'] }} menit pertama lalu berhenti tidak ditagih.
+                            {{ __('Timer hitung maju. Dihitung per :blok menit, minimal :minimal menit.', ['blok' => $this->aturanOpen['blok'], 'minimal' => $this->aturanOpen['minimal']]) }}
+                            {{ __('Main :n menit pertama lalu berhenti tidak ditagih.', ['n' => $this->aturanOpen['toleransi']]) }}
                         </p>
                     </div>
                 @endif
@@ -108,7 +108,7 @@
                 {{-- TV berisi beberapa konsol: pilih HDMI yang dibuka (tarif tetap per unit) --}}
                 @if ($tv = $this->perangkatTv)
                     <div>
-                        <div class="block text-sm mb-1.5">Konsol / HDMI di TV</div>
+                        <div class="block text-sm mb-1.5">{{ __('Konsol / HDMI di TV') }}</div>
                         <div class="flex flex-wrap gap-1.5">
                             @foreach ($tv->pilihanHdmi() as $id => $label)
                                 <button type="button" wire:click="$set('hdmi', @js($id))"
@@ -128,8 +128,8 @@
                     <label class="flex items-start gap-3 rounded-md border border-line px-3 py-2.5 cursor-pointer">
                         <input type="checkbox" wire:model.live="pilihGame" class="mt-0.5 shrink-0">
                         <span class="text-sm">
-                            <span class="block font-medium">Beri waktu pilih game {{ $this->pilihGameDefault }} menit</span>
-                            <span class="block text-xs text-muted">TV langsung terbuka; waktu sewa mulai dihitung setelah {{ $this->pilihGameDefault }} menit dan tidak ditagih.</span>
+                            <span class="block font-medium">{{ __('Beri waktu pilih game :n menit', ['n' => $this->pilihGameDefault]) }}</span>
+                            <span class="block text-xs text-muted">{{ __('TV langsung terbuka; waktu sewa mulai dihitung setelah :n menit dan tidak ditagih.', ['n' => $this->pilihGameDefault]) }}</span>
                         </span>
                     </label>
                 @endif
@@ -137,8 +137,8 @@
                 {{-- Nama tamu --}}
                 @if ($jenisPelanggan === 'tamu')
                     <div>
-                        <label for="pelanggan" class="block text-sm mb-1.5">Nama pelanggan <span class="text-muted">(opsional)</span></label>
-                        <input id="pelanggan" type="text" wire:model="pelanggan" class="input" placeholder="Tamu" maxlength="100">
+                        <label for="pelanggan" class="block text-sm mb-1.5">{{ __('Nama pelanggan') }} <span class="text-muted">({{ __('opsional') }})</span></label>
+                        <input id="pelanggan" type="text" wire:model="pelanggan" class="input" placeholder="{{ __('Tamu') }}" maxlength="100">
                         @error('pelanggan') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
                     </div>
                 @endif
@@ -153,37 +153,37 @@
                 @if (count($aksesori) > 0)
                     @php $adaPerJam = $this->daftarAksesori->whereIn('id', array_keys($aksesori))->contains('satuan', 'jam'); @endphp
                     <div class="flex items-center justify-between gap-3 mb-1 text-sm">
-                        <span class="text-muted">Sewa aksesori</span>
+                        <span class="text-muted">{{ __('Sewa aksesori') }}</span>
                         <span>
                             @if ($aks > 0)+<x-rupiah :nilai="$aks" />@endif
-                            @if ($adaPerJam)<span class="text-xs text-muted">{{ $aks > 0 ? '+ ' : '' }}per jam dihitung saat selesai</span>@endif
+                            @if ($adaPerJam)<span class="text-xs text-muted">{{ $aks > 0 ? '+ ' : '' }}{{ __('per jam dihitung saat selesai') }}</span>@endif
                         </span>
                     </div>
                 @endif
                 @if ($diskonMember > 0)
                     <div class="flex items-center justify-between gap-3 mb-1 text-sm">
-                        <span class="text-muted">Sewa</span>
+                        <span class="text-muted">{{ __('Sewa') }}</span>
                         <x-rupiah :nilai="$tagihan" />
                     </div>
                     <div class="flex items-center justify-between gap-3 mb-1 text-sm text-accent">
-                        <span>Diskon member {{ $this->member->tier }} (-{{ $this->infoMember()['diskon'] }}%)</span>
+                        <span>{{ __('Diskon member :tier (-:persen%)', ['tier' => $this->member->tier, 'persen' => $this->infoMember()['diskon']]) }}</span>
                         <span>-<x-rupiah :nilai="$diskonMember" /></span>
                     </div>
                 @endif
                 <div class="flex items-center justify-between gap-3 mb-3 text-sm">
-                    <span class="label">{{ $diskonMember > 0 ? 'Total estimasi' : 'Tagihan awal' }}</span>
+                    <span class="label">{{ $diskonMember > 0 ? __('Total estimasi') : __('Tagihan awal') }}</span>
                     @if ($tagihan)
                         <x-rupiah :nilai="$tagihan - $diskonMember + $aks" class="text-xl font-semibold text-accent" />
                     @elseif ($this->member && $this->infoMember()['diskon'] > 0 && $jenisPelanggan === 'member')
-                        <span class="text-muted">Dihitung saat selesai · diskon {{ $this->infoMember()['diskon'] }}%</span>
+                        <span class="text-muted">{{ __('Dihitung saat selesai · diskon :persen%', ['persen' => $this->infoMember()['diskon']]) }}</span>
                     @else
-                        <span class="text-muted">Dihitung saat selesai</span>
+                        <span class="text-muted">{{ __('Dihitung saat selesai') }}</span>
                     @endif
                 </div>
                 <button type="submit" form="form-mulai-sesi" class="btn btn-primary w-full h-11"
                         wire:loading.attr="disabled" wire:target="simpan">
-                    <span wire:loading.remove wire:target="simpan">Mulai Rental</span>
-                    <span wire:loading wire:target="simpan">Memproses...</span>
+                    <span wire:loading.remove wire:target="simpan">{{ __('Mulai Rental') }}</span>
+                    <span wire:loading wire:target="simpan">{{ __('Memproses...') }}</span>
                 </button>
             </x-slot:footer>
         @endif

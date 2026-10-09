@@ -1,12 +1,12 @@
 <div class="max-w-3xl mx-auto">
     <div class="mb-4">
-        <div class="label">Kehadiran karyawan</div>
-        <h1 class="text-xl font-semibold tracking-tight">Absen</h1>
-        <p class="text-sm text-muted">Pilih nama, ketik PIN, lalu ambil foto selfie.</p>
+        <div class="label">{{ __('Kehadiran karyawan') }}</div>
+        <h1 class="text-xl font-semibold tracking-tight">{{ __('Absen') }}</h1>
+        <p class="text-sm text-muted">{{ __('Pilih nama, ketik PIN, lalu ambil foto selfie.') }}</p>
     </div>
 
     @if ($this->daftar->isEmpty())
-        <div class="kartu p-10 text-center text-muted">Belum ada data karyawan untuk cabang ini. Tambahkan di Admin → Karyawan.</div>
+        <div class="kartu p-10 text-center text-muted">{{ __('Belum ada data karyawan untuk cabang ini. Tambahkan di Admin → Karyawan.') }}</div>
     @else
         <div class="grid gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 mb-5">
             @foreach ($this->daftar as $d)
@@ -21,9 +21,9 @@
                     <span class="min-w-0">
                         <span class="block font-medium truncate">{{ $k->nama }}</span>
                         @if ($buka)
-                            <span class="block text-xs text-st-kosong">Masuk {{ $buka->masuk_pada->format('H:i') }}</span>
+                            <span class="block text-xs text-st-kosong">{{ __('Masuk :jam', ['jam' => $buka->masuk_pada->format('H:i')]) }}</span>
                         @else
-                            <span class="block text-xs text-muted">{{ $k->jabatan ?: 'Belum absen' }}</span>
+                            <span class="block text-xs text-muted">{{ $k->jabatan ?: __('Belum absen') }}</span>
                         @endif
                     </span>
                 </button>
@@ -37,31 +37,26 @@
             <div>
                 <div class="font-semibold">{{ $k->nama }}</div>
                 <div class="text-sm text-muted">
-                    Jadwal hari ini: {{ $jadwal ? $jadwal->nama.' '.$jadwal->label() : 'tidak ada (libur / di luar jadwal)' }}
-                    @if ($buka) · masuk {{ $buka->masuk_pada->format('H:i') }}@endif
+                    {{ __('Jadwal hari ini: :jadwal', ['jadwal' => $jadwal ? $jadwal->nama.' '.$jadwal->label() : __('tidak ada (libur / di luar jadwal)')]) }}
+                    @if ($buka) · {{ __('masuk :jam', ['jam' => $buka->masuk_pada->format('H:i')]) }}@endif
                 </div>
             </div>
 
             <div>
-                <label for="pin-absen" class="block text-sm mb-1.5">PIN</label>
+                <label for="pin-absen" class="block text-sm mb-1.5">{{ __('PIN') }}</label>
                 <input id="pin-absen" type="password" inputmode="numeric" maxlength="6" autocomplete="off" wire:model="pin" class="input num tracking-[0.4em]">
                 @error('pin') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
             </div>
 
             <div>
-                <label for="foto-absen" class="block text-sm mb-1.5">Foto selfie</label>
+                <label class="block text-sm mb-1.5">{{ __('Foto selfie') }}</label>
                 {{-- capture=user membuka kamera depan tablet; berfungsi juga di alamat http:// LAN --}}
-                <input id="foto-absen" type="file" accept="image/*" capture="user" wire:model="foto" class="block w-full text-sm">
-                <div wire:loading wire:target="foto" class="label mt-1.5">Mengunggah foto…</div>
-                @if ($foto && method_exists($foto, 'isPreviewable') && $foto->isPreviewable())
-                    <img src="{{ $foto->temporaryUrl() }}" alt="Pratinjau" class="mt-2 h-40 rounded-md object-cover">
-                @endif
-                @error('foto') <p class="text-sm text-danger mt-1.5">{{ $message }}</p> @enderror
+                <x-input-foto wire:model="foto" :nilai="$foto" kamera="user" :label="__('Ambil foto selfie')" />
             </div>
 
             <button type="submit" @class(['btn w-full h-11', 'btn-primary' => ! $buka, 'btn-tint tint-oranye' => $buka])
                     wire:loading.attr="disabled" wire:target="masuk,pulang,foto">
-                {{ $buka ? 'Absen pulang' : 'Absen masuk' }}
+                {{ $buka ? __('Absen pulang') : __('Absen masuk') }}
             </button>
         </form>
     @endif

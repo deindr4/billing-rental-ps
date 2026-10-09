@@ -1,10 +1,10 @@
 <div>
-    <x-sheet wire:model="buka" :judul="$this->transaksi ? 'Transaksi · '.$this->transaksi->nomor : 'Detail Transaksi'">
+    <x-sheet wire:model="buka" :judul="$this->transaksi ? __('Transaksi · :nomor', ['nomor' => $this->transaksi->nomor]) : __('Detail Transaksi')">
         @if ($this->transaksi)
             @php
                 $trx = $this->transaksi;
                 $warna = ['lunas' => 'text-accent', 'belum_bayar' => 'text-st-hampir', 'dibatalkan' => 'text-danger'][$trx->status] ?? '';
-                $labelStatus = \App\Livewire\Operator\DaftarTransaksi::STATUS[$trx->status] ?? $trx->status;
+                $labelStatus = __(\App\Livewire\Operator\DaftarTransaksi::STATUS[$trx->status] ?? $trx->status);
             @endphp
 
             {{-- Ringkasan --}}
@@ -15,8 +15,8 @@
                         {{ $trx->created_at->format('d/m/Y H:i') }} · {{ $trx->user?->name }}
                     </div>
                     <div class="text-xs text-muted">
-                        {{ $trx->unit?->nama ?? (\App\Livewire\Operator\DaftarTransaksi::JENIS[$trx->jenis] ?? $trx->jenis) }}
-                        · {{ $trx->pelanggan_nama ?: 'Tamu' }}
+                        {{ $trx->unit?->nama ?? __(\App\Livewire\Operator\DaftarTransaksi::JENIS[$trx->jenis] ?? $trx->jenis) }}
+                        · {{ $trx->pelanggan_nama ?: __('Tamu') }}
                     </div>
                 </div>
                 <span class="badge {{ $warna }} shrink-0">{{ $labelStatus }}</span>
@@ -25,7 +25,7 @@
             {{-- Dibatalkan --}}
             @if ($trx->isDibatalkan())
                 <div class="rounded-md border border-danger px-3 py-2 mb-4 text-sm">
-                    <div class="text-danger font-medium">Dibatalkan</div>
+                    <div class="text-danger font-medium">{{ __('Dibatalkan') }}</div>
                     <div>{{ $trx->alasan_batal }}</div>
                     <div class="text-xs text-muted">
                         {{ $trx->dibatalkan_pada?->format('d/m/Y H:i') }} · {{ $this->namaPembatal }}
@@ -47,7 +47,7 @@
                             <x-rupiah :nilai="$item->subtotal" class="shrink-0" />
                         </li>
                     @empty
-                        <li class="px-3 py-2 text-muted">Belum ada item (open billing berjalan).</li>
+                        <li class="px-3 py-2 text-muted">{{ __('Belum ada item (open billing berjalan).') }}</li>
                     @endforelse
 
                     @foreach ($trx->diskon as $d)
@@ -58,7 +58,7 @@
                     @endforeach
                 </ul>
                 <div class="px-3 py-2 border-t border-line flex justify-between font-semibold">
-                    <span>Total</span>
+                    <span>{{ __('Total') }}</span>
                     <x-rupiah :nilai="$trx->total" />
                 </div>
             </div>
@@ -66,16 +66,16 @@
             {{-- Pembayaran --}}
             @if ($trx->pembayaran->isNotEmpty())
                 <div class="mb-4">
-                    <div class="text-sm font-medium mb-1.5">Pembayaran</div>
+                    <div class="text-sm font-medium mb-1.5">{{ __('Pembayaran') }}</div>
                     <ul class="rounded-md border border-line divide-y divide-line text-sm">
                         @foreach ($trx->pembayaran as $p)
                             <li @class(['px-3 py-2 flex justify-between gap-3', 'text-muted line-through' => $p->status !== 'sukses'])>
                                 <span class="min-w-0">
-                                    <span class="block">{{ \App\Livewire\Operator\DetailTransaksi::METODE[$p->metode] ?? $p->metode }}</span>
+                                    <span class="block">{{ __(\App\Livewire\Operator\DetailTransaksi::METODE[$p->metode] ?? $p->metode) }}</span>
                                     <span class="block text-xs text-muted">
                                         {{ $p->dibayar_pada->format('d/m H:i') }}
                                         @if ($p->metode === 'tunai' && $p->diterima)
-                                            · diterima Rp {{ number_format($p->diterima, 0, ',', '.') }}
+                                            · {{ __('diterima') }} Rp {{ number_format($p->diterima, 0, ',', '.') }}
                                         @endif
                                         @if ($p->referensi)
                                             · {{ $p->referensi }}
@@ -87,7 +87,7 @@
                         @endforeach
                     </ul>
                     @if ($trx->kembalian > 0)
-                        <div class="text-xs text-muted mt-1">Kembalian Rp {{ number_format($trx->kembalian, 0, ',', '.') }}</div>
+                        <div class="text-xs text-muted mt-1">{{ __('Kembalian') }} Rp {{ number_format($trx->kembalian, 0, ',', '.') }}</div>
                     @endif
                 </div>
             @endif
@@ -95,15 +95,15 @@
             {{-- Riwayat sesi --}}
             @if ($trx->sesi && $trx->sesi->log->isNotEmpty())
                 <details class="mb-4 text-sm">
-                    <summary class="cursor-pointer select-none font-medium">Riwayat sesi ({{ $trx->sesi->log->count() }})</summary>
+                    <summary class="cursor-pointer select-none font-medium">{{ __('Riwayat sesi (:n)', ['n' => $trx->sesi->log->count()]) }}</summary>
                     <ol class="mt-2 space-y-2 border-l border-line pl-3">
                         @foreach ($trx->sesi->log as $log)
                             <li>
-                                <div>{{ \App\Livewire\Operator\DetailTransaksi::LABEL_LOG[$log->jenis] ?? $log->jenis }}</div>
+                                <div>{{ __(\App\Livewire\Operator\DetailTransaksi::LABEL_LOG[$log->jenis] ?? $log->jenis) }}</div>
                                 <div class="text-xs text-muted">
-                                    {{ $log->created_at->format('d/m H:i:s') }} · {{ $log->user?->name ?? 'Sistem' }}
+                                    {{ $log->created_at->format('d/m H:i:s') }} · {{ $log->user?->name ?? __('Sistem') }}
                                     @if (! empty($log->data['menit']))
-                                        · {{ $log->data['menit'] }} menit
+                                        · {{ __(':n menit', ['n' => $log->data['menit']]) }}
                                     @endif
                                     @if (! empty($log->data['ke']))
                                         · {{ $log->data['dari'] ?? '' }} → {{ $log->data['ke'] }}
@@ -123,18 +123,18 @@
                     <div class="grid grid-cols-3 gap-2 mb-2">
                         <button type="button" class="btn btn-tint tint-teal text-sm"
                                 wire:click="$dispatch('buka-pratinjau-struk', { transaksiId: '{{ $trx->id }}' })">
-                            Cetak struk
+                            {{ __('Cetak struk') }}
                         </button>
-                        <a href="{{ route('struk.nota', $trx->id) }}" target="_blank" class="btn btn-tint tint-biru text-sm">Nota A4</a>
-                        <button type="button" wire:click="$toggle('formWa')" @class(['btn text-sm', 'btn-primary' => $formWa, 'btn-tint tint-hijau' => ! $formWa])>Kirim WA</button>
+                        <a href="{{ route('struk.nota', $trx->id) }}" target="_blank" class="btn btn-tint tint-biru text-sm">{{ __('Nota A4') }}</a>
+                        <button type="button" wire:click="$toggle('formWa')" @class(['btn text-sm', 'btn-primary' => $formWa, 'btn-tint tint-hijau' => ! $formWa])>{{ __('Kirim WA') }}</button>
                     </div>
 
                     @if ($formWa)
                         <form wire:submit="kirimWa" class="mb-3">
                             <div class="flex gap-2">
                                 <input type="tel" wire:model="nomorWa" class="input flex-1" inputmode="tel"
-                                       placeholder="Nomor WA pelanggan, 0812..." autofocus>
-                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="kirimWa">Kirim</button>
+                                       placeholder="{{ __('Nomor WA pelanggan, 0812...') }}" autofocus>
+                                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="kirimWa">{{ __('Kirim') }}</button>
                             </div>
                             @error('nomorWa')
                                 <p class="text-sm text-danger mt-1">{{ $message }}</p>
@@ -145,19 +145,19 @@
 
                 <div class="grid grid-cols-2 gap-2">
                     @if (! $trx->isDibatalkan() && $trx->sisaTagihan() > 0 && $trx->items->isNotEmpty())
-                        <button type="button" wire:click="bayar" class="btn btn-primary">Bayar</button>
+                        <button type="button" wire:click="bayar" class="btn btn-primary">{{ __('Bayar') }}</button>
                     @endif
 
                     @if ($this->bolehBatal())
                         <x-confirm-button action="batalkan"
-                                          title="Batalkan transaksi?"
-                                          text="Transaksi tidak dihapus, hanya ditandai batal. Butuh PIN supervisor/owner. Uang tunai yang sudah masuk dikeluarkan dari kas shift Anda."
-                                          confirm-text="Ya, batalkan"
+                                          :title="__('Batalkan transaksi?')"
+                                          :text="__('Transaksi tidak dihapus, hanya ditandai batal. Butuh PIN supervisor/owner. Uang tunai yang sudah masuk dikeluarkan dari kas shift Anda.')"
+                                          :confirm-text="__('Ya, batalkan')"
                                           danger
                                           reason
                                           pin
                                           @class(['w-full', 'col-span-2' => $trx->sisaTagihan() <= 0 || $trx->items->isEmpty()])>
-                            Batalkan
+                            {{ __('Batalkan') }}
                         </x-confirm-button>
                     @endif
                 </div>

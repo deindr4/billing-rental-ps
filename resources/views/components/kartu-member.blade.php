@@ -26,12 +26,12 @@
 
     <div class="grid grid-cols-2 gap-2">
         <div class="rounded-md border border-line bg-surface px-3 py-2">
-            <div class="label">Sisa saldo</div>
+            <div class="label">{{ __('Sisa saldo') }}</div>
             <x-rupiah :nilai="$member->saldo" class="font-semibold text-accent" />
         </div>
         <div class="rounded-md border border-line bg-surface px-3 py-2">
-            <div class="label">Poin{{ $target > 0 ? ' · Stamp' : '' }}</div>
-            <span class="font-semibold num" style="color: var(--status-main)">{{ number_format($member->poin, 0, ',', '.') }} Poin</span>
+            <div class="label">{{ __('Poin') }}{{ $target > 0 ? ' · '.__('Stamp') : '' }}</div>
+            <span class="font-semibold num" style="color: var(--status-main)">{{ __(':n Poin', ['n' => number_format($member->poin, 0, ',', '.')]) }}</span>
             @if ($target > 0)
                 <span class="text-xs text-muted num">· {{ $member->stamp }}/{{ $target }}</span>
             @endif
@@ -40,12 +40,15 @@
 
     @if ($diskon > 0)
         <div class="rounded-md px-3 py-2 text-xs" style="background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent)">
-            Benefit member {{ $member->tier }}: diskon otomatis {{ $diskon }}% biaya sewa
+            {{ __('Benefit member :tier: diskon otomatis :persen% biaya sewa', ['tier' => $member->tier, 'persen' => $diskon]) }}
         </div>
     @endif
     @if ($berikutnya)
         <div class="text-xs text-muted">
-            Belanja <x-rupiah :nilai="$berikutnya['kurang']" class="text-fg" /> lagi untuk naik ke {{ $berikutnya['nama'] }} ({{ $berikutnya['diskon_persen'] }}%).
+            {!! __('Belanja :nominal lagi untuk naik ke :tier (:persen%).', [
+                'nominal' => '<span class="num text-fg">'.e(\App\Support\Rupiah::teks((int) $berikutnya['kurang'])).'</span>',
+                'tier' => e($berikutnya['nama']), 'persen' => (int) $berikutnya['diskon_persen'],
+            ]) !!}
         </div>
     @endif
 </div>

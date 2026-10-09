@@ -5,6 +5,9 @@
 
 let swalPromise = null;
 
+// Terjemahan dari partials/teks-js (kunci = teks Indonesia)
+const t = (kunci, isi = {}) => (window.t ? window.t(kunci, isi) : kunci);
+
 function loadSwal() {
     swalPromise ??= import('sweetalert2').then((m) => m.default);
     return swalPromise;
@@ -56,7 +59,7 @@ export async function alert({ icon = 'info', title = '', text = '' } = {}) {
         icon,
         titleText: title, // teks biasa, bukan HTML
         text,
-        confirmButtonText: 'OK',
+        confirmButtonText: t('OK'),
         buttonsStyling: false,
         customClass: baseClass,
     });
@@ -67,11 +70,11 @@ export async function alert({ icon = 'info', title = '', text = '' } = {}) {
  * Return: null jika batal, object { reason?, pin? } jika dikonfirmasi.
  */
 export async function confirm({
-    title = 'Yakin?',
+    title = t('Yakin?'),
     text = '',
     icon = 'warning',
-    confirmText = 'Ya, lanjutkan',
-    cancelText = 'Batal',
+    confirmText = t('Ya, lanjutkan'),
+    cancelText = t('Batal'),
     danger = false,
     pin = false,
     reason = false,
@@ -81,11 +84,11 @@ export async function confirm({
     let html = text ? `<p class="swal-desc">${escapeHtml(text)}</p>` : '';
 
     if (reason) {
-        html += '<textarea id="swal-reason" class="input swal-textarea" placeholder="Alasan (wajib)"></textarea>';
+        html += `<textarea id="swal-reason" class="input swal-textarea" placeholder="${escapeHtml(t('Alasan (wajib)'))}"></textarea>`;
     }
 
     if (pin) {
-        html += '<input id="swal-pin" type="password" inputmode="numeric" autocomplete="off" class="input swal-pin" placeholder="PIN">';
+        html += `<input id="swal-pin" type="password" inputmode="numeric" autocomplete="off" class="input swal-pin" placeholder="${escapeHtml(t('PIN'))}">`;
     }
 
     const result = await Swal.fire({
@@ -112,7 +115,7 @@ export async function confirm({
             if (reason) {
                 const value = document.getElementById('swal-reason').value.trim();
                 if (!value) {
-                    Swal.showValidationMessage('Alasan wajib diisi');
+                    Swal.showValidationMessage(t('Alasan wajib diisi'));
                     return false;
                 }
                 data.reason = value;
@@ -121,7 +124,7 @@ export async function confirm({
             if (pin) {
                 const value = document.getElementById('swal-pin').value.trim();
                 if (!value) {
-                    Swal.showValidationMessage('PIN wajib diisi');
+                    Swal.showValidationMessage(t('PIN wajib diisi'));
                     return false;
                 }
                 data.pin = value;
@@ -134,7 +137,7 @@ export async function confirm({
     return result.isConfirmed ? result.value : null;
 }
 
-export async function loading(title = 'Memproses...') {
+export async function loading(title = t('Memproses...')) {
     const Swal = await loadSwal();
 
     Swal.fire({

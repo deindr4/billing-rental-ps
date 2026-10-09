@@ -33,7 +33,7 @@
 
         <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-line">
             <h2 class="font-semibold truncate">{{ $judul }}</h2>
-            <button type="button" class="btn btn-ghost h-8 px-2 text-muted" @click="buka = false" aria-label="Tutup">
+            <button type="button" class="btn btn-ghost h-8 px-2 text-muted" @click="buka = false" aria-label="{{ __('Tutup') }}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
         </div>
