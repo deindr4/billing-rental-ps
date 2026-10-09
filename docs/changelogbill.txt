@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (panduan bergambar Windows A–Z)
+-----------------------------------------------------------------------------
+- Panduan baru untuk pemilik rental: public/tutorial/windows.html + windows.pdf (28 screenshot) - persiapan PC,
+  installer, login, tampilan, tipe konsol, paket harga, unit, menu F&B, stok awal, akun kasir & PIN, pengaturan
+  operasional, TV, shift & transaksi pertama, tutup kas, laporan, backup/update, masalah umum. Dibuka dari aplikasi:
+  http://IP-PC/tutorial-windows (tanpa login).
+- README: screenshot baru (tampilan daftar Rental, Sewa Playbox, sewa Playbox baru) & screenshot lama diperbarui.
+
+
 2026-10-09 (panduan update cloud sebagai root)
 -----------------------------------------------------------------------------
 - installer/cloudpanel/README.md: langkah update CloudPanel bila login SSH sebagai root (pasang-site.sh tetap

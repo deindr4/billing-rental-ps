@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panduan Pasang Billing PS di Windows</title>
+<meta name="description" content="Panduan lengkap A–Z: pasang Billing PS di PC Windows, isi unit, paket harga, F&B, akun kasir, TV, sampai transaksi pertama dan tutup kas.">
+<style>
+:root {
+    --bg: #f4f6f9; --surface: #ffffff; --text: #18202b; --muted: #5c6878; --line: #dfe4ea;
+    --accent: #0ea5e9; --accent-soft: #e0f2fe; --ok: #16a34a; --ok-soft: #dcfce7; --warn: #b45309; --warn-soft: #fef3c7;
+    --code: #eef2f6;
+}
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        --bg: #0d141d; --surface: #141e2a; --text: #e6edf5; --muted: #95a3b4; --line: #243243;
+        --accent: #38bdf8; --accent-soft: #0c2a3d; --ok: #4ade80; --ok-soft: #10301d; --warn: #fbbf24; --warn-soft: #332709;
+        --code: #1b2836;
+    }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+a { color: var(--accent); }
+.wadah { max-width: 980px; margin: 0 auto; padding: 0 16px; }
+header.sampul { background: linear-gradient(135deg, #0b3b5c, #0e7490); color: #fff; padding: 48px 0 40px; }
+header.sampul .label { text-transform: uppercase; letter-spacing: .12em; font-size: 12px; opacity: .8; }
+header.sampul h1 { font-size: clamp(28px, 5vw, 42px); line-height: 1.15; margin: 8px 0 12px; }
+header.sampul p { max-width: 640px; opacity: .92; margin: 0; }
+header.sampul .tombol { display: inline-block; margin-top: 18px; padding: 10px 16px; border-radius: 8px; background: #fff; color: #0b3b5c; font-weight: 600; text-decoration: none; }
+nav.isi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 22px; margin: -24px 0 28px; position: relative; }
+nav.isi h2 { margin: 0 0 8px; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+nav.isi ol { columns: 2; column-gap: 32px; margin: 0; padding-left: 22px; }
+nav.isi li { break-inside: avoid; }
+section.bab { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 26px 26px 18px; margin-bottom: 22px; }
+section.bab > h2 { margin: 0 0 4px; font-size: 24px; display: flex; gap: 12px; align-items: baseline; }
+section.bab > h2 .no { flex: none; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 16px; }
+.lokasi { color: var(--muted); font-size: 14px; margin: 0 0 14px; }
+h3 { font-size: 18px; margin: 22px 0 6px; }
+ol.langkah { padding-left: 22px; }
+ol.langkah li { margin: 4px 0; }
+figure { margin: 14px 0 18px; }
+figure img { display: block; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 10px; }
+figcaption { color: var(--muted); font-size: 13px; margin-top: 6px; }
+table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 15px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .04em; }
+code, kbd { background: var(--code); border-radius: 5px; padding: 1px 6px; font: 14px ui-monospace, Consolas, monospace; }
+pre { background: var(--code); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: 14px/1.5 ui-monospace, Consolas, monospace; }
+.catatan, .awas, .tips { border-radius: 10px; padding: 12px 16px; margin: 14px 0; font-size: 15px; }
+.catatan { background: var(--accent-soft); }
+.tips { background: var(--ok-soft); }
+.awas { background: var(--warn-soft); }
+.catatan b:first-child, .tips b:first-child, .awas b:first-child { display: block; margin-bottom: 2px; }
+.ceklis { list-style: none; padding-left: 0; }
+.ceklis li { padding-left: 28px; position: relative; margin: 6px 0; }
+.ceklis li::before { content: "☐"; position: absolute; left: 4px; color: var(--accent); }
+.dua { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px 0 40px; }
+@media (max-width: 700px) {
+    nav.isi ol { columns: 1; }
+    section.bab { padding: 20px 16px 12px; }
+    .dua { grid-template-columns: 1fr; }
+    table { font-size: 14px; }
+}
+@media print {
+    /* PDF selalu terang walau Windows memakai mode gelap */
+    :root, :root:not([data-theme="light"]) {
+        --bg: #fff; --surface: #fff; --text: #18202b; --muted: #5c6878; --line: #dfe4ea;
+        --accent: #0284c7; --accent-soft: #e0f2fe; --ok-soft: #dcfce7; --warn-soft: #fef3c7; --code: #eef2f6;
+    }
+    @page { size: A4; margin: 14mm 12mm; }
+    body { background: #fff; font-size: 12.5px; }
+    header.sampul { padding: 28px 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    header.sampul .tombol { display: none; }
+    nav.isi { margin-top: 16px; }
+    section.bab { border: 0; padding: 0; margin: 0 0 14px; break-before: page; }
+    section.bab:first-of-type { break-before: auto; }
+    figure { break-inside: avoid; }
+    figure img { max-height: 125mm; width: auto; max-width: 100%; }
+    .catatan, .tips, .awas { -webkit-print-color-adjust: exact; print-color-adjust: exact; break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+}
+</style>
+</head>
+<body>
+
+<header class="sampul">
+    <div class="wadah">
+        <div class="label">Panduan lengkap · A sampai Z</div>
+        <h1>Pasang Billing PS di Windows</h1>
+        <p>Mulai dari menyiapkan PC, memasang installer, mengisi unit, paket harga dan menu F&amp;B, membuat akun kasir,
+           menghubungkan TV, sampai transaksi pertama dan tutup kas.</p>
+        <a class="tombol" href="windows.pdf">Unduh versi PDF</a>
+    </div>
+</header>
+
+<main class="wadah">
+<nav class="isi">
+    <h2>Daftar isi</h2>
+    <ol>
+        <li><a href="#persiapan">Persiapan PC &amp; jaringan</a></li>
+        <li><a href="#pasang">Pasang aplikasi (installer)</a></li>
+        <li><a href="#login">Login pertama</a></li>
+        <li><a href="#tampilan">Logo, warna &amp; tampilan</a></li>
+        <li><a href="#tipe">Tipe konsol (PS4, PS5, PC)</a></li>
+        <li><a href="#paket">Paket harga</a></li>
+        <li><a href="#unit">Unit (TV / meja)</a></li>
+        <li><a href="#produk">Menu F&amp;B (produk)</a></li>
+        <li><a href="#stok">Stok awal F&amp;B</a></li>
+        <li><a href="#kasir">Akun kasir &amp; PIN</a></li>
+        <li><a href="#operasional">Pengaturan operasional</a></li>
+        <li><a href="#tv">Hubungkan TV (opsional)</a></li>
+        <li><a href="#harian">Hari pertama: shift, rental, F&amp;B, bayar</a></li>
+        <li><a href="#tutup">Tutup kas &amp; laporan</a></li>
+        <li><a href="#backup">Backup &amp; update</a></li>
+        <li><a href="#masalah">Masalah umum</a></li>
+    </ol>
+</nav>
+
+<!-- ================================================================== -->
+<section class="bab" id="persiapan">
+    <h2><span class="no">1</span> Persiapan PC &amp; jaringan</h2>
+    <p class="lokasi">Dilakukan sekali, sebelum memasang.</p>
+
+    <p>Billing PS dipasang di <b>satu PC Windows</b> di rental (disebut <i>PC server</i>). Tablet/HP kasir dan TV cukup
+       membuka alamat PC ini lewat Wi-Fi/LAN yang sama — tidak perlu memasang apa pun di tablet.</p>
+
+    <table>
+        <tr><th></th><th>Minimal</th><th>Disarankan</th></tr>
+        <tr><td>Windows</td><td>Windows 10 64-bit</td><td>Windows 10 / 11 64-bit, update terbaru</td></tr>
+        <tr><td>Prosesor</td><td>2 core (Core i3 / Ryzen 3 lama)</td><td>4 core atau lebih</td></tr>
+        <tr><td>RAM</td><td>4 GB</td><td>8 GB</td></tr>
+        <tr><td>Penyimpanan</td><td>3 GB kosong</td><td>SSD, 10 GB kosong (untuk backup harian)</td></tr>
+        <tr><td>Jaringan</td><td>Satu jaringan dengan tablet &amp; TV</td><td>Kabel LAN + IP tetap</td></tr>
+        <tr><td>Internet</td><td colspan="2">Tidak wajib untuk kasir &amp; TV. Dipakai untuk WhatsApp, pembayaran online, sinkron cloud &amp; cek update.</td></tr>
+    </table>
+
+    <h3>Checklist sebelum mulai</h3>
+    <ul class="ceklis">
+        <li>Login Windows dengan akun <b>Administrator</b>.</li>
+        <li><b>IP tetap untuk PC server.</b> Di pengaturan router, buat <i>DHCP reservation</i> untuk PC ini
+            (mis. <code>192.168.1.10</code>). Kalau IP berubah-ubah, tablet &amp; TV kehilangan alamat server.</li>
+        <li>Opsional tapi disarankan: di BIOS aktifkan <i>Restore on AC power loss / Power on</i> supaya PC menyala sendiri setelah listrik padam.</li>
+        <li>Matikan mode <i>Sleep</i> PC (Settings → System → Power → Sleep: <b>Never</b>).</li>
+        <li>Siapkan: nama rental, nama cabang, email &amp; password owner, PIN 4–6 angka, daftar unit &amp; harga, daftar menu F&amp;B.</li>
+    </ul>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="pasang">
+    <h2><span class="no">2</span> Pasang aplikasi (installer)</h2>
+    <p class="lokasi">Di PC server · ±5–10 menit</p>
+
+    <ol class="langkah">
+        <li>Buka <a href="https://github.com/deindr4/billing-rental-ps/releases/latest">github.com/deindr4/billing-rental-ps/releases/latest</a>
+            dan unduh <code>BillingPS-Setup-&lt;versi&gt;.exe</code>.</li>
+        <li>Klik dua kali file tersebut → pilih <b>Yes</b> saat Windows meminta izin Administrator.
+            Bila muncul <i>Windows protected your PC</i>, klik <b>More info → Run anyway</b>.</li>
+        <li>Ikuti wizard:
+            <table>
+                <tr><th>Halaman</th><th>Isi</th></tr>
+                <tr><td>Folder</td><td>Biarkan <code>C:\BillingPS</code>.</td></tr>
+                <tr><td>Jenis pemasangan</td><td><b>Pasang baru</b> (data kosong). Pilih <i>Pulihkan dari file backup</i> hanya saat pindah PC.</td></tr>
+                <tr><td>Data rental</td><td>Nama rental &amp; nama cabang (bisa diubah nanti).</td></tr>
+                <tr><td>Akun owner</td><td>Nama, email, password (min. 8 karakter) dan <b>PIN</b> 4–6 angka untuk menyetujui aksi penting.</td></tr>
+                <tr><td>Zona waktu</td><td>WIB / WITA / WIT sesuai lokasi.</td></tr>
+                <tr><td>Port web</td><td>Biarkan <b>80</b>. Ganti (mis. 8000) hanya bila port 80 dipakai program lain.</td></tr>
+            </table>
+        </li>
+        <li>Klik <b>Install</b> dan tunggu tahap <i>Menyiapkan database, aplikasi &amp; layanan</i> selesai (beberapa menit).</li>
+        <li>Di akhir muncul <b>Data login</b>: email, password, PIN, akun super admin dan <b>alamat aplikasi</b>
+            (mis. <code>http://192.168.1.10</code>). <b>Foto atau catat</b> — password tidak disimpan di file mana pun.</li>
+        <li>Centang <i>Buka Billing PS sekarang</i> → Finish. Ikon <b>Billing PS</b> juga ada di Desktop.</li>
+    </ol>
+
+    <div class="catatan"><b>Yang terpasang otomatis</b>
+        Web server, database, layanan realtime TV, antrean, jadwal (cek QRIS, backup harian) dan WhatsApp — semuanya
+        sebagai <i>layanan Windows</i> yang menyala sendiri setiap PC dinyalakan. Firewall dibuka hanya untuk jaringan lokal.
+        Tidak perlu memasang PHP, MySQL atau XAMPP terpisah.</div>
+
+    <div class="awas"><b>Antivirus</b>
+        Bila antivirus memblokir pemasangan, izinkan installer lalu jalankan ulang. Langkah yang sudah berhasil tidak diulang.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="login">
+    <h2><span class="no">3</span> Login pertama</h2>
+    <p class="lokasi">Di PC server: <code>http://localhost</code> · di tablet/HP: <code>http://IP-PC-server</code></p>
+
+    <figure><img src="gambar/login.webp" alt="Halaman login"><figcaption>Halaman login — isi email (atau username) dan password owner dari langkah 2.</figcaption></figure>
+
+    <ol class="langkah">
+        <li>Masuk dengan email &amp; password owner.</li>
+        <li>Bila rental punya lebih dari satu cabang, pilih cabang yang sedang dikelola.</li>
+        <li>Aplikasi terbagi dua:
+            <ul>
+                <li><b>Aplikasi Kasir</b> — rental, POS F&amp;B, pembayaran, kas laci (dipakai harian di tablet).</li>
+                <li><b>Panel Admin</b> — data master &amp; pengaturan. Buka dari menu akun (kiri bawah) → <b>Panel Admin</b>, atau alamat <code>/admin</code>.</li>
+            </ul>
+        </li>
+    </ol>
+
+    <figure><img src="gambar/admin-dasbor.webp" alt="Dasbor admin"><figcaption>Panel Admin — menu data master ada di samping kiri: Rental, F&amp;B, Karyawan, Pengaturan.</figcaption></figure>
+
+    <div class="tips"><b>Urutan pengisian data</b>
+        Ikuti urutan bab 4 → 11: tipe konsol harus ada sebelum paket harga &amp; unit, dan produk harus ada sebelum stok.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="tampilan">
+    <h2><span class="no">4</span> Logo, warna &amp; tampilan</h2>
+    <p class="lokasi">Admin → Pengaturan → <b>Tampilan</b></p>
+
+    <figure><img src="gambar/admin-tampilan.webp" alt="Pengaturan tampilan"><figcaption>Mode tampilan, warna aksen dan logo — berlaku untuk semua cabang, aplikasi kasir, billboard dan layar TV.</figcaption></figure>
+    <ol class="langkah">
+        <li><b>Mode tampilan</b>: Gelap, Terang, atau Ikuti sistem.</li>
+        <li><b>Warna aksen</b>: warna tombol utama (ada preset Mint, Biru, Oranye, Merah, Kuning). Warna status unit tidak ikut berubah.</li>
+        <li><b>Logo rental</b>: unggah logo (PNG transparan paling bagus).</li>
+        <li>Opsional: teks tambahan di kaki aplikasi dan wallpaper <b>layar kunci TV</b>.</li>
+        <li>Klik <b>Simpan</b>.</li>
+    </ol>
+    <p>Nama rental &amp; cabang diisi saat pemasangan (bab 2).</p>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="tipe">
+    <h2><span class="no">5</span> Tipe konsol (PS4, PS5, PC)</h2>
+    <p class="lokasi">Admin → Rental → <b>Tipe Konsol</b> → <b>Buat</b></p>
+
+    <p>Tipe konsol mengelompokkan unit yang tarifnya sama, misalnya <i>PS4</i> dan <i>PS5</i>.</p>
+    <figure><img src="gambar/admin-tipe-konsol-baru.webp" alt="Buat tipe konsol"><figcaption>Form tipe konsol.</figcaption></figure>
+    <table>
+        <tr><th>Isian</th><th>Contoh</th><th>Keterangan</th></tr>
+        <tr><td>Kode</td><td><code>PS5</code></td><td>Singkat, unik.</td></tr>
+        <tr><td>Nama</td><td>PlayStation 5</td><td>Tampil di kartu unit.</td></tr>
+        <tr><td>Jenis rental</td><td>PlayStation / konsol</td><td>Pilih <b>PC</b> untuk komputer — unitnya tampil di menu kasir <i>Rental PC</i>.</td></tr>
+    </table>
+    <p>Klik <b>Buat &amp; buat lainnya</b> untuk langsung menambah tipe berikutnya (mis. PS4).</p>
+    <figure><img src="gambar/admin-tipe-konsol.webp" alt="Daftar tipe konsol"><figcaption>Daftar tipe konsol setelah diisi.</figcaption></figure>
+
+    <div class="catatan"><b>Kategori unit (opsional)</b>
+        Admin → Rental → <b>Kategori Unit</b> untuk membedakan Reguler / VIP. Paket harga bisa dibuat khusus per kategori.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="paket">
+    <h2><span class="no">6</span> Paket harga</h2>
+    <p class="lokasi">Admin → Rental → <b>Paket Harga</b> → <b>Buat</b></p>
+
+    <p>Setiap tipe konsol butuh <b>minimal satu tarif per jam</b>. Paket durasi tetap (mis. 3 jam lebih murah) boleh ditambahkan.</p>
+    <figure><img src="gambar/admin-paket-harga-baru.webp" alt="Buat paket harga"><figcaption>Form paket harga.</figcaption></figure>
+    <table>
+        <tr><th>Jenis</th><th>Isi</th><th>Contoh</th></tr>
+        <tr><td><b>Tarif per jam</b></td><td>Harga per jam. Dipakai untuk durasi bebas &amp; open billing (dihitung proporsional per menit sesuai pengaturan).</td><td>PS4 · Rp8.000 / jam</td></tr>
+        <tr><td><b>Paket (durasi tetap)</b></td><td>Durasi (menit) + harga paket.</td><td>Paket 3 Jam PS4 · 180 menit · Rp20.000</td></tr>
+    </table>
+    <ol class="langkah">
+        <li>Pilih <b>Tipe konsol</b> (mis. PS4). <i>Semua tipe konsol</i> berarti berlaku untuk semua.</li>
+        <li><b>Kategori unit</b> — kosongkan, atau pilih VIP bila harga VIP berbeda.</li>
+        <li><b>Berlaku di cabang</b> — <i>Semua cabang</i> atau cabang tertentu.</li>
+        <li><b>Keterangan</b> opsional, mis. "+ 1 Es Teh".</li>
+    </ol>
+    <figure><img src="gambar/admin-paket-harga.webp" alt="Daftar paket harga"><figcaption>Contoh daftar paket: tarif per jam PS4/PS5 dan paket durasi.</figcaption></figure>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="unit">
+    <h2><span class="no">7</span> Unit (TV / meja)</h2>
+    <p class="lokasi">Admin → Rental → <b>Unit</b> → <b>Buat</b></p>
+
+    <p>Satu unit = satu TV / meja main yang disewakan.</p>
+    <figure><img src="gambar/admin-unit-baru.webp" alt="Buat unit"><figcaption>Form unit: informasi unit (kiri) dan kontrol TV / PC (kanan).</figcaption></figure>
+    <table>
+        <tr><th>Isian</th><th>Contoh</th><th>Keterangan</th></tr>
+        <tr><td>Nama</td><td>TV 1 - PS5</td><td>Nama lengkap di struk &amp; laporan.</td></tr>
+        <tr><td>Kode</td><td><code>TV1</code></td><td>Tampil besar di kartu kasir.</td></tr>
+        <tr><td>Tipe konsol</td><td>PlayStation 5</td><td>Menentukan tarif (bab 6).</td></tr>
+        <tr><td>Kategori</td><td>VIP</td><td>Opsional.</td></tr>
+        <tr><td>Lokasi, Urutan</td><td>Lantai 1, 1</td><td>Urutan tampil di matriks kasir.</td></tr>
+        <tr><td>Warna kartu</td><td>(kosong)</td><td>Kosong = warna otomatis berbeda tiap unit.</td></tr>
+        <tr><td>Mode</td><td>Manual / TV Agent</td><td><b>Manual</b> bila TV belum memakai aplikasi TV Agent. Ubah ke TV Agent setelah TV dipasangkan (bab 12).</td></tr>
+    </table>
+    <p>Gunakan <b>Buat &amp; buat lainnya</b> untuk mengisi semua unit berurutan (TV1, TV2, …).</p>
+    <figure><img src="gambar/admin-unit.webp" alt="Daftar unit"><figcaption>Daftar unit.</figcaption></figure>
+
+    <div class="catatan"><b>Aksesori sewa (opsional)</b>
+        Admin → Rental → <b>Aksesori Sewa</b> untuk stik tambahan / headset yang disewakan per sesi atau per jam, dengan stok.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="produk">
+    <h2><span class="no">8</span> Menu F&amp;B (produk)</h2>
+    <p class="lokasi">Admin → F&amp;B → <b>Kategori Produk</b>, lalu <b>Produk</b></p>
+
+    <h3>8a. Kategori produk</h3>
+    <p>Buat kategori seperti <i>Minuman</i>, <i>Makanan</i>, <i>Snack</i>. Kategori menjadi tab di layar POS.</p>
+    <figure><img src="gambar/admin-kategori-produk-baru.webp" alt="Buat kategori produk"><figcaption>Form kategori produk.</figcaption></figure>
+
+    <h3>8b. Produk</h3>
+    <figure><img src="gambar/admin-produk-baru.webp" alt="Buat produk"><figcaption>Form produk F&amp;B.</figcaption></figure>
+    <table>
+        <tr><th>Isian</th><th>Contoh</th><th>Keterangan</th></tr>
+        <tr><td>Nama</td><td>Indomie Goreng</td><td></td></tr>
+        <tr><td>Kategori</td><td>Makanan</td><td>Tombol <b>+</b> membuat kategori baru langsung dari sini.</td></tr>
+        <tr><td>Harga jual</td><td>Rp7.000</td><td>Harga ke pelanggan.</td></tr>
+        <tr><td>Satuan</td><td>pcs</td><td>pcs / gelas / porsi.</td></tr>
+        <tr><td>Kode</td><td><code>MI01</code></td><td>Untuk cari cepat di POS.</td></tr>
+        <tr><td>Barcode</td><td>8998866200301</td><td>Opsional — POS bisa scan barcode.</td></tr>
+        <tr><td>Lacak stok</td><td>Aktif</td><td>Matikan untuk produk tanpa stok (jasa, es teh racikan bila tidak dihitung).</td></tr>
+        <tr><td>Stok minimum</td><td>5</td><td>Di bawah angka ini muncul peringatan "menipis".</td></tr>
+    </table>
+    <div class="tips"><b>Harga pokok (HPP) tidak diisi di sini</b>
+        HPP dihitung otomatis dari <b>Stok masuk</b> (bab 9) sebagai rata-rata harga beli, supaya laba di laporan akurat.</div>
+    <figure><img src="gambar/admin-produk.webp" alt="Daftar produk"><figcaption>Daftar produk.</figcaption></figure>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="stok">
+    <h2><span class="no">9</span> Stok awal F&amp;B</h2>
+    <p class="lokasi">Aplikasi Kasir → Operasional → <b>Stok</b> → tab <b>Stok Masuk</b></p>
+
+    <figure><img src="gambar/kasir-stok-masuk.webp" alt="Stok masuk"><figcaption>Stok masuk: pilih produk, jumlah dan harga pokok per satuan. Bisa banyak baris sekaligus.</figcaption></figure>
+    <ol class="langkah">
+        <li>Pilih produk, isi <b>jumlah</b> dan <b>harga pokok / satuan</b> (harga beli).</li>
+        <li><b>+ Tambah baris</b> untuk produk lain dalam satu belanja.</li>
+        <li>Centang <i>Dibayar dari laci kas</i> hanya bila uangnya diambil dari laci kasir hari itu (tercatat sebagai pengeluaran shift).
+            Untuk stok awal, biarkan tidak dicentang.</li>
+        <li><b>Simpan Stok Masuk</b>.</li>
+    </ol>
+    <figure><img src="gambar/kasir-stok.webp" alt="Saldo stok"><figcaption>Tab Saldo Stok: stok, HPP, harga jual, margin dan nilai stok. Tab <b>Opname</b> untuk hitung fisik berkala.</figcaption></figure>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="kasir">
+    <h2><span class="no">10</span> Akun kasir &amp; PIN</h2>
+    <p class="lokasi">Admin → Pengaturan → <b>Pengguna</b> → <b>Buat</b></p>
+
+    <figure><img src="gambar/admin-pengguna-baru.webp" alt="Buat pengguna"><figcaption>Form pengguna: akun login, role &amp; cabang, PIN persetujuan.</figcaption></figure>
+    <ol class="langkah">
+        <li>Isi nama, username (untuk login cepat di tablet), email &amp; password.</li>
+        <li><b>Role</b>:
+            <table>
+                <tr><th>Role</th><th>Untuk</th></tr>
+                <tr><td>Kasir</td><td>Rental, POS, terima bayar, buka/tutup kas. Tidak bisa membatalkan transaksi tanpa PIN atasan.</td></tr>
+                <tr><td>Supervisor</td><td>Seperti kasir + menyetujui aksi dengan PIN, masuk panel admin data master.</td></tr>
+                <tr><td>Teknisi</td><td>Maintenance unit &amp; akses staf di TV.</td></tr>
+            </table>
+        </li>
+        <li>Centang <b>cabang</b> tempat ia bekerja.</li>
+        <li><b>PIN</b> — dipakai saat serah terima laci dan absensi; untuk supervisor juga untuk menyetujui aksi sensitif.</li>
+    </ol>
+    <div class="catatan"><b>Data karyawan &amp; gaji (opsional)</b>
+        Admin → Karyawan untuk profil, jadwal shift, absensi PIN + selfie dan rekap gaji. Tidak wajib untuk mulai berjualan.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="operasional">
+    <h2><span class="no">11</span> Pengaturan operasional</h2>
+    <p class="lokasi">Admin → Pengaturan → <b>Operasional</b></p>
+
+    <figure><img src="gambar/admin-operasional.webp" alt="Pengaturan operasional"><figcaption>Pilih cabang di atas — semua isian di bawahnya berlaku untuk cabang itu.</figcaption></figure>
+    <p>Periksa minimal:</p>
+    <ul>
+        <li><b>Kas &amp; pengeluaran</b> — batas pengeluaran kas laci per shift tanpa PIN, dan <b>modal tetap di laci</b>
+            (uang kembalian yang selalu ditinggal saat serah terima / tutup kas).</li>
+        <li><b>Open billing</b> — dihitung per berapa menit, minimal ditagih, dan aturan pembulatan.</li>
+        <li><b>Sesi &amp; TV</b> — peringatan sisa waktu, waktu pilih game, batal sesi tanpa PIN, tampilan timer di TV.</li>
+        <li><b>Struk</b> — lebar kertas printer, teks tambahan di kepala dan teks penutup.</li>
+        <li><b>Jam operasional</b> &amp; <b>QRIS</b> bila dipakai.</li>
+    </ul>
+    <p>Pembayaran online, WhatsApp &amp; laporan otomatis, serta member &amp; poin ada di menu Pengaturan lainnya — bisa diatur belakangan.</p>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="tv">
+    <h2><span class="no">12</span> Hubungkan TV (opsional)</h2>
+    <p class="lokasi">Di TV Android / Google TV + Admin → Rental → <b>Perangkat TV &amp; PC</b></p>
+
+    <p>Dengan aplikasi <b>TV Agent</b>, TV terkunci saat tidak ada sesi, menampilkan timer &amp; tagihan, dan bisa
+       dikontrol dari kartu unit (volume, matikan layar, pemberitahuan). Tanpa TV Agent, billing tetap jalan (mode Manual).</p>
+    <ol class="langkah">
+        <li>Di TV, pasang aplikasi <b>Downloader</b> dari Play Store, lalu buka alamat <code>http://IP-PC-server/apk</code> → pasang <b>TV Agent</b>.</li>
+        <li>Buka TV Agent → isi alamat server (<code>http://IP-PC-server</code>) → TV menampilkan <b>kode pairing</b>.</li>
+        <li>Di Admin → Perangkat TV &amp; PC → <b>Pasangkan TV / PC</b> → masukkan kode → pilih unit.</li>
+        <li>Ubah unit itu ke mode <b>TV Agent</b> (bab 7). Indikator <i>TV online</i> muncul di kartu kasir.</li>
+    </ol>
+    <figure><img src="gambar/admin-perangkat-tv.webp" alt="Perangkat TV"><figcaption>Daftar perangkat TV &amp; PC yang sudah dipasangkan, dengan status online.</figcaption></figure>
+    <div class="catatan"><b>Izin &amp; mode kiosk TV</b>
+        Langkah izin (tampil di atas aplikasi lain, aksesibilitas, device owner) ada di <code>tv-agent/README.md</code> di GitHub.</div>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="harian">
+    <h2><span class="no">13</span> Hari pertama: shift, rental, F&amp;B, bayar</h2>
+    <p class="lokasi">Aplikasi Kasir (tablet / HP / PC)</p>
+
+    <h3>13a. Buka shift (kas laci)</h3>
+    <p>Saat kasir login dan belum ada shift, aplikasi membuka halaman <b>Buka Shift</b>: hitung uang di laci,
+       isi <b>kas awal</b>, klik Buka. Satu cabang = satu laci; kasir berikutnya menerima laci lewat
+       <b>Serah Terima</b> (menu akun), bukan membuka shift baru.</p>
+
+    <h3>13b. Matriks unit</h3>
+    <figure><img src="gambar/kasir-matriks.webp" alt="Matriks unit"><figcaption>Menu <b>Rental PS</b>: kartu setiap unit dengan status Ready / Terisi / Menunggu Bayar / Maintenance. Ikon di kanan atas mengganti tampilan kotak ↔ daftar.</figcaption></figure>
+
+    <h3>13c. Mulai rental</h3>
+    <figure><img src="gambar/kasir-mulai-sesi.webp" alt="Mulai rental"><figcaption>Klik <b>Mulai Rental</b> di unit yang Ready.</figcaption></figure>
+    <ol class="langkah">
+        <li>Pilih <b>Tamu</b> atau <b>Member</b>.</li>
+        <li>Pilih cara tagih:
+            <b>Paket</b> (durasi tetap dari bab 6), <b>Durasi</b> (pilih/ketik menit, timer hitung mundur) atau
+            <b>Open Billing</b> (timer berjalan, dibayar saat selesai).</li>
+        <li>Opsional: sewa aksesori, waktu pilih game (tidak ditagih), nama pelanggan.</li>
+        <li>Klik <b>Mulai Rental</b>. Tagihan awal tampil di bawah; TV (bila terhubung) langsung terbuka.</li>
+    </ol>
+
+    <h3>13d. Kelola sesi</h3>
+    <figure><img src="gambar/kasir-kelola-sesi.webp" alt="Kelola sesi"><figcaption><b>Kelola Sesi</b>: rincian tagihan, sewa aksesori, tambah F&amp;B, pause, pindah unit, bonus waktu, cetak struk, <b>Selesai</b>, atau batalkan sesi (tidak jadi main).</figcaption></figure>
+    <p>Mode paket/durasi: ikon jam di kartu untuk <b>tambah waktu</b>. Klik <b>Selesai</b> saat pelanggan berhenti — unit berubah menjadi <i>Menunggu Bayar</i>.</p>
+
+    <h3>13e. Jual F&amp;B</h3>
+    <figure><img src="gambar/kasir-pos.webp" alt="POS F&B"><figcaption>Menu <b>POS &amp; F&amp;B</b>: ketuk produk, lalu bayar langsung atau <b>gabung ke tagihan unit</b>.</figcaption></figure>
+    <p>Dari kartu unit, ikon cangkir membuka POS yang sudah terhubung ke unit tersebut.</p>
+
+    <h3>13f. Bayar</h3>
+    <figure><img src="gambar/kasir-bayar.webp" alt="Pembayaran"><figcaption>Dialog pembayaran: tunai (uang pas / pecahan cepat, kembalian otomatis), QRIS, transfer, saldo member, atau dibagi beberapa metode.</figcaption></figure>
+    <p>Setelah bayar, struk bisa dicetak ke printer Bluetooth atau dikirim lewat WhatsApp.
+       Semua transaksi ada di menu <b>Transaksi</b>.</p>
+    <figure><img src="gambar/kasir-transaksi.webp" alt="Daftar transaksi"><figcaption>Daftar transaksi per hari: klik baris untuk rincian, cetak ulang struk atau batal (butuh PIN supervisor/owner).</figcaption></figure>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="tutup">
+    <h2><span class="no">14</span> Tutup kas &amp; laporan</h2>
+    <p class="lokasi">Menu akun → <b>Tutup Kas</b> · Operasional → <b>Laporan</b></p>
+
+    <figure><img src="gambar/kasir-tutup-kas.webp" alt="Tutup kas"><figcaption>Tutup kas: kas seharusnya (kas awal + penjualan tunai + deposit titipan), non-tunai, hitung fisik dan uang yang ditinggal.</figcaption></figure>
+    <ol class="langkah">
+        <li>Sesi yang masih berjalan tidak terganggu — pembayarannya masuk ke shift berikutnya.</li>
+        <li>Hitung uang di laci, ketik di <b>Uang di laci (hitung fisik)</b>. Selisih kurang/lebih tercatat otomatis.</li>
+        <li>Isi uang yang <b>ditinggal di laci</b> untuk besok; sisanya setoran.</li>
+        <li>Tutup. Laporan shift bisa dicetak / dikirim ke owner.</li>
+    </ol>
+    <figure><img src="gambar/kasir-laporan.webp" alt="Laporan"><figcaption>Laporan per periode: omzet bersih, transaksi, laba bersih, pengeluaran, ringkasan keuangan (sewa PS, F&amp;B, Playbox, HPP), metode pembayaran dan jam sibuk. Ikon mata di atas menyembunyikan nominal saat layar difoto.</figcaption></figure>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="backup">
+    <h2><span class="no">15</span> Backup &amp; update</h2>
+    <p class="lokasi">Admin → Pengaturan → <b>Backup &amp; Restore</b> dan <b>Pemeliharaan sistem</b></p>
+
+    <div class="dua">
+        <figure><img src="gambar/admin-backup.webp" alt="Backup"><figcaption>Status backup, tombol Backup sekarang, daftar file (Unduh / Pulihkan) dan unggah file backup.</figcaption></figure>
+        <figure><img src="gambar/admin-pemeliharaan.webp" alt="Pemeliharaan sistem"><figcaption>Pemeliharaan sistem: info versi, update database, trigger sinkron, optimalkan, restart layanan.</figcaption></figure>
+    </div>
+
+    <h3>Backup</h3>
+    <ul>
+        <li>Backup berjalan otomatis setiap hari jam <b>02:00</b> (database + foto/logo/wallpaper), disimpan di
+            <code>C:\BillingPS\data\storage\app\private\backup</code>. PC harus menyala pada jam itu.</li>
+        <li>Bila status berwarna kuning "Backup otomatis harian tidak berjalan", buka menu Start → Billing PS →
+            <b>Kelola layanan Billing PS</b> dan pastikan <code>BillingPS-Jadwal</code> berjalan.</li>
+        <li>Seminggu sekali <b>unduh</b> backup terbaru ke flashdisk / Google Drive — bila hard disk rusak, data bisa dipulihkan
+            dengan installer (pilih <i>Pulihkan dari file backup</i>).</li>
+    </ul>
+
+    <h3>Update ke versi baru</h3>
+    <ol class="langkah">
+        <li>Aplikasi memberi tahu bila ada versi baru (dasbor admin). Unduh <code>BillingPS-Setup-&lt;versi&gt;.exe</code> terbaru.</li>
+        <li>Jalankan di PC server yang sama → Next sampai selesai. Wizard isian dilewati; data &amp; pengaturan tetap.
+            Billing berhenti ±2–5 menit, sesi &amp; timer TV tetap berjalan.</li>
+        <li>Buka Pemeliharaan sistem: <b>Backup dulu → Update database → Pasang ulang trigger sinkron → Optimalkan → Restart antrean &amp; realtime</b>.</li>
+    </ol>
+</section>
+
+<!-- ================================================================== -->
+<section class="bab" id="masalah">
+    <h2><span class="no">16</span> Masalah umum</h2>
+
+    <table>
+        <tr><th>Gejala</th><th>Penyebab &amp; solusi</th></tr>
+        <tr><td>Tablet tidak bisa membuka <code>http://IP-PC</code></td>
+            <td>Tablet beda jaringan / Wi-Fi tamu; IP PC berubah (buat IP tetap, bab 1); port web bukan 80 → tambahkan <code>:PORT</code>.</td></tr>
+        <tr><td>Lupa password owner</td>
+            <td>PowerShell <b>Administrator</b>:
+                <pre>cd C:\BillingPS\app
+..\runtime\php\php.exe artisan tinker --execute="App\Models\User::withoutGlobalScopes()->where('email','EMAIL')->update(['password'=>bcrypt('PasswordBaru123')]);"</pre></td></tr>
+        <tr><td>Aplikasi tidak terbuka setelah PC restart</td>
+            <td>Menu Start → Billing PS → <b>Kelola layanan Billing PS</b> → Nyalakan semua. Log ada di <code>C:\BillingPS\logs</code>.</td></tr>
+        <tr><td>Port 80 dipakai program lain (IIS, Skype lama)</td>
+            <td>Jalankan installer lagi dan pilih port lain (mis. 8000), lalu buka <code>http://IP-PC:8000</code>.</td></tr>
+        <tr><td>TV "offline"</td>
+            <td>TV standby / Wi-Fi putus. Tekan tombol <b>Bangunkan</b> di kartu unit, cek alamat server di TV Agent sama dengan IP PC.</td></tr>
+        <tr><td>Unit tidak muncul di kasir</td>
+            <td>Unit tidak aktif, atau tipe konsolnya berjenis PC (lihat menu <i>Rental PC</i>), atau filter status masih aktif.</td></tr>
+        <tr><td>"Tarif belum diatur" di kartu unit</td>
+            <td>Belum ada paket <b>Tarif per jam</b> untuk tipe konsol / kategori unit itu (bab 6).</td></tr>
+    </table>
+
+    <div class="tips"><b>Panduan lain</b>
+        Dokumentasi lengkap (TV Agent, rental PC, Playbox, karyawan, cloud, pembayaran online) ada di
+        <a href="https://github.com/deindr4/billing-rental-ps">github.com/deindr4/billing-rental-ps</a> → folder <code>docs</code>.</div>
+</section>
+</main>
+
+<footer>
+    Billing PS · <a href="https://github.com/deindr4">Copyright © deindr4</a> · Lisensi MIT
+</footer>
+</body>
+</html>

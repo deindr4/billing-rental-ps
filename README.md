@@ -56,19 +56,24 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
     <td width="50%"><img src="docs/gambar/kasir-pos.webp" alt="POS F&B"><br><sub><b>POS F&B</b> — gabung ke tagihan unit, batalkan salah order (−1 / semua)</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/gambar/kasir-rental-daftar.webp" alt="Tampilan daftar"><br><sub><b>Tampilan daftar</b> — satu baris per unit (timer, tagihan, aksi, remote), 15 unit per halaman; bisa ganti ke kotak</sub></td>
+    <td><img src="docs/gambar/kasir-playbox.webp" alt="Sewa Playbox"><br><sub><b>Sewa Playbox</b> — PS bawa pulang: jatuh tempo, telat, deposit, perpanjang, kembali, surat sewa, WA & lokasi Maps</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-playbox-baru.webp" alt="Sewa Playbox baru"><br><sub><b>Sewa Playbox baru</b> — 4 langkah: penyewa (foto, KTP, lokasi) → unit & durasi → jaminan & checklist → tanda tangan</sub></td>
     <td><img src="docs/gambar/kasir-rental-pc.webp" alt="Rental PC"><br><sub><b>Rental PC</b> — menu terpisah dari Rental PS; tutup game hang, Task Manager sementara, kunci, log off, restart, nyalakan (Wake-on-LAN)</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/gambar/kasir-analisa-pintar.webp" alt="Analisa Pintar"><br><sub><b>Analisa Pintar</b> — audit kecurangan kasir, titik impas, proyeksi akhir bulan, operasional & stok (tanpa AI, offline)</sub></td>
-  </tr>
-  <tr>
     <td><img src="docs/gambar/kasir-kelola-tv.webp" alt="Kelola TV"><br><sub><b>Kelola TV</b> — unlock / lock, bypass berdurasi, kode darurat, riwayat</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/gambar/kasir-turnamen-bagan.webp" alt="Turnamen"><br><sub><b>Turnamen</b> — gugur, gugur ganda, liga, fase grup + klasemen</sub></td>
-  </tr>
-  <tr>
     <td><img src="docs/gambar/kasir-sembunyi-nominal.webp" alt="Sembunyikan nominal"><br><sub><b>Tombol mata</b> — omzet, kas laci & laporan jadi <code>Rp *******</code> sebelum foto layar</sub></td>
-    <td><img src="docs/gambar/kasir-matriks-terang.webp" alt="Mode terang"><br><sub>Mode terang · ikon & tombol berwarna per fungsi</sub></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="55%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
+    <td><img src="docs/gambar/kasir-matriks-terang.webp" alt="Mode terang"><br><sub>Mode terang · ikon & tombol berwarna per fungsi</sub></td>
+    <td align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="70%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
   </tr>
 </table>
 
@@ -269,6 +274,10 @@ Shared hosting / cPanel juga bisa tanpa realtime TV: [docs/hosting.md](docs/host
 
 ### PC rental (Windows 10 / 11, 64-bit)
 
+> 📘 **Panduan bergambar A–Z** (pasang → tipe konsol, paket harga, unit, menu F&B, stok, akun kasir, TV → transaksi
+> pertama & tutup kas): [PDF](public/tutorial/windows.pdf) ·
+> [versi web](public/tutorial/windows.html) — juga tersedia di aplikasi: `http://IP-PC/tutorial-windows`.
+
 1. Unduh **`BillingPS-Setup-<versi>.exe`** dari [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest).
 2. Jalankan → pilih **Pasang baru** atau **Pulihkan dari file backup** (pindah PC).
 3. Isi nama rental, akun owner, zona waktu → tunggu beberapa menit.
@@ -363,6 +372,7 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/pc-agent.md](docs/pc-agent.md) | Rental PC & kontrak agen kiosk Windows |
 | [docs/analisa-pintar.md](docs/analisa-pintar.md) | Aturan Analisa Pintar (skor risiko kasir, keuangan, operasional, stok) |
 | [docs/karyawan.md](docs/karyawan.md) | Satu laci & serah terima shift, data karyawan, jadwal & absensi (PIN + selfie), rekap gaji & bonus |
+| [public/tutorial/windows.html](public/tutorial/windows.html) · [PDF](public/tutorial/windows.pdf) | Panduan bergambar pasang di Windows A–Z: data unit, paket, F&B, kasir, TV, transaksi pertama |
 | [docs/playbox.md](docs/playbox.md) | Sewa Playbox bawa pulang: penyewa, jaminan, checklist, perpanjang, pengembalian, pengingat WA |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |

@@ -51,6 +51,9 @@ Route::get('/apk', function () {
     ]);
 })->middleware('throttle:20,1')->name('apk');
 
+// Panduan pasang Windows A–Z (file statis public/tutorial/windows.html & .pdf)
+Route::redirect('/tutorial-windows', '/tutorial/windows.html')->name('tutorial.windows');
+
 // Publik (tanpa login): billboard TV lounge
 Route::get('/billboard/{kode}', Billboard::class)->middleware('throttle:60,1')->name('billboard');
 Route::get('/booking/{kode}', BookingPortal::class)->middleware('throttle:60,1')->name('booking');

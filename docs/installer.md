@@ -1,5 +1,8 @@
 # Installer Windows (tahap 14)
 
+Panduan bergambar untuk pemilik rental (pasang sampai transaksi pertama): `public/tutorial/windows.html` / `.pdf`,
+dibuka di aplikasi lewat `http://IP-PC/tutorial-windows`. Dokumen ini catatan teknis installernya.
+
 Satu file `BillingPS-Setup-<versi>.exe` untuk PC rental yang masih bersih (Windows 10/11 64-bit).
 Isi: PHP 8.4, Apache 2.4.68, MariaDB 10.11 LTS, Visual C++ runtime 14.50+, Node.js (WhatsApp), cloudflared,
 aplikasi siap pakai, APK TV.
