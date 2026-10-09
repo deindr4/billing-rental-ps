@@ -31,6 +31,8 @@ final class MenuOperator
                 ['route' => 'pembayaran-online', 'label' => 'Pembayaran online', 'ikon' => 'bayar', 'warna' => 'text-ik-hijau', 'izin' => 'pembayaran.terima'],
                 ['route' => 'transaksi', 'label' => 'Transaksi', 'ikon' => 'transaksi', 'warna' => 'text-ik-teal', 'izin' => 'transaksi.lihat'],
                 ['route' => 'member', 'label' => 'Member', 'ikon' => 'member', 'warna' => 'text-ik-indigo', 'izin' => 'member.kelola'],
+                // Absen masuk / pulang karyawan (PIN + foto selfie) di tablet kasir
+                ['route' => 'absen', 'label' => 'Absen', 'ikon' => 'jam', 'warna' => 'text-ik-hijau', 'izin' => 'shift.kelola'],
             ],
             'Operasional' => [
                 ['route' => 'stok', 'label' => 'Stok', 'ikon' => 'stok', 'warna' => 'text-ik-teal', 'izin' => 'stok.lihat'],

@@ -4,6 +4,7 @@ use App\Http\Controllers\LaporanAsetController;
 use App\Http\Controllers\StrukController;
 use App\Livewire\Auth\Login;
 use App\Livewire\Auth\PilihCabang;
+use App\Livewire\Operator\Absen;
 use App\Livewire\Operator\AnalisaPintar;
 use App\Livewire\Operator\AsetModal;
 use App\Livewire\Operator\BukaShift;
@@ -87,6 +88,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/shift/buka', BukaShift::class)->middleware('can:shift.kelola')->name('shift.buka');
         Route::get('/shift/tutup', TutupKas::class)->middleware('can:shift.kelola')->name('shift.tutup');
         Route::get('/shift/serah-terima', SerahTerima::class)->middleware('can:shift.kelola')->name('shift.serah');
+        Route::get('/absen', Absen::class)->middleware('can:shift.kelola')->name('absen');
         Route::get('/shift/{id}/laporan', LaporanShift::class)->whereUuid('id')->name('shift.laporan');
         Route::get('/transaksi', DaftarTransaksi::class)->middleware('can:transaksi.lihat')->name('transaksi');
         Route::get('/stok', Stok::class)->middleware('can:stok.lihat')->name('stok');

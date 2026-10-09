@@ -65,6 +65,17 @@
         </div>
     @endif
 
+    @if ($absenPulang || $absenMasuk)
+        <div class="grid gap-2 mb-3 print:hidden {{ $absenPulang && $absenMasuk ? 'grid-cols-2' : '' }}">
+            @if ($absenPulang)
+                <a href="{{ route('absen', ['k' => $absenPulang->id]) }}" wire:navigate class="btn btn-tint tint-oranye h-10">Absen pulang · {{ $absenPulang->nama }}</a>
+            @endif
+            @if ($absenMasuk)
+                <a href="{{ route('absen', ['k' => $absenMasuk->id]) }}" wire:navigate class="btn btn-tint tint-hijau h-10">Absen masuk · {{ $absenMasuk->nama }}</a>
+            @endif
+        </div>
+    @endif
+
     @if ($perluKeluar)
         <form method="POST" action="{{ route('logout') }}" class="print:hidden">
             @csrf

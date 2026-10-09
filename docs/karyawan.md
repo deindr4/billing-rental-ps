@@ -6,7 +6,7 @@ Rancangan (keputusan pemilik, 2026-10-09). Dikerjakan bertahap:
 |---|---|---|
 | A | Satu laci per cabang + serah terima shift (modal tetap, setoran) | ✅ |
 | B | Data karyawan (profil, boleh tanpa akun login) | ✅ |
-| C | Jadwal shift & absensi (PIN + foto selfie) | ⬜ |
+| C | Jadwal shift & absensi (PIN + foto selfie) | ✅ |
 | D | Gaji & bonus (pokok bulanan / per shift / per jam + bonus target omzet, potongan selisih kas disetujui owner) | ⬜ |
 
 ## A. Satu laci & serah terima
@@ -50,6 +50,29 @@ Admin → **Karyawan → Karyawan** (izin `karyawan.kelola`, bawaan hanya Owner)
 - **PIN absen**: karyawan tanpa akun login punya PIN sendiri; yang punya akun memakai PIN akunnya.
 
 Tabel `karyawan` ikut sinkron lokal ↔ cloud.
+
+## C. Jadwal & absensi
+
+**Admin → Karyawan**
+- **Jam shift**: nama, jam mulai–selesai (selesai < mulai = lewat tengah malam, mis. 17:00–02:00), toleransi terlambat.
+- **Jadwal mingguan**: tabel karyawan × hari (Senin–Minggu), tiap sel pilih jam shift atau *Libur*;
+  tombol "= Senin" menyamakan semua hari. Berulang tiap minggu.
+- **Absensi**: riwayat dengan foto masuk & pulang, jadwal, terlambat, lama kerja; filter karyawan, periode,
+  "hanya yang terlambat". **Koreksi** (mis. lupa absen pulang) wajib alasan, dihitung ulang, tercatat di log aktivitas.
+  Absensi tidak bisa ditambah dari admin — hanya dari aplikasi kasir (PIN + foto).
+
+**Aplikasi kasir → Absen** (`/absen`)
+1. Pilih nama (karyawan aktif cabang ini / tanpa cabang utama).
+2. Ketik PIN (akun login, atau PIN absen karyawan). Salah 5× → diblokir 5 menit.
+3. Ambil foto selfie — memakai kamera bawaan tablet (`<input capture>`), karena tablet membuka aplikasi lewat
+   `http://` LAN dan akses kamera langsung dari browser hanya diizinkan di HTTPS. Foto dikompres WebP (±30–60 KB).
+4. Masuk: **terlambat** = melewati jam mulai + toleransi (dihitung dari jam mulai). Masuk tanpa jadwal hari itu
+   tetap dicatat (lembur / tukar shift). Pulang: **lama kerja** & **pulang cepat** (sebelum jam selesai).
+
+Kasir yang membuka shift & belum absen langsung diarahkan ke halaman Absen. Laporan serah terima menampilkan
+tombol *Absen pulang* (penyerah) & *Absen masuk* (penerima).
+
+Catatan: foto absen tersimpan di PC tempat absen; sinkron cloud hanya membawa data (foto tidak ikut).
 
 Kolom baru `shifts`: `kas_ditinggal`, `setoran`, `diserahkan_ke`, `shift_sebelum_id`, `shift_berikut_id`,
 `selisih_terima`, `serah_terima` (JSON potret). Pengaturan: `kas.modal_tetap` (per cabang, bawaan Rp200.000).

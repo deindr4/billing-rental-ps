@@ -5,6 +5,8 @@ namespace App\Livewire\Operator;
 use App\Exceptions\BillingException;
 use App\Livewire\Concerns\WithAlert;
 use App\Models\Cabang;
+use App\Models\Karyawan;
+use App\Services\Karyawan\AbsensiService;
 use App\Models\Shift;
 use App\Services\Billing\ShiftService;
 use App\Support\Tenancy;
@@ -67,6 +69,15 @@ class BukaShift extends Component
             $this->error($e->getMessage());
 
             return;
+        }
+
+        // Belum absen masuk hari ini → langsung ke halaman absen (PIN + selfie)
+        $karyawan = Karyawan::query()->where('user_id', auth()->id())->aktif()->first();
+
+        if ($karyawan && ! app(AbsensiService::class)->terbuka($karyawan)) {
+            $this->flashSuccess('Shift dibuka · silakan absen masuk');
+
+            return $this->redirectRoute('absen', ['k' => $karyawan->id], navigate: true);
         }
 
         $this->flashSuccess('Shift dibuka');

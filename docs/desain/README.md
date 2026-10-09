@@ -65,6 +65,9 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Tambahan di luar desain — Serah Terima & Laporan Shift: pola halaman Tutup Kas (`max-w-lg`, `surface`, ringkasan
   kas bersama `partials/ringkasan-kas`), langkah bernomor 1–3, daftar "Diteruskan ke kasir berikutnya"; Buka Shift
   menampilkan kartu "Laci sedang dipegang" bila kasir lain bertugas. Menu akun: "Serah Terima (ganti kasir)".
+- Tambahan di luar desain — Absen (menu kasir, ikon `jam` hijau): grid kartu karyawan (foto bundar / inisial, status
+  "Masuk HH:MM"), lalu panel PIN + input foto kamera + pratinjau, tombol Absen masuk (primary) / pulang (tint oranye).
+  Admin: Jam shift, Jadwal mingguan (tabel select per hari), Absensi (foto bundar masuk/pulang).
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.
