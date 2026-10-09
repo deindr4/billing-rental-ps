@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (installer VPS satu perintah)
+-----------------------------------------------------------------------------
+- installer/vps/pasang-vps.sh untuk VPS polos Ubuntu 22.04/24.04 & Debian 12: domain/subdomain atau IP, mode server
+  utama (rental + owner + PIN dibuat) atau cloud pendamping PC rental. Memasang Nginx, PHP 8.4-FPM, MariaDB,
+  Supervisor, SSL Let's Encrypt; tuning otomatis sesuai RAM/CPU (buffer pool MariaDB, proses PHP-FPM & OPcache,
+  gzip & cache aset Nginx, HTTP/2, swap). Selesai: alamat akses, IP, login & password owner/super admin tampil di
+  layar (salinan /root/billingps-login.txt). Dijalankan lagi = update ke rilis terbaru. Panduan: docs/vps.md.
+
+
 2026-10-09 (gaji & bonus karyawan)
 -----------------------------------------------------------------------------
 - Admin -> Karyawan -> Rekap gaji: buat draft per karyawan per periode (bulanan/mingguan/harian). Komponen: gaji

@@ -278,6 +278,16 @@ yang menyala sendiri, firewall dibuka hanya untuk jaringan lokal. Panduan: [docs
 Di TV buka `http://IP-PC/apk` → pasang **TV Agent** → isi alamat server → masukkan kode pairing di Admin → Perangkat TV & PC.
 Izin & mode kiosk: [tv-agent/README.md](tv-agent/README.md).
 
+### VPS polos — satu perintah
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/deindr4/billing-rental-ps/master/installer/vps/pasang-vps.sh -o pasang-vps.sh
+sudo bash pasang-vps.sh
+```
+
+Ubuntu 22.04/24.04 · Debian 12: pasang Nginx, PHP 8.4, MariaDB & SSL, **disetel otomatis sesuai RAM**, lalu menampilkan
+alamat akses, login & password. Bisa sebagai server utama (tanpa PC rental) atau cloud pendamping. Panduan: [docs/vps.md](docs/vps.md).
+
 ### Server cloud (opsional)
 
 Unggah **`BillingPS-cloud-<versi>.tar.gz`** ke CloudPanel / VPS — langkah lengkap di [docs/cloudpanel.md](docs/cloudpanel.md)
@@ -337,6 +347,7 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 |---|---|
 | [docs/installer.md](docs/installer.md) | Installer Windows: pasang, pulihkan backup, update, Cloudflare Tunnel, WhatsApp, uninstall, build |
 | [docs/update-aplikasi.md](docs/update-aplikasi.md) | Cek update dari GitHub & menerbitkan rilis |
+| [docs/vps.md](docs/vps.md) | VPS polos satu perintah (tuning Nginx/PHP/MariaDB otomatis, SSL, login tampil di akhir) |
 | [docs/cloudpanel.md](docs/cloudpanel.md) | Server cloud di CloudPanel (Nginx, Cloudflare, cron, supervisor, update) |
 | [docs/hosting.md](docs/hosting.md) | Server cloud di shared hosting / cPanel (tanpa realtime TV) |
 | [docs/server-publik.md](docs/server-publik.md) | Server publik, Cloudflare, `.env` produksi, checklist |
