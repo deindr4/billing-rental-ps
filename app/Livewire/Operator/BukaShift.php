@@ -34,10 +34,12 @@ class BukaShift extends Component
         $this->dipegang = $shift->terbukaDiCabang($tenancy->cabangId());
 
         // Saran kas awal: uang yang ditinggal di laci saat shift terakhir ditutup (data lama: kas fisik)
+        // Shift yang ditutup lewat serah terima selalu punya penerus → yang dicari: penutupan tanpa penerus
         $terakhir = Shift::query()
             ->where('status', Shift::STATUS_TUTUP)
+            ->whereNull('shift_berikut_id')
             ->orderByDesc('ditutup_pada')
-            ->orderByDesc('dibuka_pada') // serah terima & tutup bisa di detik yang sama
+            ->orderByDesc('dibuka_pada')
             ->first(['kas_fisik', 'kas_ditinggal']);
         $this->kasAkhirSebelumnya = $terakhir ? (int) ($terakhir->kas_ditinggal ?? $terakhir->kas_fisik) : null;
     }
