@@ -43,6 +43,9 @@ Paket lokal (tanpa unduh dari GitHub): `sudo bash pasang-vps.sh BillingPS-cloud-
 | Layanan | Supervisor: `billingps-antrean`, `billingps-realtime` (Reverb 127.0.0.1:6001), `billingps-jadwal` |
 | SSL | Let's Encrypt + alih HTTP→HTTPS + perpanjang otomatis (bila domain sudah mengarah ke VPS) |
 | Firewall | bila `ufw` aktif, port 80/443 dibuka (ufw tidak diaktifkan otomatis supaya SSH tidak terkunci) |
+| Rapikan data | jadwal Laravel: `db:rapikan` tiap hari 03:40 (log lama, cache kedaluwarsa, antrean sinkron ganda), `db:rapikan --analisa` Minggu 04:10 — lihat [installer.md → Performa](installer.md#performa-database--php) |
+
+Nama aplikasi **Delta Billing HuB** (`APP_NAME`); saat update, nama bawaan lama di `.env` diganti otomatis.
 
 ## Selesai
 

@@ -1,4 +1,8 @@
-# Installer Windows (tahap 14)
+# Installer Windows Delta Billing HuB (tahap 14)
+
+Nama aplikasi **Delta Billing HuB** (sejak 2026.10.09.3; dulu Billing Rental PS). Nama internal tetap: folder
+`C:\BillingPS`, layanan `BillingPS-*`, file `BillingPS-Setup/cloud/Monitor`, database `billing_ps` — update versi lama mulus.
+Saat update, `APP_NAME` di `.env` diganti otomatis hanya bila masih nama bawaan lama; pintasan nama lama dihapus.
 
 Panduan bergambar untuk pemilik rental (pasang sampai transaksi pertama): `public/tutorial/windows.html` / `.pdf`,
 dibuka di aplikasi lewat `http://IP-PC/tutorial-windows`. Dokumen ini catatan teknis installernya.
@@ -21,8 +25,8 @@ aplikasi siap pakai, APK TV.
 3. Tunggu "Menyiapkan database, aplikasi & layanan" (beberapa menit).
 4. **Data login** tampil di kotak pesan (harus ditutup dulu) lalu lagi di halaman Selesai: email, username, password,
    PIN, super admin & alamat aplikasi (mis. `http://192.168.1.10`). Password **tidak** disimpan ke file mana pun.
-   Centang "Buka Billing PS sekarang" untuk langsung membuka aplikasi.
-5. Ikon **Billing PS** di Desktop membuka aplikasi di PC itu.
+   Centang "Buka Delta Billing HuB sekarang" untuk langsung membuka aplikasi.
+5. Ikon **Delta Billing HuB** di Desktop membuka aplikasi di PC itu.
 
 Pulihkan dari backup — urutan otomatis: buat tabel → pulihkan isi backup (data & logo) → lengkapi tabel/kolom versi baru
 → hak akses & trigger sync → alamat server lokal TV diganti ke IP PC ini (bila satu cabang). Yang perlu diisi ulang
@@ -78,9 +82,10 @@ supaya HTTPS & IP asli pengunjung (`CF-Connecting-IP`) terbaca — batas login d
 | `logs` | log pemasangan, apache, mariadb, layanan |
 | `kelola` | skrip pengelola & `konfigurasi.json` |
 
-## Billing PS Monitor
+## Delta Billing HuB Monitor
 
-Ikon **Billing PS Monitor** di Desktop & menu Start (`kelola\BillingPS-Monitor.exe`, minta izin Administrator).
+Ikon **Delta Billing HuB Monitor** di Desktop & menu Start (`kelola\BillingPS-Monitor.exe`, minta izin Administrator;
+installer menutupnya otomatis sebelum update supaya file tidak terkunci).
 Dipakai saat billing tidak bisa dibuka:
 
 - **Layanan Windows**: status Database (MariaDB), Web (Apache + PHP), Realtime, Antrean, Jadwal, WhatsApp, Tunnel
@@ -98,12 +103,25 @@ bawaan Windows — tanpa SDK). Konversi manual: `BillingPS-Monitor.exe --konvers
 
 ## Kelola sehari-hari
 
-Menu Start → **Billing PS**:
-- **Billing PS Monitor** — lihat di atas.
-- **Kelola layanan Billing PS** — status, nyalakan / hentikan / mulai ulang semua layanan, buka folder log.
-- **Folder log Billing PS**, **Panel Admin**, **Uninstall**.
+Menu Start → **Delta Billing HuB** (pemasangan lama: grup **Billing PS** tetap dipakai):
+- **Delta Billing HuB Monitor** — lihat di atas.
+- **Kelola layanan Delta Billing HuB** — status, nyalakan / hentikan / mulai ulang semua layanan, buka folder log.
+- **Folder log Delta Billing HuB**, **Panel Admin**, **Uninstall**.
 
 Pemeliharaan lain (cache, migrasi, trigger sync) ada di Admin → Pengaturan → **Pemeliharaan sistem**.
+
+## Performa database & PHP
+
+- **Index** tambahan untuk tabel yang cepat membesar: `sesi (cabang_id, mulai_pada)`, `audit_log (cabang_id, aksi, created_at)`,
+  `transaksi_item (transaksi_id, jenis)`, `sync_antrean (tabel, row_id, aksi)`.
+- **Antrean sinkron** tidak lagi diisi heartbeat TV (kolom status/ping `perangkat_tv` diabaikan trigger) dan baris
+  ganda per data dirapikan — hanya perubahan terakhir yang dikirim.
+- **`php artisan db:rapikan`** (jadwal tiap hari 03:40): hapus log lama bertahap per 5.000 baris — `log_tv` 120 hari,
+  `notifikasi_log` 90, `sync_log` 30, `audit_log` 400, `failed_jobs` 30 — plus cache kedaluwarsa & antrean ganda.
+  `--analisa` (Minggu 04:10) memperbarui statistik index (`ANALYZE TABLE`) tabel besar.
+- **MariaDB** (`templat\my.ini`): `innodb_buffer_pool_size` ±20% RAM (256 MB–2 GB, dihitung ulang tiap update),
+  log InnoDB 256 MB, performance_schema mati, query > 2 detik dicatat di `logs\mariadb-lambat.log`.
+- **PHP OPcache** (`templat\php.ini`): 256 MB, 30.000 file, cek perubahan file tiap 30 detik.
 
 ## Update ke versi baru
 
@@ -114,7 +132,7 @@ Pemasangan lama tanpa WhatsApp otomatis mendapat layanan `BillingPS-WhatsApp` + 
 
 ## Uninstall
 
-Panel Kontrol / menu Start → Uninstall Billing PS. Layanan & aturan firewall dihapus, lalu ditanya:
+Panel Kontrol / menu Start → Uninstall Delta Billing HuB. Layanan & aturan firewall dihapus, lalu ditanya:
 **hapus semua data?** Pilih **No** untuk menyimpan `C:\BillingPS\data` (database, foto, backup) —
 saat dipasang ulang ke folder yang sama, data lama dipakai lagi.
 

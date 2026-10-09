@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Billing PS - pasang / update server cloud di CloudPanel. Jalankan sebagai SITE USER (bukan root):
+# Delta Billing HuB - pasang / update server cloud di CloudPanel. Jalankan sebagai SITE USER (bukan root):
 #   bash pasang-site.sh [file-paket.tar.gz]
 # Pertama kali: ekstrak paket, buat .env (isian database ditanya), migrasi, super admin, optimize.
 # Sudah terpasang (.env ada): mode update (maintenance, backup, ekstrak, migrasi, optimize).
@@ -73,6 +73,8 @@ if [ -f .env ]; then
     art migrate --force
     art db:seed --class=HakAksesSeeder --force
     art sync pasang-trigger
+    # Nama aplikasi baru: ganti hanya bila masih nama bawaan lama
+    sed -i -E 's/^APP_NAME="?(Billing Rental PS|Billing PS)"?$/APP_NAME="Delta Billing HuB"/' .env
     art optimize
     art queue:restart
     art up
@@ -96,7 +98,7 @@ read -rp "Domain lewat Cloudflare (awan oranye)? [Y/n]: " CF; CF="${CF:-Y}"
 echo "APP_KEY dari PC rental (C:\\BillingPS\\app\\.env, baris APP_KEY=...) supaya kunci payment gateway terbaca"
 read -rsp "  di kedua server. Kosongkan untuk membuat baru: " KUNCI; echo
 
-atur APP_NAME '"Billing Rental PS"'
+atur APP_NAME '"Delta Billing HuB"'
 atur APP_ENV production
 atur APP_DEBUG false
 atur APP_URL "https://$DOMAIN"

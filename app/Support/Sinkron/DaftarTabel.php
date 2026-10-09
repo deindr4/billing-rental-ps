@@ -36,6 +36,27 @@ final class DaftarTabel
     /** Tabel yang hanya ditambah (tidak pernah diubah): dikirim dengan INSERT IGNORE */
     public const HANYA_TAMBAH = ['audit_log'];
 
+    /**
+     * Kolom yang berubah terus (heartbeat / status langsung): UPDATE yang HANYA mengubah kolom ini tidak masuk antrean.
+     * Tanpa ini setiap heartbeat TV (beberapa detik sekali) menambah baris antrean & ikut dikirim ke cloud.
+     */
+    public const VOLATIL = [
+        'perangkat_tv' => ['terakhir_online', 'ip', 'ping_lokal_ms', 'ping_cloud_ms', 'server_dipakai', 'layar', 'volume',
+            'senyap', 'layar_hidup', 'diagnostik', 'diagnostik_pada', 'updated_at', 'version', 'origin', 'synced_at'],
+    ];
+
+    /** Syarat trigger UPDATE: minimal satu kolom bukan-volatil berubah ('' = selalu catat) */
+    private static function syaratUbah(string $tabel): string
+    {
+        if (! isset(self::VOLATIL[$tabel])) {
+            return '';
+        }
+
+        $kolom = array_diff(Schema::getColumnListing($tabel), self::VOLATIL[$tabel]);
+
+        return $kolom === [] ? '' : '('.implode(' OR ', array_map(fn ($k) => "NOT (NEW.`{$k}` <=> OLD.`{$k}`)", $kolom)).')';
+    }
+
     /** Pivot: tabel => [kolom induk, tabel induk (untuk tenant)] */
     public const PIVOT = [
         'cabang_user' => ['user_id', 'users'],
@@ -59,7 +80,7 @@ final class DaftarTabel
     public static function trigger(): array
     {
         $sql = [];
-        $catat = fn (string $tabel, string $id, string $aksi, string $tenant) => 'IF @sync_lewati IS NULL THEN '
+        $catat = fn (string $tabel, string $id, string $aksi, string $tenant, string $syarat = '') => 'IF @sync_lewati IS NULL'.($syarat !== '' ? " AND {$syarat}" : '').' THEN '
             ."INSERT INTO sync_antrean (tabel, row_id, aksi, tenant_id, sumber, created_at) VALUES ('{$tabel}', {$id}, '{$aksi}', {$tenant}, @sync_sumber, NOW(3)); "
             .'END IF';
 
@@ -69,7 +90,7 @@ final class DaftarTabel
             }
 
             $sql[] = "CREATE TRIGGER sync_{$t}_ai AFTER INSERT ON `{$t}` FOR EACH ROW ".$catat($t, 'NEW.id', 'upsert', 'NEW.tenant_id');
-            $sql[] = "CREATE TRIGGER sync_{$t}_au AFTER UPDATE ON `{$t}` FOR EACH ROW ".$catat($t, 'NEW.id', 'upsert', 'NEW.tenant_id');
+            $sql[] = "CREATE TRIGGER sync_{$t}_au AFTER UPDATE ON `{$t}` FOR EACH ROW ".$catat($t, 'NEW.id', 'upsert', 'NEW.tenant_id', self::syaratUbah($t));
             $sql[] = "CREATE TRIGGER sync_{$t}_ad AFTER DELETE ON `{$t}` FOR EACH ROW ".$catat($t, 'OLD.id', 'hapus', 'OLD.tenant_id');
         }
 

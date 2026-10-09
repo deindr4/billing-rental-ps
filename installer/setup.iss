@@ -1,4 +1,4 @@
-; Billing Rental PS — installer Windows (Inno Setup 6). Dibangun oleh installer\build.ps1:
+; Delta Billing HuB (dulu Billing Rental PS) — installer Windows (Inno Setup 6). Dibangun oleh installer\build.ps1:
 ;   ISCC.exe /DVersi=2026.10.01 /DStaging=<folder staging> /DKeluaran=<folder hasil> setup.iss
 ; Pertama kali: wizard data rental & owner -> kelola\pasang.ps1
 ; Sudah terpasang: update -> kelola\perbarui.ps1 (backup, migrasi, data & pengaturan tetap)
@@ -17,12 +17,13 @@
 
 [Setup]
 AppId={#AppId}
-AppName=Billing Rental PS
+AppName=Delta Billing HuB
 AppVersion={#Versi}
-AppVerName=Billing Rental PS {#Versi}
-AppPublisher=Billing Rental PS
+AppVerName=Delta Billing HuB {#Versi}
+AppPublisher=Delta Billing HuB
+; Folder, nama layanan & nama file tetap "BillingPS" supaya update versi lama mulus
 DefaultDirName={sd}\BillingPS
-DefaultGroupName=Billing PS
+DefaultGroupName=Delta Billing HuB
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
 PrivilegesRequired=admin
@@ -35,7 +36,7 @@ SetupIconFile={#Staging}\ikon.ico
 ; Halaman lisensi (MIT + syarat atribusi hak cipta) saat pasang
 LicenseFile={#Staging}\LICENSE.txt
 UninstallDisplayIcon={app}\app\public\favicon.ico
-UninstallDisplayName=Billing Rental PS
+UninstallDisplayName=Delta Billing HuB
 Compression=lzma2/max
 SolidCompression=yes
 WizardStyle=modern
@@ -64,23 +65,32 @@ Type: filesandordirs; Name: "{app}\app\resources"
 Type: filesandordirs; Name: "{app}\app\routes"
 Type: filesandordirs; Name: "{app}\app\vendor"
 Type: filesandordirs; Name: "{app}\app\public\build"
+; Pintasan nama lama (sebelum 2026.10.09.3) diganti nama Delta Billing HuB
+Type: files; Name: "{group}\Billing PS.lnk"
+Type: files; Name: "{group}\Billing PS - Panel Admin.lnk"
+Type: files; Name: "{group}\Billing PS Monitor.lnk"
+Type: files; Name: "{group}\Kelola layanan Billing PS.lnk"
+Type: files; Name: "{group}\Folder log Billing PS.lnk"
+Type: files; Name: "{group}\Uninstall Billing PS.lnk"
+Type: files; Name: "{autodesktop}\Billing PS.lnk"
+Type: files; Name: "{autodesktop}\Billing PS Monitor.lnk"
 
 [Dirs]
 Name: "{app}\data"; Flags: uninsneveruninstall
 Name: "{app}\logs"; Flags: uninsneveruninstall
 
 [Icons]
-Name: "{group}\Billing PS"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
-Name: "{group}\Billing PS - Panel Admin"; Filename: "{app}\Billing PS - Admin.url"; IconFilename: "{app}\app\public\favicon.ico"
-Name: "{group}\Billing PS Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
-Name: "{autodesktop}\Billing PS Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
-Name: "{group}\Kelola layanan Billing PS"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\kelola\layanan.ps1"""; IconFilename: "{app}\app\public\favicon.ico"
-Name: "{group}\Folder log Billing PS"; Filename: "{app}\logs"
-Name: "{group}\Uninstall Billing PS"; Filename: "{uninstallexe}"
-Name: "{autodesktop}\Billing PS"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
+Name: "{group}\Delta Billing HuB"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
+Name: "{group}\Delta Billing HuB - Panel Admin"; Filename: "{app}\Billing PS - Admin.url"; IconFilename: "{app}\app\public\favicon.ico"
+Name: "{group}\Delta Billing HuB Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
+Name: "{autodesktop}\Delta Billing HuB Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
+Name: "{group}\Kelola layanan Delta Billing HuB"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\kelola\layanan.ps1"""; IconFilename: "{app}\app\public\favicon.ico"
+Name: "{group}\Folder log Delta Billing HuB"; Filename: "{app}\logs"
+Name: "{group}\Uninstall Delta Billing HuB"; Filename: "{uninstallexe}"
+Name: "{autodesktop}\Delta Billing HuB"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
 
 [Run]
-Filename: "{app}\Billing PS.url"; Description: "Buka Billing PS sekarang"; Flags: postinstall shellexec nowait skipifsilent
+Filename: "{app}\Billing PS.url"; Description: "Buka Delta Billing HuB sekarang"; Flags: postinstall shellexec nowait skipifsilent
 
 [UninstallRun]
 Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\kelola\copot.ps1"""; Flags: runhidden waituntilterminated; RunOnceId: "CopotLayanan"
@@ -120,10 +130,10 @@ begin
   HalMode.SelectedValueIndex := 0;
 
   HalBackup := CreateInputFilePage(HalMode.ID, 'File backup',
-    'Pilih file backup Billing PS (backup-....zip).',
+    'Pilih file backup Delta Billing HuB / Billing PS (backup-....zip).',
     'Ambil dari PC lama: Admin > Platform > Backup > Unduh, atau folder data\storage\app\private\backup. ' +
     'Akun owner, transaksi, member, pengaturan & logo ikut dipulihkan.');
-  HalBackup.Add('File backup:', 'Backup Billing PS (*.zip)|*.zip', '.zip');
+  HalBackup.Add('File backup:', 'Backup Delta Billing HuB (*.zip)|*.zip', '.zip');
 
   HalRental := CreateInputQueryPage(HalBackup.ID, 'Data rental',
     'Nama rental & cabang yang tampil di aplikasi, struk, TV dan billboard.', '');
@@ -281,8 +291,12 @@ end;
 
 { Update: backup database & hentikan layanan sebelum file diganti (memakai skrip versi lama) }
 function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Kode: Integer;
 begin
   Result := '';
+  { Monitor yang masih terbuka mengunci file exe-nya: tutup dulu }
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM BillingPS-Monitor.exe', '', SW_HIDE, ewWaitUntilTerminated, Kode);
   if ModeUpdate and FileExists(ExpandConstant('{app}\kelola\perbarui.ps1')) then begin
     WizardForm.PreparingLabel.Caption := 'Backup database & menghentikan layanan...';
     if PowerShell('perbarui.ps1', '-Tahap sebelum') <> 0 then
@@ -341,10 +355,10 @@ begin
   if (CurPageID = wpFinished) and (HasilPasang <> '') then begin
     if BerhasilPasang and not ModeUpdate then
       WizardForm.FinishedLabel.Caption := InfoLogin + #13#10#13#10 + HasilPasang + #13#10#13#10 +
-        'Buka aplikasi dari ikon "Billing PS" di Desktop.'
+        'Buka aplikasi dari ikon "Delta Billing HuB" di Desktop.'
     else
       WizardForm.FinishedLabel.Caption := HasilPasang + #13#10#13#10 +
-        'Buka aplikasi dari ikon "Billing PS" di Desktop. Kelola layanan lewat menu Start > Billing PS.';
+        'Buka aplikasi dari ikon "Delta Billing HuB" di Desktop. Status & restart layanan: ikon "Delta Billing HuB Monitor".';
     WizardForm.FinishedLabel.AdjustHeight;
   end;
 end;
@@ -357,7 +371,7 @@ begin
   if CurUninstallStep <> usPostUninstall then Exit;
   Root := ExpandConstant('{app}');
 
-  if MsgBox('Hapus juga SEMUA DATA Billing PS?' + #13#10#13#10 +
+  if MsgBox('Hapus juga SEMUA DATA Delta Billing HuB?' + #13#10#13#10 +
     '- Database (transaksi, member, laporan)' + #13#10 +
     '- Foto, logo & file backup' + #13#10#13#10 +
     'Pilih "No" untuk menyimpan data di ' + Root + '\data supaya bisa dipakai lagi saat pasang ulang.',

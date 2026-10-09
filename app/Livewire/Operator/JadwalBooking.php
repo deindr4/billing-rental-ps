@@ -57,7 +57,8 @@ class JadwalBooking extends Component
     public function daftar(): Collection
     {
         return Booking::query()->with(['unit:id,nama', 'member:id,kode,tier'])
-            ->whereDate('mulai_pada', $this->tanggal)
+            // Rentang (bukan whereDate) supaya index (cabang_id, mulai_pada) terpakai
+            ->whereBetween('mulai_pada', [\Illuminate\Support\Carbon::parse($this->tanggal)->startOfDay(), \Illuminate\Support\Carbon::parse($this->tanggal)->endOfDay()])
             ->orderBy('mulai_pada')
             ->get();
     }

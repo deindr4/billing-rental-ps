@@ -1,4 +1,4 @@
-# Billing PS — kelola layanan dari menu Start ("Kelola layanan Billing PS").
+# Delta Billing HuB — kelola layanan dari menu Start ("Kelola layanan Delta Billing HuB").
 param([ValidateSet('menu', 'status', 'mulai', 'henti', 'ulang')][string] $Aksi = 'menu')
 
 # Perlu hak administrator untuk menyalakan/mematikan layanan
@@ -37,7 +37,7 @@ switch ($Aksi) {
     'menu' {
         while ($true) {
             Clear-Host
-            Write-Host '=== Billing PS - Kelola layanan ===' -ForegroundColor Cyan
+            Write-Host '=== Delta Billing HuB - Kelola layanan ===' -ForegroundColor Cyan
             Status
             Write-Host "`n  1. Nyalakan semua   2. Hentikan semua   3. Mulai ulang semua   4. Buka folder log   5. Keluar"
             switch (Read-Host '  Pilih') {

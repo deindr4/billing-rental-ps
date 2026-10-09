@@ -5,6 +5,24 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (nama baru: Delta Billing HuB + optimasi database)
+-----------------------------------------------------------------------------
+- Aplikasi berganti nama menjadi "Delta Billing HuB" (judul panel admin, installer, pintasan Desktop/menu Start,
+  Monitor, panduan). Saat update, APP_NAME di .env diganti otomatis hanya bila masih nama bawaan lama; nama yang
+  sudah diubah sendiri tetap. Folder C:\BillingPS, nama layanan BillingPS-* dan nama file tetap (update mulus).
+- Index database baru untuk data yang cepat membesar: sesi per cabang & waktu mulai, audit log per cabang/aksi/waktu,
+  item transaksi per jenis, antrean sinkron per data. Halaman jadwal booking memakai rentang tanggal (bisa pakai index).
+- Antrean sinkron jauh lebih kecil: heartbeat TV (status online, ping, layar, volume) tidak lagi dicatat; baris ganda
+  untuk data yang sama dirapikan (hanya perubahan terakhir yang dikirim). Di PC uji: 20.850 -> 624 baris.
+- Perintah baru "php artisan db:rapikan" (otomatis tiap hari 03:40): hapus log lama bertahap - log TV 120 hari,
+  log notifikasi 90 hari, log sinkron 30 hari, audit 400 hari, job gagal 30 hari - plus cache kedaluwarsa.
+  "--analisa" (Minggu 04:10) memperbarui statistik index tabel besar.
+- PC rental: MariaDB disetel sesuai RAM (buffer pool +-20% RAM, 256 MB-2 GB), log InnoDB lebih besar,
+  performance_schema dimatikan, query lambat (> 2 detik) dicatat di logs\mariadb-lambat.log; OPcache PHP 256 MB.
+  Berlaku otomatis saat installer update dijalankan.
+- Installer menutup Delta Billing HuB Monitor yang masih terbuka sebelum update (file tidak terkunci).
+
+
 2026-10-09 (Billing PS Monitor)
 -----------------------------------------------------------------------------
 - Program baru di PC rental: "Billing PS Monitor" (ikon Desktop & menu Start, ikut installer). Menampilkan status

@@ -46,6 +46,10 @@ Schedule::call(function () {
 Schedule::call(fn () => app(PlayboxService::class)->kirimPengingat())
     ->everyTenMinutes()->name('playbox-pengingat')->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
 
+// Database tetap ringan: pangkas log lama, cache kedaluwarsa, antrean sinkron ganda; statistik index tiap Minggu
+Schedule::command('db:rapikan')->dailyAt('03:40')->withoutOverlapping(30);
+Schedule::command('db:rapikan --analisa')->weeklyOn(0, '04:10')->withoutOverlapping(30);
+
 // Sinkron lokal -> cloud tiap menit (diam jika belum diatur); cloud membersihkan antrean lama
 Schedule::command('sync jalankan --diam')->everyMinute()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
 Schedule::command('sync bersihkan')->dailyAt('03:30')->when(fn () => config('app.mode') === 'cloud');

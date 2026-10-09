@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panduan Pasang Billing PS di Windows</title>
-<meta name="description" content="Panduan lengkap A–Z: pasang Billing PS di PC Windows, isi unit, paket harga, F&B, akun kasir, TV, sampai transaksi pertama dan tutup kas.">
+<title>Panduan Pasang Delta Billing HuB di Windows</title>
+<meta name="description" content="Panduan lengkap A–Z: pasang Delta Billing HuB di PC Windows, isi unit, paket harga, F&B, akun kasir, TV, sampai transaksi pertama dan tutup kas.">
 <style>
 :root {
     --bg: #f4f6f9; --surface: #ffffff; --text: #18202b; --muted: #5c6878; --line: #dfe4ea;
@@ -88,7 +88,7 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
 <header class="sampul">
     <div class="wadah">
         <div class="label">Panduan lengkap · A sampai Z</div>
-        <h1>Pasang Billing PS di Windows</h1>
+        <h1>Pasang Delta Billing HuB di Windows</h1>
         <p>Mulai dari menyiapkan PC, memasang installer, mengisi unit, paket harga dan menu F&amp;B, membuat akun kasir,
            menghubungkan TV, sampai transaksi pertama dan tutup kas.</p>
         <a class="tombol" href="windows.pdf">Unduh versi PDF</a>
@@ -123,7 +123,7 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
     <h2><span class="no">1</span> Persiapan PC &amp; jaringan</h2>
     <p class="lokasi">Dilakukan sekali, sebelum memasang.</p>
 
-    <p>Billing PS dipasang di <b>satu PC Windows</b> di rental (disebut <i>PC server</i>). Tablet/HP kasir dan TV cukup
+    <p>Delta Billing HuB dipasang di <b>satu PC Windows</b> di rental (disebut <i>PC server</i>). Tablet/HP kasir dan TV cukup
        membuka alamat PC ini lewat Wi-Fi/LAN yang sama — tidak perlu memasang apa pun di tablet.</p>
 
     <table>
@@ -171,7 +171,8 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
         <li>Klik <b>Install</b> dan tunggu tahap <i>Menyiapkan database, aplikasi &amp; layanan</i> selesai (beberapa menit).</li>
         <li>Di akhir muncul <b>Data login</b>: email, password, PIN, akun super admin dan <b>alamat aplikasi</b>
             (mis. <code>http://192.168.1.10</code>). <b>Foto atau catat</b> — password tidak disimpan di file mana pun.</li>
-        <li>Centang <i>Buka Billing PS sekarang</i> → Finish. Ikon <b>Billing PS</b> juga ada di Desktop.</li>
+        <li>Centang <i>Buka Delta Billing HuB sekarang</i> → Finish. Ikon <b>Delta Billing HuB</b> dan
+            <b>Delta Billing HuB Monitor</b> (status &amp; restart layanan, backup darurat) juga ada di Desktop.</li>
     </ol>
 
     <div class="catatan"><b>Yang terpasang otomatis</b>
@@ -458,8 +459,8 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
     <ul>
         <li>Backup berjalan otomatis setiap hari jam <b>02:00</b> (database + foto/logo/wallpaper), disimpan di
             <code>C:\BillingPS\data\storage\app\private\backup</code>. PC harus menyala pada jam itu.</li>
-        <li>Bila status berwarna kuning "Backup otomatis harian tidak berjalan", buka menu Start → Billing PS →
-            <b>Kelola layanan Billing PS</b> dan pastikan <code>BillingPS-Jadwal</code> berjalan.</li>
+        <li>Bila status berwarna kuning "Backup otomatis harian tidak berjalan", buka ikon
+            <b>Delta Billing HuB Monitor</b> di Desktop dan pastikan <code>BillingPS-Jadwal</code> berjalan.</li>
         <li>Seminggu sekali <b>unduh</b> backup terbaru ke flashdisk / Google Drive — bila hard disk rusak, data bisa dipulihkan
             dengan installer (pilih <i>Pulihkan dari file backup</i>).</li>
     </ul>
@@ -486,7 +487,8 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
                 <pre>cd C:\BillingPS\app
 ..\runtime\php\php.exe artisan tinker --execute="App\Models\User::withoutGlobalScopes()->where('email','EMAIL')->update(['password'=>bcrypt('PasswordBaru123')]);"</pre></td></tr>
         <tr><td>Aplikasi tidak terbuka setelah PC restart</td>
-            <td>Menu Start → Billing PS → <b>Kelola layanan Billing PS</b> → Nyalakan semua. Log ada di <code>C:\BillingPS\logs</code>.</td></tr>
+            <td>Buka <b>Delta Billing HuB Monitor</b> di Desktop → <b>Nyalakan semua</b>. Belum bisa? Klik <b>Backup database</b>
+                dulu, lalu lihat log di <code>C:\BillingPS\logs</code>.</td></tr>
         <tr><td>Port 80 dipakai program lain (IIS, Skype lama)</td>
             <td>Jalankan installer lagi dan pilih port lain (mis. 8000), lalu buka <code>http://IP-PC:8000</code>.</td></tr>
         <tr><td>TV "offline"</td>
@@ -504,7 +506,7 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 24px
 </main>
 
 <footer>
-    Billing PS · <a href="https://github.com/deindr4">Copyright © deindr4</a> · Lisensi MIT
+    Delta Billing HuB · <a href="https://github.com/deindr4">Copyright © deindr4</a> · Lisensi MIT
 </footer>
 </body>
 </html>

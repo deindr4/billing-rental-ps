@@ -35,7 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class) // batas login gagal per IP sama dengan login kasir
-            ->brandName('Billing Rental PS')
+            ->brandName(fn () => config('app.name'))
             ->brandLogo(fn () => view('filament.brand'))
             ->brandLogoHeight('2.25rem')
             ->favicon('/favicon.ico')

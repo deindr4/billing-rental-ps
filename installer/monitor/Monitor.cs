@@ -1,4 +1,4 @@
-// Billing PS Monitor — status & perbaikan cepat server billing di PC rental (Windows).
+// Delta Billing HuB Monitor — status & perbaikan cepat server billing di PC rental (Windows).
 // Dipasang installer di <folder>\kelola\BillingPS-Monitor.exe, berjalan sebagai Administrator.
 //  - Status layanan Windows (MariaDB, Apache+PHP, Realtime, Antrean, Jadwal, WhatsApp, Tunnel) + nyalakan/hentikan/restart
 //  - Pemeriksaan: query database, PHP CLI, halaman web (/up), realtime TV
@@ -138,7 +138,7 @@ namespace BillingPS.Monitor
         public Jendela()
         {
             _k = Konfig.Muat();
-            Text = "Billing PS Monitor";
+            Text = "Delta Billing HuB Monitor";
             Font = new Font("Segoe UI", 9.5f);
             Width = 1000;
             Height = 760;
@@ -148,7 +148,7 @@ namespace BillingPS.Monitor
 
             // ---------- Kepala ----------
             var kepala = new Panel { Dock = DockStyle.Top, Height = 64, Padding = new Padding(12, 8, 12, 8), BackColor = Color.FromArgb(15, 28, 43) };
-            var judul = new Label { Text = "Billing PS Monitor", ForeColor = Color.White, Font = new Font("Segoe UI Semibold", 14f), AutoSize = true, Location = new Point(12, 8) };
+            var judul = new Label { Text = "Delta Billing HuB Monitor", ForeColor = Color.White, Font = new Font("Segoe UI Semibold", 14f), AutoSize = true, Location = new Point(12, 8) };
             var sub = new Label
             {
                 Text = _k.Ada ? ("Folder " + _k.Root + "  ·  web :" + _k.PortWeb + "  ·  database :" + _k.PortDb + "  ·  realtime :" + _k.PortWs)
@@ -549,7 +549,7 @@ namespace BillingPS.Monitor
 
         private void AksiTerpilih(string aksi)
         {
-            if (_lvLayanan.SelectedItems.Count == 0) { MessageBox.Show(this, "Pilih layanan di daftar dulu.", "Billing PS Monitor"); return; }
+            if (_lvLayanan.SelectedItems.Count == 0) { MessageBox.Show(this, "Pilih layanan di daftar dulu.", "Delta Billing HuB Monitor"); return; }
             var item = _lvLayanan.SelectedItems[0];
             string nama = (string)item.Tag, judul = item.Text;
             if (aksi == "nyalakan") Jalankan("Menyalakan " + judul, () => Nyalakan(nama));
@@ -651,14 +651,14 @@ namespace BillingPS.Monitor
                     var entri = zip.CreateEntry("database.sql", CompressionLevel.Optimal);
                     using (var tulis = new StreamWriter(entri.Open(), new UTF8Encoding(false)))
                     {
-                        tulis.Write("-- Backup Billing PS (Monitor) " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n");
+                        tulis.Write("-- Backup Delta Billing HuB (Monitor) " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n");
                         tulis.Write("-- Pulihkan: Admin -> Backup, php artisan backup:pulihkan <file>, atau installer\n\n");
                         TulisPernyataan(sementara, tulis);
                     }
 
                     var info = zip.CreateEntry("info.json");
                     using (var tulis = new StreamWriter(info.Open(), new UTF8Encoding(false)))
-                        tulis.Write("{\n    \"aplikasi\": \"Billing PS\",\n    \"mode\": \"local\",\n    \"database\": \"billing_ps\",\n    \"dibuat\": \"" +
+                        tulis.Write("{\n    \"aplikasi\": \"Delta Billing HuB\",\n    \"mode\": \"local\",\n    \"database\": \"billing_ps\",\n    \"dibuat\": \"" +
                                     DateTime.Now.ToString("yyyy-MM-ddTHH:mm:sszzz") + "\",\n    \"sumber\": \"monitor\"\n}");
 
                     if (_cbFoto.Checked)

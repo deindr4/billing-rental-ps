@@ -1,6 +1,8 @@
 <div align="center">
 
-# 🎮 Billing Rental PS
+# 🎮 Delta Billing HuB
+
+<sub>dulu: Billing Rental PS</sub>
 
 **Aplikasi billing rental PlayStation & PC lengkap — kasir, TV terkunci otomatis, F&B, booking, member, turnamen, laporan & analisa.**
 Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
@@ -286,8 +288,11 @@ Shared hosting / cPanel juga bisa tanpa realtime TV: [docs/hosting.md](docs/host
 Semua komponen (PHP 8.4, Apache, MariaDB, Node.js untuk WhatsApp, cloudflared) terpasang sebagai **layanan Windows**
 yang menyala sendiri, firewall dibuka hanya untuk jaringan lokal. Panduan: [docs/installer.md](docs/installer.md).
 
-**Billing PS Monitor** (ikut installer, ikon di Desktop): status MySQL / PHP / Apache & port, restart layanan, dan
+**Delta Billing HuB Monitor** (ikut installer, ikon di Desktop): status MySQL / PHP / Apache & port, restart layanan, dan
 backup database walau halaman billing tidak bisa dibuka.
+
+**Cepat walau data menumpuk:** index untuk tabel yang paling sering dibuka (sesi, transaksi, audit, antrean sinkron),
+log lama dirapikan otomatis tiap malam (`php artisan db:rapikan`), MariaDB & OPcache disetel sesuai RAM PC.
 
 ### TV
 

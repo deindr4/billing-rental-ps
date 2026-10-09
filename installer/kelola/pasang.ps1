@@ -43,6 +43,7 @@ try {
     $nilai = @{
         APP = Path-Maju $App; RUNTIME = Path-Maju $Runtime; DATA = Path-Maju $Data; LOGS = Path-Maju $Logs
         PORT_WEB = $konfig.port_web; PORT_DB = $konfig.port_db; ZONA = $konfig.zona
+        BUFFER_POOL = Ukuran-BufferPool
     }
 
     # ---------------- 3. PHP ----------------

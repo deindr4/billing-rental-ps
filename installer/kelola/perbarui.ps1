@@ -27,6 +27,7 @@ try {
     $nilai = @{
         APP = Path-Maju $App; RUNTIME = Path-Maju $Runtime; DATA = Path-Maju $Data; LOGS = Path-Maju $Logs
         PORT_WEB = $konfig.port_web; PORT_DB = $konfig.port_db; ZONA = $konfig.zona
+        BUFFER_POOL = Ukuran-BufferPool
     }
 
     # Runtime bisa ikut diperbarui: tulis ulang konfigurasi dari templat terbaru
@@ -44,6 +45,15 @@ try {
     Artisan @('sync', 'pasang-trigger')
     Artisan @('pasang:awal', "--apk=$(Join-Path $Root 'apk\tv-agent.apk')")
     Artisan @('storage:link', '--force') -BolehGagal | Out-Null
+    # Nama aplikasi baru (2026.10.09.2): ganti hanya bila masih nama bawaan lama
+    $fileEnv = Join-Path $App '.env'
+    $isiEnv = [IO.File]::ReadAllText($fileEnv)
+    if ($isiEnv -match '(?m)^APP_NAME="?(Billing Rental PS|Billing PS)"?\r?$') {
+        $isiEnv = [regex]::Replace($isiEnv, '(?m)^APP_NAME=.*$', 'APP_NAME="Delta Billing HuB"')
+        [IO.File]::WriteAllText($fileEnv, $isiEnv, (New-Object Text.UTF8Encoding $false))
+        Tulis 'Nama aplikasi: Delta Billing HuB'
+    }
+
     # Versi lama tanpa WhatsApp: layanan & .env dilengkapi di sini (sebelum optimize)
     Siapkan-WhatsApp $konfig
     Siapkan-Tunnel

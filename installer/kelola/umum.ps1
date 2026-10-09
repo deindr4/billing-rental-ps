@@ -1,4 +1,4 @@
-# Billing PS — fungsi bersama skrip pengelola (pasang, perbarui, copot, layanan).
+# Delta Billing HuB (nama internal: BillingPS) — fungsi bersama skrip pengelola (pasang, perbarui, copot, layanan).
 # Struktur di PC rental:
 #   <root>\app       aplikasi Laravel (+ .env)
 #   <root>\runtime   php, apache, mariadb, nssm.exe
@@ -56,6 +56,14 @@ function Isi-Templat([string] $Sumber, [string] $Tujuan, [hashtable] $Nilai) {
 }
 
 function Path-Maju([string] $p) { return $p.Replace('\', '/') }
+
+# Buffer pool InnoDB ±20% RAM (PC rental juga dipakai program lain): 256 MB – 2 GB, kelipatan 128 MB
+function Ukuran-BufferPool {
+    $ramMb = 4096
+    try { $ramMb = [int] ((Get-CimInstance Win32_ComputerSystem).TotalPhysicalMemory / 1MB) } catch { }
+    $mb = [math]::Floor(($ramMb * 0.2) / 128) * 128
+    return '{0}M' -f [math]::Min(2048, [math]::Max(256, $mb))
+}
 
 function Port-Terpakai([int] $Port) {
     return [bool] (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue)
@@ -148,7 +156,7 @@ function Pasang-Layanan([string] $Nama, [string] $Judul, [string] $Exe, [string]
     if ($Argumen) { Nssm @('set', $Nama, 'AppParameters', $Argumen) }
     Nssm @('set', $Nama, 'AppDirectory', $Folder)
     Nssm @('set', $Nama, 'DisplayName', $Judul)
-    Nssm @('set', $Nama, 'Description', 'Billing Rental PS')
+    Nssm @('set', $Nama, 'Description', 'Delta Billing HuB')
     Nssm @('set', $Nama, 'Start', 'SERVICE_AUTO_START')
     Nssm (@('set', $Nama, 'AppEnvironmentExtra', "PATH=$PathRuntime") + $EnvTambahan)
     Nssm @('set', $Nama, 'AppStdout', (Join-Path $Logs "$Nama.log"))

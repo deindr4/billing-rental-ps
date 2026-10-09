@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================================================
-# Billing Rental PS - pasang di VPS polos (Ubuntu 22.04/24.04, Debian 12) dalam satu perintah.
+# Delta Billing HuB (dulu Billing Rental PS) - pasang di VPS polos (Ubuntu 22.04/24.04, Debian 12) dalam satu perintah.
 #
 #   curl -fsSL https://raw.githubusercontent.com/deindr4/billing-rental-ps/master/installer/vps/pasang-vps.sh -o pasang-vps.sh
 #   sudo bash pasang-vps.sh                      # tanya isian (domain, mode, nama rental, ...)
@@ -56,7 +56,7 @@ art() { sudo -u "$APP_USER" php "$APP_DIR/artisan" "$@"; }
 #  MODE UPDATE: sudah terpasang
 # ====================================================================================================
 if [ -f "$APP_DIR/.env" ]; then
-    judul "Billing PS sudah terpasang di $APP_DIR → UPDATE"
+    judul "Delta Billing HuB sudah terpasang di $APP_DIR → UPDATE"
     if [ -z "$PAKET_LOKAL" ]; then
         VERSI="${VERSI:-$(curl -fsS "https://api.github.com/repos/$REPO/releases/latest" | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 | sed 's/^v//')}"
         PAKET_LOKAL="/root/BillingPS-cloud-$VERSI.tar.gz"
@@ -70,6 +70,8 @@ if [ -f "$APP_DIR/.env" ]; then
     art migrate --force
     art db:seed --class=HakAksesSeeder --force
     art sync pasang-trigger
+    # Nama aplikasi baru: ganti hanya bila masih nama bawaan lama
+    sed -i -E 's/^APP_NAME="?(Billing Rental PS|Billing PS)"?$/APP_NAME="Delta Billing HuB"/' "$APP_DIR/.env"
     art optimize
     art queue:restart
     art up
@@ -82,7 +84,7 @@ fi
 # ====================================================================================================
 #  ISIAN
 # ====================================================================================================
-judul "Billing Rental PS — pasang baru (RAM ${RAM_MB} MB, ${CPU} CPU, IP $IP_PUBLIK)"
+judul "Delta Billing HuB — pasang baru (RAM ${RAM_MB} MB, ${CPU} CPU, IP $IP_PUBLIK)"
 echo "Domain / subdomain yang sudah diarahkan (A record) ke IP $IP_PUBLIK, mis. billing.rentalku.com."
 echo "Kosongkan untuk akses lewat IP saja (http, tanpa SSL)."
 tanya DOMAIN "Domain"
@@ -253,7 +255,7 @@ atur() { # KUNCI nilai di .env
 
 # Alamat & HTTPS ditentukan setelah SSL; sementara http
 HOST="${DOMAIN:-$IP_PUBLIK}"
-atur APP_NAME '"Billing Rental PS"'
+atur APP_NAME '"Delta Billing HuB"'
 atur APP_ENV production
 atur APP_DEBUG false
 atur APP_URL "http://$HOST"
@@ -492,7 +494,7 @@ supervisorctl restart billingps-realtime billingps-antrean billingps-jadwal >/de
 # ====================================================================================================
 URL="$SKEMA://$HOST"
 {
-    echo "Billing Rental PS — dipasang $(date '+%d/%m/%Y %H:%M') di $(hostname) (IP $IP_PUBLIK)"
+    echo "Delta Billing HuB — dipasang $(date '+%d/%m/%Y %H:%M') di $(hostname) (IP $IP_PUBLIK)"
     echo "Alamat aplikasi : $URL"
     echo "Panel admin     : $URL/admin"
     if [ "$MODE" = utama ]; then

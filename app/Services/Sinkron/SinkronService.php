@@ -79,6 +79,25 @@ final class SinkronService
         return (int) DB::table('sync_antrean')->count();
     }
 
+    /**
+     * Hapus antrean ganda (tabel + baris + aksi sama), sisakan yang terbaru. Aman: paket sinkron selalu mengambil
+     * isi baris terkini dari tabelnya, jadi antrean lama untuk baris yang sama tidak membawa data tambahan.
+     * Menjaga antrean tetap kecil saat sinkron belum diatur / internet lama putus. Return jumlah baris dihapus.
+     */
+    public function rapikanAntrean(): int
+    {
+        if (! in_array(DB::getDriverName(), ['mysql', 'mariadb'], true)) {
+            return 0;
+        }
+
+        // Satu baris MAX(id) per grup (bukan self-join: ribuan heartbeat satu TV = jutaan pasangan baris)
+        return (int) DB::affectingStatement(
+            'DELETE a FROM sync_antrean a JOIN (SELECT tabel, row_id, aksi, MAX(id) AS akhir FROM sync_antrean'
+            .' GROUP BY tabel, row_id, aksi HAVING COUNT(*) > 1) g ON g.tabel = a.tabel AND g.row_id = a.row_id AND g.aksi = a.aksi'
+            .' WHERE a.id < g.akhir'
+        );
+    }
+
     /** Tenant yang disinkronkan server lokal ini (rental ini) */
     public function tenantId(): ?string
     {
