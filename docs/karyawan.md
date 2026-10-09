@@ -7,7 +7,7 @@ Rancangan (keputusan pemilik, 2026-10-09). Dikerjakan bertahap:
 | A | Satu laci per cabang + serah terima shift (modal tetap, setoran) | ✅ |
 | B | Data karyawan (profil, boleh tanpa akun login) | ✅ |
 | C | Jadwal shift & absensi (PIN + foto selfie) | ✅ |
-| D | Gaji & bonus (pokok bulanan / per shift / per jam + bonus target omzet, potongan selisih kas disetujui owner) | ⬜ |
+| D | Gaji & bonus (pokok bulanan / per shift / per jam + bonus target omzet, potongan selisih kas disetujui owner) | ✅ |
 
 ## A. Satu laci & serah terima
 
@@ -73,6 +73,30 @@ Kasir yang membuka shift & belum absen langsung diarahkan ke halaman Absen. Lapo
 tombol *Absen pulang* (penyerah) & *Absen masuk* (penerima).
 
 Catatan: foto absen tersimpan di PC tempat absen; sinkron cloud hanya membawa data (foto tidak ikut).
+
+## D. Gaji & bonus
+
+Admin → **Karyawan → Rekap gaji** (izin `karyawan.kelola`).
+
+**Buat rekap**: pilih periode gaji (bulanan / mingguan / harian — tanggal bawaan: bulan lalu, Senin–Minggu lalu,
+kemarin), centang karyawan dengan periode itu → satu **draft** per karyawan. Periode yang bertumpuk dengan rekap
+lain (selain yang dibatalkan) ditolak.
+
+**Komponen** (dari pengaturan gaji karyawan):
+
+| Komponen | Rumus |
+|---|---|
+| Gaji pokok | penuh bila periode = satu bulan kalender, selain itu prorata `pokok × hari periode ÷ hari dalam bulan` |
+| Upah hadir | `upah per shift/hari × hari hadir` (absensi) |
+| Upah jam | `upah per jam × jam kerja` (absensi, per menit) |
+| Bonus | per **shift yang dipegang** karyawan (akun login) dengan omzet ≥ target: nominal tetap, atau `persen × (omzet − target)`. Omzet shift = pembayaran sukses di shift itu, tanpa top up saldo member |
+| Penyesuaian | baris manual ± (uang makan, lembur, kasbon, …) |
+| Potongan | **usulan**: kas kurang saat tutup kas / serah terima di shift yang dipegang, dan selisih saat uang yang ditinggal dihitung penerima (tanggung jawab penyerah). **Hanya yang dicentang owner yang dipotong.** |
+
+**Alur**: draft (centang potongan, isi penyesuaian → *Simpan & hitung ulang* memakai data absensi & shift terbaru)
+→ **Setujui** (terkunci) → **Bayar** dari rekening / kas laci → tercatat sebagai **pengeluaran kategori Gaji**
+(kas laci: butuh shift terbuka & saldo cukup). **Batalkan** rekap yang sudah dibayar ikut membatalkan pengeluarannya.
+**Slip gaji** bisa dicetak (`/gaji/{id}/slip`).
 
 Kolom baru `shifts`: `kas_ditinggal`, `setoran`, `diserahkan_ke`, `shift_sebelum_id`, `shift_berikut_id`,
 `selisih_terima`, `serah_terima` (JSON potret). Pengaturan: `kas.modal_tetap` (per cabang, bawaan Rp200.000).

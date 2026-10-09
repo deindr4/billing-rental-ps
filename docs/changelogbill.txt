@@ -5,6 +5,16 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (gaji & bonus karyawan)
+-----------------------------------------------------------------------------
+- Admin -> Karyawan -> Rekap gaji: buat draft per karyawan per periode (bulanan/mingguan/harian). Komponen: gaji
+  pokok (prorata bila bukan sebulan penuh), upah per hari hadir & per jam kerja (dari absensi), bonus target omzet per
+  shift yang dipegang (nominal / persen kelebihan), penyesuaian manual, potongan selisih kas (usulan dari kas kurang &
+  selisih serah terima; hanya yang dicentang owner). Alur draft -> setujui -> bayar (pengeluaran kategori Gaji,
+  rekening / kas laci) -> slip gaji; batal ikut membatalkan pengeluaran.
+- Database: tabel baru penggajian -> Update database + Pasang ulang trigger sinkron. Panduan: docs/karyawan.md.
+
+
 2026-10-09 (jadwal & absensi karyawan)
 -----------------------------------------------------------------------------
 - Admin -> Karyawan: "Jam shift" (template jam kerja + toleransi terlambat, bisa lewat tengah malam), "Jadwal

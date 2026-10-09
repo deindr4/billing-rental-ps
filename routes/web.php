@@ -89,6 +89,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/shift/tutup', TutupKas::class)->middleware('can:shift.kelola')->name('shift.tutup');
         Route::get('/shift/serah-terima', SerahTerima::class)->middleware('can:shift.kelola')->name('shift.serah');
         Route::get('/absen', Absen::class)->middleware('can:shift.kelola')->name('absen');
+        Route::get('/gaji/{id}/slip', fn (string $id) => view('struk.slip-gaji', [
+            'p' => \App\Models\Penggajian::query()->with('karyawan')->findOrFail($id),
+            'tenant' => auth()->user()->tenant?->nama,
+        ]))->whereUuid('id')->middleware('can:karyawan.kelola')->name('gaji.slip');
         Route::get('/shift/{id}/laporan', LaporanShift::class)->whereUuid('id')->name('shift.laporan');
         Route::get('/transaksi', DaftarTransaksi::class)->middleware('can:transaksi.lihat')->name('transaksi');
         Route::get('/stok', Stok::class)->middleware('can:stok.lihat')->name('stok');

@@ -68,6 +68,8 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Tambahan di luar desain — Absen (menu kasir, ikon `jam` hijau): grid kartu karyawan (foto bundar / inisial, status
   "Masuk HH:MM"), lalu panel PIN + input foto kamera + pratinjau, tombol Absen masuk (primary) / pulang (tint oranye).
   Admin: Jam shift, Jadwal mingguan (tabel select per hari), Absensi (foto bundar masuk/pulang).
+- Tambahan di luar desain — Rekap gaji (admin): tabel rincian komponen di section Filament, checkbox usulan potongan,
+  repeater penyesuaian, aksi header Slip / Setujui / Bayar / Batalkan; slip gaji HTML polos siap cetak (A5/A4).
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.
