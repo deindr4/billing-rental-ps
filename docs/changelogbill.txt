@@ -5,6 +5,14 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (screenshot README & panduan diperbarui)
+-----------------------------------------------------------------------------
+- README: semua screenshot kasir & admin diambil ulang dengan nama Delta Billing HuB & menu Lisensi MIT; gambar baru
+  Lisensi MIT dan Delta Billing HuB Monitor + tabel fungsi Monitor. Panduan Windows (HTML + PDF) ikut memuat Monitor.
+- Monitor: baris PHP hanya menampilkan versi (peringatan php.ini tidak ikut tampil), versi MariaDB lebih ringkas,
+  kolom keterangan kesehatan lebih lebar. Berlaku di build installer berikutnya.
+
+
 2026-10-09 (nama baru: Delta Billing HuB + optimasi database)
 -----------------------------------------------------------------------------
 - Aplikasi berganti nama menjadi "Delta Billing HuB" (judul panel admin, installer, pintasan Desktop/menu Start,

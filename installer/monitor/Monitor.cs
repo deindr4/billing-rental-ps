@@ -187,7 +187,7 @@ namespace BillingPS.Monitor
             gbLayanan.Controls.Add(barLayanan);
             isi.Controls.Add(gbLayanan, 0, 0);
 
-            _lvCek = Daftar(new[] { "Pemeriksaan", "Hasil", "Keterangan" }, new[] { 110, 70, 420 });
+            _lvCek = Daftar(new[] { "Pemeriksaan", "Hasil", "Keterangan" }, new[] { 95, 55, 420 });
             _lvCek.ShowItemToolTips = true;
             isi.Controls.Add(Grup("Kesehatan (MySQL, PHP, Apache)", _lvCek), 1, 0);
 
@@ -410,7 +410,7 @@ namespace BillingPS.Monitor
                 if (kode == 0)
                 {
                     var bagian = k.Trim().Split('\t');
-                    hasil.Add(Baris(Hijau, "MySQL", "OK", "MariaDB " + bagian[0] + (bagian.Length > 1 ? " · " + bagian[1] + " pengguna" : "")));
+                    hasil.Add(Baris(Hijau, "MySQL", "OK", "MariaDB " + bagian[0].Split('-')[0] + (bagian.Length > 1 ? " · " + bagian[1] + " pengguna" : "")));
                 }
                 else hasil.Add(Baris(Merah, "MySQL", "GAGAL", Ringkas(k)));
             }
@@ -422,7 +422,9 @@ namespace BillingPS.Monitor
             {
                 string v = Perintah(php, "-r \"echo PHP_VERSION, ' ', extension_loaded('pdo_mysql') ? 'pdo_mysql' : 'TANPA pdo_mysql';\"", _k.App, 8000);
                 bool ok = v.Contains("pdo_mysql") && !v.Contains("TANPA");
-                hasil.Add(Baris(ok ? Hijau : Merah, "PHP", ok ? "OK" : "GAGAL", Ringkas(v)));
+                // Peringatan php.ini (stderr) ikut terbaca: tampilkan versinya saja bila berhasil
+                var cocok = Regex.Match(v, @"(\d+\.\d+\.\d+) pdo_mysql");
+                hasil.Add(Baris(ok ? Hijau : Merah, "PHP", ok ? "OK" : "GAGAL", ok && cocok.Success ? "PHP " + cocok.Groups[1].Value + " · pdo_mysql" : Ringkas(v)));
             }
 
             // Apache + PHP + Laravel: halaman /up

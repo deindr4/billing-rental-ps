@@ -77,7 +77,30 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
     <td><img src="docs/gambar/kasir-matriks-terang.webp" alt="Mode terang"><br><sub>Mode terang · ikon & tombol berwarna per fungsi</sub></td>
     <td align="center"><img src="docs/gambar/kasir-hp.webp" alt="Kasir di HP" width="70%"><br><sub>Responsif di HP: matriks unit & POS</sub></td>
   </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-lisensi.webp" alt="Lisensi MIT"><br><sub><b>Lisensi MIT</b> — teks lisensi, kontak pengembang (Telegram), grup WhatsApp info pengembangan & GitHub</sub></td>
+    <td></td>
+  </tr>
 </table>
+
+### Delta Billing HuB Monitor (PC rental Windows)
+
+<p align="center">
+  <img src="docs/gambar/monitor.webp" alt="Delta Billing HuB Monitor" width="85%"><br>
+  <sub>Program pendamping yang ikut installer — ikon <b>Delta Billing HuB Monitor</b> di Desktop & menu Start</sub>
+</p>
+
+Dipakai saat halaman billing tidak bisa dibuka atau terasa bermasalah — tanpa perlu membuka browser, PowerShell, atau services.msc:
+
+| Bagian | Fungsi |
+|---|---|
+| **Layanan Windows** | Status Database (MariaDB), Web (Apache + PHP), Realtime TV, Antrean, Jadwal, WhatsApp, Cloudflare Tunnel — tombol **Nyalakan / Hentikan / Restart** per layanan, **Nyalakan semua**, **Restart semua** (database dulu) |
+| **Kesehatan** | Query MySQL sungguhan (versi + jumlah pengguna), PHP CLI + pdo_mysql, halaman web `/up` (Apache + PHP + Laravel, waktu respons), realtime TV, ruang disk |
+| **Port** | Web, database, realtime, WhatsApp — terbuka / tidak aktif & **program yang memakainya** (mudah melihat port bentrok, mis. Skype/IIS di port 80) |
+| **Backup database** | Langsung dari MariaDB walau billing mati → `.zip` format sama dengan backup aplikasi (opsional + foto/logo), bisa dipulihkan dari Admin → Backup atau installer |
+| Lainnya | Segarkan otomatis tiap 10 detik, catatan aksi, tombol Buka Billing & Folder log |
+
+<sub>Foto di atas diambil di PC pengembang (layanan Windows belum dipasang, jadi "Tidak terpasang"); di PC rental semua layanan tampil "Berjalan".</sub>
 
 ### TV (APK TV Agent untuk Android TV / Google TV)
 
@@ -289,7 +312,7 @@ Semua komponen (PHP 8.4, Apache, MariaDB, Node.js untuk WhatsApp, cloudflared) t
 yang menyala sendiri, firewall dibuka hanya untuk jaringan lokal. Panduan: [docs/installer.md](docs/installer.md).
 
 **Delta Billing HuB Monitor** (ikut installer, ikon di Desktop): status MySQL / PHP / Apache & port, restart layanan, dan
-backup database walau halaman billing tidak bisa dibuka.
+backup database walau halaman billing tidak bisa dibuka — lihat [Tampilan → Monitor](#delta-billing-hub-monitor-pc-rental-windows).
 
 **Cepat walau data menumpuk:** index untuk tabel yang paling sering dibuka (sesi, transaksi, audit, antrean sinkron),
 log lama dirapikan otomatis tiap malam (`php artisan db:rapikan`), MariaDB & OPcache disetel sesuai RAM PC.
