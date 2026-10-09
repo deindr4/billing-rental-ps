@@ -62,6 +62,11 @@ final class Bahasa
 
     public static function untukPengguna(?User $user, ?string $cabangId, ?string $sesi = null): string
     {
+        // Pemilih disembunyikan: pilihan lama pengguna / sesi tidak berlaku (tidak bisa dikembalikan dari layar)
+        if (! self::PEMILIH_AKTIF) {
+            return self::cabang($cabangId);
+        }
+
         return match (true) {
             self::valid($user?->locale) => $user->locale,
             self::valid($sesi) => $sesi,

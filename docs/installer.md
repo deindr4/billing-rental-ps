@@ -78,9 +78,28 @@ supaya HTTPS & IP asli pengunjung (`CF-Connecting-IP`) terbaca — batas login d
 | `logs` | log pemasangan, apache, mariadb, layanan |
 | `kelola` | skrip pengelola & `konfigurasi.json` |
 
+## Billing PS Monitor
+
+Ikon **Billing PS Monitor** di Desktop & menu Start (`kelola\BillingPS-Monitor.exe`, minta izin Administrator).
+Dipakai saat billing tidak bisa dibuka:
+
+- **Layanan Windows**: status Database (MariaDB), Web (Apache + PHP), Realtime, Antrean, Jadwal, WhatsApp, Tunnel
+  + tombol Nyalakan / Hentikan / Restart per layanan, Nyalakan semua, Restart semua (database dulu).
+- **Kesehatan**: query MySQL sungguhan (versi + jumlah pengguna), PHP CLI (+ pdo_mysql), halaman web `/up`
+  (Apache + PHP + Laravel, waktu respons), port realtime, ruang disk.
+- **Port**: web, database, realtime, WhatsApp — terbuka / tidak & program yang memakainya (bila bentrok).
+- **Backup database** tanpa aplikasi web: `mariadb-dump` → `data\storage\app\private\backup\backup-…-monitor.zip`
+  (format sama dengan backup aplikasi, opsional + foto/logo). Database dinyalakan otomatis bila berhenti. Pulihkan
+  lewat Admin → Backup atau installer "Pulihkan dari file backup" (trigger sinkron dipasang ulang otomatis).
+- Segarkan otomatis tiap 10 detik, catatan aksi di bawah, tombol Buka Billing & Folder log.
+
+Dibuat dari `installer\monitor\Monitor.cs` (C# WinForms, dikompilasi `build.ps1` dengan `csc` .NET Framework 4
+bawaan Windows — tanpa SDK). Konversi manual: `BillingPS-Monitor.exe --konversi dump.sql database.sql`.
+
 ## Kelola sehari-hari
 
 Menu Start → **Billing PS**:
+- **Billing PS Monitor** — lihat di atas.
 - **Kelola layanan Billing PS** — status, nyalakan / hentikan / mulai ulang semua layanan, buka folder log.
 - **Folder log Billing PS**, **Panel Admin**, **Uninstall**.
 

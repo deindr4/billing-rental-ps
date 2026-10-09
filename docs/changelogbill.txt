@@ -5,11 +5,21 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (Billing PS Monitor)
+-----------------------------------------------------------------------------
+- Program baru di PC rental: "Billing PS Monitor" (ikon Desktop & menu Start, ikut installer). Menampilkan status
+  layanan Windows (MariaDB, Apache + PHP, Realtime, Antrean, Jadwal, WhatsApp, Tunnel) dengan tombol nyalakan /
+  hentikan / restart, pemeriksaan kesehatan (query MySQL, PHP, halaman web, realtime, ruang disk), status port beserta
+  program yang memakainya, dan backup database langsung dari MariaDB walau billing tidak bisa dibuka (zip format
+  backup aplikasi, bisa dipulihkan dari Admin -> Backup / installer). Panduan: docs/installer.md.
+
+
 2026-10-09 (menu Lisensi MIT)
 -----------------------------------------------------------------------------
 - Menu kasir baru "Lisensi MIT" (grup Operasional, di bawah Analisa Pintar, untuk semua pengguna): ringkasan &
   teks lisensi lengkap, versi aplikasi, kontak pengembang Telegram (t.me/deindr4), grup WhatsApp info pengembangan,
-  dan tautan GitHub.
+  dan tautan GitHub — masing-masing berupa tombol berwarna dengan ikon (Chat di Telegram, Gabung grup WhatsApp,
+  Buka GitHub).
 - Persiapan multi bahasa (belum aktif): pesan validasi bawaan kini berbahasa Indonesia (sebelumnya Inggris), teks
   kasir disiapkan untuk diterjemahkan. Pemilih bahasa masih disembunyikan sampai terjemahan selesai.
 

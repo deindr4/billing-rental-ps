@@ -183,6 +183,18 @@ Copy-Item (Unduh $Bahan.cloudflared 'cloudflared.exe') (Join-Path $runtime 'clou
 
 # ---------------- 3. Skrip pengelola & templat ----------------
 Salin (Join-Path $Installer 'kelola') (Join-Path $Staging 'kelola')
+
+# Billing PS Monitor (status layanan, port, restart, backup darurat) — csc bawaan .NET Framework 4, tanpa SDK
+Tulis 'Mengompilasi Billing PS Monitor...'
+$csc = Join-Path $env:WINDIR 'Microsoft.NET\Framework64\v4.0.30319\csc.exe'
+if (-not (Test-Path $csc)) { throw "csc.exe .NET Framework 4 tidak ditemukan: $csc" }
+$monitor = Join-Path $Installer 'monitor'
+& $csc -nologo -target:winexe -optimize+ "-out:$(Join-Path $Staging 'kelola\BillingPS-Monitor.exe')" `
+    "-win32manifest:$(Join-Path $monitor 'app.manifest')" "-win32icon:$(Join-Path $Repo 'public\favicon.ico')" `
+    -r:System.ServiceProcess.dll -r:System.Web.Extensions.dll -r:System.IO.Compression.dll `
+    -r:System.IO.Compression.FileSystem.dll -r:System.Windows.Forms.dll -r:System.Drawing.dll `
+    (Join-Path $monitor 'Monitor.cs') | Out-Host
+if ($LASTEXITCODE -ne 0) { throw 'Kompilasi Billing PS Monitor gagal' }
 Salin (Join-Path $Installer 'templat') (Join-Path $Staging 'kelola\templat')
 # Lisensi untuk halaman persetujuan installer (UTF-8 ber-BOM agar tanda (c) terbaca Inno Setup)
 [IO.File]::WriteAllText((Join-Path $Staging 'LICENSE.txt'), [IO.File]::ReadAllText((Join-Path $Repo 'LICENSE')), (New-Object Text.UTF8Encoding $true))

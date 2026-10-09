@@ -286,6 +286,9 @@ Shared hosting / cPanel juga bisa tanpa realtime TV: [docs/hosting.md](docs/host
 Semua komponen (PHP 8.4, Apache, MariaDB, Node.js untuk WhatsApp, cloudflared) terpasang sebagai **layanan Windows**
 yang menyala sendiri, firewall dibuka hanya untuk jaringan lokal. Panduan: [docs/installer.md](docs/installer.md).
 
+**Billing PS Monitor** (ikut installer, ikon di Desktop): status MySQL / PHP / Apache & port, restart layanan, dan
+backup database walau halaman billing tidak bisa dibuka.
+
 ### TV
 
 Di TV buka `http://IP-PC/apk` → pasang **TV Agent** → isi alamat server → masukkan kode pairing di Admin → Perangkat TV & PC.

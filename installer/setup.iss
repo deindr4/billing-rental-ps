@@ -72,6 +72,8 @@ Name: "{app}\logs"; Flags: uninsneveruninstall
 [Icons]
 Name: "{group}\Billing PS"; Filename: "{app}\Billing PS.url"; IconFilename: "{app}\app\public\favicon.ico"
 Name: "{group}\Billing PS - Panel Admin"; Filename: "{app}\Billing PS - Admin.url"; IconFilename: "{app}\app\public\favicon.ico"
+Name: "{group}\Billing PS Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
+Name: "{autodesktop}\Billing PS Monitor"; Filename: "{app}\kelola\BillingPS-Monitor.exe"; Comment: "Status MySQL/PHP/Apache, port, restart layanan, backup database"
 Name: "{group}\Kelola layanan Billing PS"; Filename: "{sys}\WindowsPowerShell\v1.0\powershell.exe"; Parameters: "-NoProfile -ExecutionPolicy Bypass -File ""{app}\kelola\layanan.ps1"""; IconFilename: "{app}\app\public\favicon.ico"
 Name: "{group}\Folder log Billing PS"; Filename: "{app}\logs"
 Name: "{group}\Uninstall Billing PS"; Filename: "{uninstallexe}"
