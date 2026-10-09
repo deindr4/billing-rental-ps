@@ -27,6 +27,9 @@ final class Bahasa
 
     public const SUMBER = 'id';
 
+    /** Pemilih bahasa di aplikasi disembunyikan sampai file terjemahan (lang/app) selesai */
+    public const PEMILIH_AKTIF = false;
+
     /** Kalimat yang dipakai JavaScript (resources/js), dikirim lewat partials/teks-js */
     public const TEKS_JS = [
         'Yakin?', 'Ya, lanjutkan', 'Batal', 'Alasan (wajib)', 'PIN', 'Alasan wajib diisi', 'PIN wajib diisi',

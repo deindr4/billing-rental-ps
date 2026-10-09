@@ -35,6 +35,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Terima pembayaran (termasuk Pembayaran online) | ✅ | ✅ | ✅ | – |
 | Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
 | Buka & tutup kas, serah terima laci ke kasir lain (penerima ketik PIN) | ✅ | ✅ | ✅ | – |
+| Menu Lisensi MIT (teks lisensi, kontak Telegram & grup WA pengembangan) | ✅ | ✅ | ✅ | ✅ |
 | Halaman Absen di tablet (tiap karyawan absen dengan PIN + foto sendiri) | ✅ | ✅ | ✅ | – |
 | Ikut bertransaksi di laci kasir yang bertugas / serah terima atas namanya (`shift.bantu`) | ✅ | ✅ | – | – |
 | **Transaksi** | | | | |

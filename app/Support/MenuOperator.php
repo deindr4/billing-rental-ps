@@ -15,7 +15,9 @@ final class MenuOperator
     /**
      * warna = kelas warna ikon (token --ikon-* di tokens.css), supaya menu mudah dibedakan sekilas.
      *
-     * @return array<string, array<int, array{route:string, label:string, ikon:string, warna:string, izin:string}>>
+     * izin null = semua pengguna yang login.
+     *
+     * @return array<string, array<int, array{route:string, label:string, ikon:string, warna:string, izin:?string}>>
      */
     public static function daftar(): array
     {
@@ -44,6 +46,8 @@ final class MenuOperator
                 ['route' => 'laporan', 'label' => 'Laporan', 'ikon' => 'laporan', 'warna' => 'text-ik-biru', 'izin' => 'laporan.lihat'],
                 // Audit kecurangan kasir & analisa keuangan/operasional/stok (aturan otomatis), khusus Owner
                 ['route' => 'analisa', 'label' => 'Analisa Pintar', 'ikon' => 'analisa', 'warna' => 'text-ik-ungu', 'izin' => 'laporan.laba'],
+                // Lisensi MIT + kontak pengembang & grup WA info pengembangan (semua pengguna)
+                ['route' => 'lisensi', 'label' => 'Lisensi MIT', 'ikon' => 'lisensi', 'warna' => 'text-ik-teal', 'izin' => null],
             ],
         ];
     }
@@ -59,7 +63,7 @@ final class MenuOperator
                 array_map(fn ($m) => $m + [
                     'aktif' => request()->routeIs($m['route'], $m['route'].'.*'),
                 ], $items),
-                fn ($m) => Route::has($m['route']) && $user?->can($m['izin']) && self::syarat($m['syarat'] ?? null)
+                fn ($m) => Route::has($m['route']) && $user && ($m['izin'] === null || $user->can($m['izin'])) && self::syarat($m['syarat'] ?? null)
             ));
 
             if ($items !== []) {

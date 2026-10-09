@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (menu Lisensi MIT)
+-----------------------------------------------------------------------------
+- Menu kasir baru "Lisensi MIT" (grup Operasional, di bawah Analisa Pintar, untuk semua pengguna): ringkasan &
+  teks lisensi lengkap, versi aplikasi, kontak pengembang Telegram (t.me/deindr4), grup WhatsApp info pengembangan,
+  dan tautan GitHub.
+- Persiapan multi bahasa (belum aktif): pesan validasi bawaan kini berbahasa Indonesia (sebelumnya Inggris), teks
+  kasir disiapkan untuk diterjemahkan. Pemilih bahasa masih disembunyikan sampai terjemahan selesai.
+
+
 2026-10-09 (panduan bergambar Windows A–Z)
 -----------------------------------------------------------------------------
 - Panduan baru untuk pemilik rental: public/tutorial/windows.html + windows.pdf (28 screenshot) - persiapan PC,

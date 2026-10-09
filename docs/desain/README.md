@@ -40,6 +40,8 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Angka di desain adalah data contoh.
 - Tambahan di luar desain — timer melayang TV (APK 0.6.5): baris info teknis kecil & redup di bawah angka
   (`v0.6.5 · ●L 12ms · ●C 85ms`, titik hijau/kuning/merah), bisa dimatikan di Admin → Pengaturan Operasional.
+- Tambahan di luar desain — Lisensi MIT (menu kasir Operasional, ikon `lisensi` teal, semua pengguna): tiga `kartu`
+  tautan (Telegram biru, Grup WhatsApp hijau, GitHub), kartu ringkasan, `<details>` teks LICENSE (font mono).
 - Tambahan di luar desain — Rental PS / PC tampilan DAFTAR (sakelar ikon `kotak`/`daftar` di kanan tab status, diingat
   per login): `x-baris-unit` satu baris per unit (garis kiri warna unit, chip kode, titik status TV/PC, label status,
   pemain & paket, timer ringkas, tagihan, tombol aksi ringkas); tombol remote membuka baris `x-remote-unit` (komponen

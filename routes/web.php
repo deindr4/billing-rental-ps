@@ -141,6 +141,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/stok', Stok::class)->middleware('can:stok.lihat')->name('stok');
         Route::get('/laporan', Laporan::class)->middleware('can:laporan.lihat')->name('laporan');
         Route::get('/analisa', AnalisaPintar::class)->middleware('can:laporan.laba')->name('analisa');
+        Route::get('/lisensi', \App\Livewire\Operator\Lisensi::class)->name('lisensi');
         Route::get('/pengeluaran', Pengeluaran::class)->middleware('can:pengeluaran.catat')->name('pengeluaran');
         Route::get('/member', Member::class)->middleware('can:member.kelola')->name('member');
         Route::get('/pembayaran-online', PembayaranOnlineKasir::class)->middleware('can:pembayaran.terima')->name('pembayaran-online');
