@@ -79,7 +79,7 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
   </tr>
   <tr>
     <td><img src="docs/gambar/kasir-lisensi.webp" alt="Lisensi MIT"><br><sub><b>Lisensi MIT</b> — teks lisensi, kontak pengembang (Telegram), grup WhatsApp info pengembangan & GitHub</sub></td>
-    <td></td>
+    <td><img src="docs/gambar/kasir-sambutan-lisensi.webp" alt="Sambutan Lisensi MIT"><br><sub><b>Sambutan pertama</b> — setelah pasang baru di Windows, popup Lisensi MIT + Telegram & grup WhatsApp tampil <b>sekali</b></sub></td>
   </tr>
 </table>
 

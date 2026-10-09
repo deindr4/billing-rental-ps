@@ -111,13 +111,13 @@ try {
 
     if ($pulihkan) {
         Artisan @('sync', 'pasang-trigger')
-        Artisan @('pasang:awal', "--url-lokal=$url", "--apk=$apk")
+        Artisan @('pasang:awal', "--url-lokal=$url", "--apk=$apk", '--sambut-lisensi')
         $owner = Artisan-Keluaran @('pasang:awal', '--daftar-owner') | Where-Object { $_ -match '^OWNER: ' } | ForEach-Object { $_.Substring(7) }
     } else {
         Tulis 'Mengisi data rental & akun owner...'
         Artisan @('pasang:awal', "--rental=$($w.rental)", "--cabang=$($w.cabang)", "--zona=$($konfig.zona)",
             "--owner-nama=$($w.owner_nama)", "--owner-email=$($w.owner_email)", "--owner-password=$($w.owner_password)",
-            "--pin=$($w.pin)", "--url-lokal=$url", "--apk=$apk")
+            "--pin=$($w.pin)", "--url-lokal=$url", "--apk=$apk", '--sambut-lisensi')
     }
 
     Artisan @('storage:link', '--force') -BolehGagal

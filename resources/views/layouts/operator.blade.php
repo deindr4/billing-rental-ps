@@ -313,6 +313,8 @@
     {{-- Panggilan "Panggil Kasir" dari TV Agent --}}
     <livewire:operator.panggilan-tv />
 @endif
+{{-- Popup Lisensi MIT + Telegram & WhatsApp: sekali setelah pasang baru di Windows --}}
+<livewire:operator.sambutan-lisensi />
 
 @livewireScripts
 </body>

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Livewire\Operator\SambutanLisensi;
 use App\Models\Cabang;
 use App\Models\Pengaturan;
 use App\Models\RilisApk;
@@ -35,7 +36,8 @@ class PasangAwal extends Command
         {--superadmin-email=superadmin@billing.lokal : Email super admin}
         {--apk= : File APK TV Agent untuk didaftarkan sebagai rilis}
         {--url-lokal= : Alamat server lokal untuk TV (mis. http://192.168.1.10)}
-        {--daftar-owner : Tampilkan email login owner (pemasangan dari backup)}';
+        {--daftar-owner : Tampilkan email login owner (pemasangan dari backup)}
+        {--sambut-lisensi : Pasang baru: popup Lisensi MIT + kontak tampil sekali saat aplikasi kasir dibuka}';
 
     protected $description = 'Data awal pemasangan: rental, cabang, owner, super admin, rilis APK TV';
 
@@ -72,6 +74,12 @@ class PasangAwal extends Command
 
         if ($apk = $this->option('apk')) {
             $this->daftarkanApk($apk);
+        }
+
+        // Pengaturan butuh tenant aktif (di konsol belum ada, mis. pemasangan dari backup): pakai rental pertama
+        if ($this->option('sambut-lisensi') && ($tenant = Tenant::query()->first())) {
+            app(Tenancy::class)->set($tenant->id, app(Tenancy::class)->cabangId());
+            Pengaturan::simpan(SambutanLisensi::KUNCI, true);
         }
 
         return self::SUCCESS;

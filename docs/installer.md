@@ -27,6 +27,10 @@ aplikasi siap pakai, APK TV.
    PIN, super admin & alamat aplikasi (mis. `http://192.168.1.10`). Password **tidak** disimpan ke file mana pun.
    Centang "Buka Delta Billing HuB sekarang" untuk langsung membuka aplikasi.
 5. Ikon **Delta Billing HuB** di Desktop membuka aplikasi di PC itu.
+6. Pertama kali aplikasi kasir dibuka setelah login, muncul **popup Lisensi MIT** dengan tombol Telegram pengembang
+   & grup WhatsApp info pengembangan — **sekali saja** (pasang baru & pulihkan dari backup; tidak saat update).
+   Penanda dinyalakan `pasang:awal --sambut-lisensi` dan dimatikan begitu popup tampil. Teks lengkap tetap ada di menu
+   **Lisensi MIT**. Server cloud / VPS tidak menampilkannya.
 
 Pulihkan dari backup — urutan otomatis: buat tabel → pulihkan isi backup (data & logo) → lengkapi tabel/kolom versi baru
 → hak akses & trigger sync → alamat server lokal TV diganti ke IP PC ini (bila satu cabang). Yang perlu diisi ulang

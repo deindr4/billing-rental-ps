@@ -5,6 +5,14 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (popup Lisensi MIT sekali setelah pasang baru)
+-----------------------------------------------------------------------------
+- PC rental Windows: setelah pasang baru (atau pulihkan dari backup di PC baru), saat aplikasi kasir pertama kali
+  dibuka muncul popup "Selamat datang di Delta Billing HuB" berisi ringkasan Lisensi MIT, tombol Chat di Telegram
+  pengembang dan Gabung grup WhatsApp info pengembangan. Hanya tampil SEKALI (tidak muncul lagi setelah ditutup /
+  dimuat ulang), tidak tampil saat update versi dan tidak di server cloud. Teks lengkap tetap di menu Lisensi MIT.
+
+
 2026-10-09 (screenshot README & panduan diperbarui)
 -----------------------------------------------------------------------------
 - README: semua screenshot kasir & admin diambil ulang dengan nama Delta Billing HuB & menu Lisensi MIT; gambar baru
