@@ -5,7 +5,7 @@ Rancangan (keputusan pemilik, 2026-10-09). Dikerjakan bertahap:
 | Tahap | Isi | Status |
 |---|---|---|
 | A | Satu laci per cabang + serah terima shift (modal tetap, setoran) | ✅ |
-| B | Data karyawan (profil, boleh tanpa akun login) | ⬜ |
+| B | Data karyawan (profil, boleh tanpa akun login) | ✅ |
 | C | Jadwal shift & absensi (PIN + foto selfie) | ⬜ |
 | D | Gaji & bonus (pokok bulanan / per shift / per jam + bonus target omzet, potongan selisih kas disetujui owner) | ⬜ |
 
@@ -34,6 +34,22 @@ Kasir lama sudah pulang? Owner/Supervisor bisa melakukan serah terima atas naman
 
 **Tutup kas (akhir hari)** — tanpa penerus: hitung laci, isi uang yang ditinggal untuk besok; sisanya setoran.
 Besok, Buka Shift menyarankan kas awal = uang yang ditinggal.
+
+## B. Data karyawan
+
+Admin → **Karyawan → Karyawan** (izin `karyawan.kelola`, bawaan hanya Owner).
+- Profil: nama, jabatan, telepon, cabang utama, foto (dikompres WebP), aktif bekerja.
+- **Akun login** opsional: kasir/supervisor ditautkan ke penggunanya; OB/cleaning boleh tanpa akun.
+  Tombol **Ambil dari pengguna** membuat data karyawan untuk semua akun login yang belum punya.
+- Data pribadi (NIK, tanggal lahir, alamat, kontak darurat) & rekening (bank, nomor, atas nama).
+  **NIK & nomor rekening terenkripsi** di database dan tidak ditulis ke log aktivitas.
+- Kepegawaian: tanggal masuk / keluar (masa kerja dihitung otomatis). Karyawan tidak dihapus — nonaktifkan.
+- **Gaji & bonus** (dipakai rekap gaji tahap D): periode (bulanan / mingguan / harian), gaji pokok per bulan,
+  upah per shift/hari hadir, upah per jam, target omzet per shift + bonus (nominal per shift tercapai, atau persen
+  dari kelebihan target).
+- **PIN absen**: karyawan tanpa akun login punya PIN sendiri; yang punya akun memakai PIN akunnya.
+
+Tabel `karyawan` ikut sinkron lokal ↔ cloud.
 
 Kolom baru `shifts`: `kas_ditinggal`, `setoran`, `diserahkan_ke`, `shift_sebelum_id`, `shift_berikut_id`,
 `selisih_terima`, `serah_terima` (JSON potret). Pengaturan: `kas.modal_tetap` (per cabang, bawaan Rp200.000).

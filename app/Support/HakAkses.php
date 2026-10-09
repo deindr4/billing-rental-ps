@@ -65,6 +65,7 @@ final class HakAkses
             'admin.akses' => 'Masuk panel admin',
             'admin.master' => 'Kelola unit, paket harga & produk',
             'admin.pengguna' => 'Kelola pengguna & role',
+            'karyawan.kelola' => 'Kelola data karyawan, jadwal, absensi & gaji',
             'admin.pengaturan' => 'Kelola pengaturan',
         ],
     ];

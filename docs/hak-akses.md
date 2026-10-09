@@ -82,6 +82,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Masuk panel admin | ✅ | ✅ | – | – |
 | Kelola unit (termasuk warna kartu), paket harga, aksesori sewa, produk, iklan, perangkat TV | ✅ | ✅ | – | – |
 | Kelola pengguna & role | ✅ | – | – | – |
+| Kelola data karyawan, jadwal, absensi & gaji (`karyawan.kelola`) | ✅ | – | – | – |
 | Kelola pengaturan | ✅ | – | – | – |
 
 ---

@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (data karyawan)
+-----------------------------------------------------------------------------
+- Admin -> Karyawan -> Karyawan (khusus Owner, izin baru karyawan.kelola): profil, jabatan, cabang utama, foto,
+  akun login opsional (OB/cleaning tanpa akun), data pribadi & kontak darurat, rekening, tanggal masuk/keluar
+  (masa kerja), pengaturan gaji & bonus (periode bulanan/mingguan/harian, pokok, upah per shift, upah per jam,
+  target omzet + bonus), PIN absen. NIK & nomor rekening terenkripsi. Tombol "Ambil dari pengguna".
+- Database: tabel baru karyawan -> Update database + Pasang ulang trigger sinkron.
+
+
 2026-10-09 (satu laci per cabang + serah terima shift)
 -----------------------------------------------------------------------------
 - Satu cabang = satu laci = satu shift terbuka. Kasir lain tidak bisa membuka shift kedua; menerima laci lewat

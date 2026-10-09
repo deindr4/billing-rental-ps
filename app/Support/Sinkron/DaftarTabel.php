@@ -20,7 +20,7 @@ final class DaftarTabel
 {
     /** Tabel data biasa (id uuid + tenant_id) */
     public const BARIS = [
-        'cabang', 'users',
+        'cabang', 'users', 'karyawan',
         'tipe_konsol', 'kategori_unit', 'games', 'units', 'paket_harga', 'aturan_harga', 'aksesori', 'pengaturan',
         'kategori_produk', 'produk', 'produk_stok', 'stok_mutasi',
         'shifts', 'kas_mutasi', 'transaksi', 'transaksi_item', 'transaksi_diskon', 'pembayaran',
