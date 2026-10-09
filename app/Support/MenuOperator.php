@@ -25,6 +25,8 @@ final class MenuOperator
                 // Tampil bila cabang punya unit bertipe PC (Admin → Tipe konsol → jenis PC)
                 ['route' => 'rental-pc', 'label' => 'Rental PC', 'ikon' => 'pc', 'warna' => 'text-ik-teal', 'izin' => 'rental.kelola', 'syarat' => 'ada_pc'],
                 ['route' => 'pos', 'label' => 'POS & F&B', 'ikon' => 'pos', 'warna' => 'text-ik-oranye', 'izin' => 'pos.jual'],
+                // Sewa PlayStation bawa pulang (setelah POS: 3 menu pertama dipakai navigasi bawah HP)
+                ['route' => 'playbox', 'label' => 'Sewa Playbox', 'ikon' => 'playbox', 'warna' => 'text-ik-kuning', 'izin' => 'playbox.kelola'],
                 ['route' => 'jadwal', 'label' => 'Jadwal & Booking', 'ikon' => 'jadwal', 'warna' => 'text-ik-ungu', 'izin' => 'rental.kelola'],
                 ['route' => 'lounge', 'label' => 'Billboard', 'ikon' => 'lounge', 'warna' => 'text-ik-pink', 'izin' => 'rental.kelola'],
                 ['route' => 'turnamen', 'label' => 'Turnamen', 'ikon' => 'turnamen', 'warna' => 'text-ik-kuning', 'izin' => 'turnamen.kelola'],

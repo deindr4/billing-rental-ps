@@ -5,6 +5,25 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (sewa Playbox bawa pulang)
+-----------------------------------------------------------------------------
+- Menu kasir baru "Sewa Playbox" (izin playbox.kelola: Owner, Supervisor, Kasir): sewa PlayStation dibawa pulang
+  dengan inventaris terpisah (Admin -> Sewa Playbox -> Playbox: kelengkapan + harga ganti, tarif jam/hari/minggu/
+  bulan, denda telat, saran deposit).
+- Sewa baru 4 langkah: penyewa (cari dari HP, rumah/kost, koordinat dari link Google Maps / lat,lng -> klik buka
+  Maps tanpa API, foto & foto KTP otomatis dikompres) -> unit & durasi -> jaminan (identitas asli, deposit, barang
+  lain + foto), checklist & foto kondisi -> syarat + tanda tangan di layar. Bayar di muka; deposit masuk laci
+  sebagai titipan (bukan omzet).
+- Perpanjang dari jatuh tempo lama, pengembalian dengan checklist (kurang/rusak -> biaya ganti otomatis), denda telat
+  di luar toleransi, potong deposit, unit rusak -> status servis. Surat sewa siap cetak / kirim WA. Batal salah input.
+- WhatsApp (bila aktif di cabang): ringkasan sewa ke penyewa + pengingat sekali N jam sebelum jatuh tempo.
+- Admin -> Sewa Playbox -> Penyewa: data, foto, riwayat sewa, daftar hitam (hanya Supervisor/Owner yang bisa tetap
+  menyewakan). Pengaturan -> Operasional: toleransi telat, jam pengingat, syarat & ketentuan.
+- Foto penyewa/KTP/kondisi/tanda tangan disimpan privat (bukan folder publik). Laporan: baris Sewa Playbox.
+- Database: tabel baru playbox, penyewa, sewa_playbox -> Update database + Pasang ulang trigger sinkron.
+  Panduan: docs/playbox.md.
+
+
 2026-10-09 (installer VPS satu perintah)
 -----------------------------------------------------------------------------
 - installer/vps/pasang-vps.sh untuk VPS polos Ubuntu 22.04/24.04 & Debian 12: domain/subdomain atau IP, mode server

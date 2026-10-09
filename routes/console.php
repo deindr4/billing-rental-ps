@@ -2,6 +2,7 @@
 
 use App\Models\Iklan;
 use App\Services\Gateway\BayarMandiriService;
+use App\Services\Playbox\PlayboxService;
 use App\Services\Publik\BookingService;
 use App\Services\UpdateAplikasi;
 use Illuminate\Foundation\Inspiring;
@@ -40,6 +41,10 @@ Schedule::call(function () {
     $layanan->periksaSemua();
     $layanan->selesaikanYangHabis();
 })->everyMinute()->name('bayar-mandiri')->withoutOverlapping(5);
+
+// Sewa Playbox: pengingat WA ke penyewa sebelum jatuh tempo (hanya server lokal agar tidak dobel dengan cloud)
+Schedule::call(fn () => app(PlayboxService::class)->kirimPengingat())
+    ->everyTenMinutes()->name('playbox-pengingat')->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');
 
 // Sinkron lokal -> cloud tiap menit (diam jika belum diatur); cloud membersihkan antrean lama
 Schedule::command('sync jalankan --diam')->everyMinute()->withoutOverlapping(10)->when(fn () => config('app.mode') !== 'cloud');

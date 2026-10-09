@@ -18,7 +18,10 @@ use App\Livewire\Operator\Member;
 use App\Livewire\Operator\PembayaranOnlineKasir;
 use App\Livewire\Operator\Pengeluaran;
 use App\Livewire\Operator\Pos;
+use App\Livewire\Operator\KembaliPlaybox;
 use App\Livewire\Operator\LaporanShift;
+use App\Livewire\Operator\PlayboxSewa;
+use App\Livewire\Operator\SewaPlayboxBaru;
 use App\Livewire\Operator\Rental;
 use App\Livewire\Operator\RentalPc;
 use App\Livewire\Operator\Stok;
@@ -89,6 +92,22 @@ Route::middleware('auth')->group(function () {
         Route::get('/shift/tutup', TutupKas::class)->middleware('can:shift.kelola')->name('shift.tutup');
         Route::get('/shift/serah-terima', SerahTerima::class)->middleware('can:shift.kelola')->name('shift.serah');
         Route::get('/absen', Absen::class)->middleware('can:shift.kelola')->name('absen');
+
+        // Sewa Playbox bawa pulang
+        Route::get('/playbox', PlayboxSewa::class)->middleware('can:playbox.kelola')->name('playbox');
+        Route::get('/playbox/sewa', SewaPlayboxBaru::class)->middleware('can:playbox.kelola')->name('playbox.baru');
+        Route::get('/playbox/{id}/kembali', KembaliPlaybox::class)->whereUuid('id')->middleware('can:playbox.kelola')->name('playbox.kembali');
+        Route::get('/playbox/{id}/surat', function (string $id) {
+            $s = \App\Models\SewaPlaybox::query()->with(['playbox', 'penyewa'])->findOrFail($id);
+
+            return view('struk.surat-sewa', [
+                's' => $s,
+                'tenant' => auth()->user()->tenant?->nama,
+                'petugas' => \App\Models\User::query()->whereKey($s->user_id)->value('name'),
+                'syarat' => (string) \App\Models\Pengaturan::ambil('playbox.syarat', \App\Services\Playbox\PlayboxService::SYARAT_DEFAULT, $s->cabang_id),
+                'wa' => PlayboxSewa::linkWa($s),
+            ]);
+        })->whereUuid('id')->middleware('can:playbox.kelola')->name('playbox.surat');
 
         // Berkas privat (KTP, foto penyewa, kondisi barang sewa, tanda tangan): hanya tenant sendiri & berizin
         Route::get('/berkas/{path}', function (string $path) {

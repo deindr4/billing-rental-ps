@@ -30,6 +30,8 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | Rental: mulai, kelola & selesaikan sesi | ✅ | ✅ | ✅ | – |
 | POS: jual & tambah F&B ke tagihan | ✅ | ✅ | ✅ | – |
 | Sewa aksesori ke sesi, kembalikan, batal salah input (≤ 5 menit) | ✅ | ✅ | ✅ | – |
+| Sewa Playbox bawa pulang: sewa baru, perpanjang, pengembalian, batal, surat sewa, lihat foto/KTP penyewa (`playbox.kelola`) | ✅ | ✅ | ✅ | – |
+| Menyewakan ke penyewa daftar hitam (centang persetujuan, tercatat di log) | ✅ | ✅ | – | – |
 | Terima pembayaran (termasuk Pembayaran online) | ✅ | ✅ | ✅ | – |
 | Bayar sekaligus beberapa tagihan unit/POS (satu struk gabungan, tanpa saldo member) | ✅ | ✅ | ✅ | – |
 | Buka & tutup kas, serah terima laci ke kasir lain (penerima ketik PIN) | ✅ | ✅ | ✅ | – |
@@ -82,6 +84,7 @@ Tabel izin di bawah adalah **bawaan** saat rental dibuat.
 | **Admin** | | | | |
 | Masuk panel admin | ✅ | ✅ | – | – |
 | Kelola unit (termasuk warna kartu), paket harga, aksesori sewa, produk, iklan, perangkat TV | ✅ | ✅ | – | – |
+| Kelola unit Playbox (kelengkapan, tarif, denda) & data penyewa (daftar hitam) | ✅ | ✅ | – | – |
 | Kelola pengguna & role | ✅ | – | – | – |
 | Kelola data karyawan, jadwal, absensi & gaji (`karyawan.kelola`) | ✅ | – | – | – |
 | Kelola pengaturan | ✅ | – | – | – |

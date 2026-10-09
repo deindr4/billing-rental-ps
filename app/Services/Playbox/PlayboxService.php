@@ -3,6 +3,7 @@
 namespace App\Services\Playbox;
 
 use App\Exceptions\BillingException;
+use App\Jobs\KirimNotifikasi;
 use App\Models\Cabang;
 use App\Models\Pengaturan;
 use App\Models\Penyewa;
@@ -15,6 +16,7 @@ use App\Services\Billing\BillingService;
 use App\Services\Billing\KasService;
 use App\Services\Billing\NomorTransaksi;
 use App\Services\Billing\ShiftService;
+use App\Services\Notifikasi\PengaturanNotifikasi;
 use App\Support\Audit;
 use App\Support\FotoPrivat;
 use App\Support\Koordinat;
@@ -374,6 +376,54 @@ final class PlayboxService
             $sewa->update(['status' => 'batal', 'kembali_pada' => now(), 'catatan' => trim(($sewa->catatan ? $sewa->catatan."\n" : '').'Batal: '.$alasan)]);
             Playbox::withoutGlobalScopes()->whereKey($sewa->playbox_id)->update(['status' => 'tersedia']);
         });
+    }
+
+    /** Ringkasan sewa ke WA penyewa (bila WhatsApp aktif di cabang) */
+    public function kirimRingkasan(SewaPlaybox $s): bool
+    {
+        if (! PengaturanNotifikasi::untuk($s->cabang_id)->waAktif() || ! $s->penyewa?->telepon) {
+            return false;
+        }
+
+        $teks = "Terima kasih {$s->penyewa->nama} 🙏\nSewa {$s->playbox->kode} {$s->playbox->nama} ({$s->nomor})\n"
+            ."Mulai: {$s->mulai_pada->format('d/m/Y H:i')}\nJatuh tempo: *{$s->jatuh_tempo->format('d/m/Y H:i')}*\n"
+            .'Kelengkapan: '.collect($s->checklist_keluar)->map(fn ($c) => "{$c['nama']} ×{$c['jumlah']}")->implode(', ')."\n"
+            .'Mohon dikembalikan tepat waktu & lengkap. Keterlambatan dikenakan denda.';
+
+        KirimNotifikasi::antrekan('whatsapp', $s->tenant_id, $s->cabang_id, 'sewa_playbox', $teks, referensi: $s, tujuan: $s->penyewa->telepon);
+
+        return true;
+    }
+
+    /**
+     * Pengingat WA sebelum jatuh tempo (Pengaturan Operasional → Sewa Playbox → jam), sekali per jatuh tempo.
+     * Dijalankan jadwal hanya di server lokal supaya tidak terkirim dua kali dari lokal & cloud.
+     */
+    public function kirimPengingat(): int
+    {
+        $n = 0;
+        $sewa = SewaPlaybox::withoutGlobalScopes()->with(['penyewa', 'playbox'])
+            ->where('status', 'berjalan')->whereNull('diingatkan_pada')
+            ->where('jatuh_tempo', '>', now())->where('jatuh_tempo', '<=', now()->addHours(72))->get();
+
+        foreach ($sewa as $s) {
+            $jam = (int) Pengaturan::ambil('playbox.pengingat_jam', 3, $s->cabang_id);
+
+            if ($jam <= 0 || $s->jatuh_tempo->gt(now()->addHours($jam)) || ! $s->penyewa?->telepon
+                || ! PengaturanNotifikasi::untuk($s->cabang_id)->waAktif()) {
+                continue;
+            }
+
+            $teks = "Halo {$s->penyewa->nama} 👋\nPengingat: sewa {$s->playbox?->kode} ({$s->nomor}) jatuh tempo "
+                ."*{$s->jatuh_tempo->translatedFormat('l, d F Y \p\u\k\u\l H.i')}*.\n"
+                .'Mohon dikembalikan tepat waktu, atau hubungi kami bila ingin perpanjang. Terima kasih 🙏';
+
+            KirimNotifikasi::antrekan('whatsapp', $s->tenant_id, $s->cabang_id, 'pengingat_sewa', $teks, referensi: $s, tujuan: $s->penyewa->telepon);
+            SewaPlaybox::withoutGlobalScopes()->whereKey($s->id)->update(['diingatkan_pada' => now()]);
+            $n++;
+        }
+
+        return $n;
     }
 
     private function rapikanChecklist(array $checklist, Playbox $playbox): array

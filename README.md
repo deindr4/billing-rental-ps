@@ -140,6 +140,9 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
   penerima), selisih kas tercatat; pengeluaran dengan batas & PIN.
 - **Karyawan**: data & PIN, jadwal mingguan, **absen PIN + foto selfie** (terlambat, lama kerja), **rekap gaji**
   (pokok, upah hadir/jam, bonus target omzet, potongan selisih disetujui owner) & slip gaji.
+- **Sewa Playbox** (PlayStation bawa pulang): data penyewa + lokasi Google Maps, foto & KTP (terkompres, privat),
+  tarif jam/hari/minggu/bulan, jaminan (identitas, deposit, barang), checklist & foto kondisi, surat sewa bertanda
+  tangan, perpanjang, denda telat, ganti rugi dipotong deposit, pengingat WA, daftar hitam.
 - Pembayaran: tunai, QRIS statis (nominal otomatis), transfer, saldo member, campuran.
 - **Bayar sekaligus** beberapa tagihan unit / POS dengan satu struk gabungan (tiap unit tetap tercatat sendiri).
 - **Koreksi harga pokok** stok masuk oleh owner — HPP & laba penjualan sejak itu dihitung ulang.
@@ -359,6 +362,7 @@ docs/                Dokumentasi & changelog              docs/desain/   desain 
 | [docs/pc-agent.md](docs/pc-agent.md) | Rental PC & kontrak agen kiosk Windows |
 | [docs/analisa-pintar.md](docs/analisa-pintar.md) | Aturan Analisa Pintar (skor risiko kasir, keuangan, operasional, stok) |
 | [docs/karyawan.md](docs/karyawan.md) | Satu laci & serah terima shift, data karyawan, jadwal & absensi (PIN + selfie), rekap gaji & bonus |
+| [docs/playbox.md](docs/playbox.md) | Sewa Playbox bawa pulang: penyewa, jaminan, checklist, perpanjang, pengembalian, pengingat WA |
 | [docs/rilis-apk.md](docs/rilis-apk.md) | Rilis, push update & rollback APK TV |
 | [docs/pentest-2026-10-02.md](docs/pentest-2026-10-02.md) | Hasil uji keamanan & checklist |
 | [docs/desain/README.md](docs/desain/README.md) | Desain Stitch (acuan semua tampilan) |
