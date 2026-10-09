@@ -20,7 +20,8 @@
         {{-- ======================= 1. PENYEWA ======================= --}}
         @if ($langkah === 1)
             <div class="flex gap-2">
-                <input type="tel" wire:model="cariHp" wire:keydown.enter="cari" class="input flex-1" placeholder="Nomor HP penyewa (cari data lama)">
+                <input type="tel" inputmode="numeric" maxlength="15" wire:model="cariHp" wire:keydown.enter="cari" class="input num flex-1"
+                       x-data x-on:input="$el.value = $el.value.replace(/\D/g, '')" placeholder="Nomor HP penyewa (cari data lama)">
                 <button type="button" wire:click="cari" class="btn btn-tint tint-biru">Cari</button>
             </div>
 
@@ -46,12 +47,15 @@
                 </div>
                 <div>
                     <label class="block text-sm mb-1.5">Nomor HP / WhatsApp</label>
-                    <input type="tel" wire:model="penyewa.telepon" class="input num" maxlength="30">
+                    <input type="tel" inputmode="numeric" wire:model="penyewa.telepon" class="input num" maxlength="15" placeholder="08xxxxxxxxxx"
+                           x-data x-on:input="$el.value = $el.value.replace(/\D/g, '')">
                     @error('penyewa.telepon') <p class="text-sm text-danger mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="block text-sm mb-1.5">NIK (KTP) <span class="text-muted">{{ $this->penyewaLama ? '· kosongkan bila sama' : '' }}</span></label>
-                    <input type="text" inputmode="numeric" wire:model="penyewa.nik" class="input num" maxlength="20">
+                    <input type="text" inputmode="numeric" wire:model="penyewa.nik" class="input num" maxlength="16" placeholder="16 digit"
+                           x-data x-on:input="$el.value = $el.value.replace(/\D/g, '').slice(0, 16)">
+                    @error('penyewa.nik') <p class="text-sm text-danger mt-1">{{ $message }}</p> @enderror
                 </div>
                 <div>
                     <label class="block text-sm mb-1.5">Tinggal di</label>
@@ -90,15 +94,9 @@
             <div class="grid gap-3 sm:grid-cols-2">
                 @foreach (['fotoPenyewa' => ['Foto penyewa (wajah)', 'user', $this->penyewaLama?->foto], 'fotoKtp' => ['Foto KTP', 'environment', $this->penyewaLama?->foto_ktp]] as $model => [$label, $kamera, $lama])
                     <div>
-                        <label class="block text-sm mb-1.5">{{ $label }} {{ $lama ? '· sudah ada, ambil ulang bila perlu' : '' }}</label>
-                        <input type="file" accept="image/*" capture="{{ $kamera }}" wire:model="{{ $model }}" class="block w-full text-sm">
-                        <div wire:loading wire:target="{{ $model }}" class="label mt-1">Mengunggah…</div>
-                        @if ($this->{$model} && method_exists($this->{$model}, 'isPreviewable') && $this->{$model}->isPreviewable())
-                            <img src="{{ $this->{$model}->temporaryUrl() }}" class="mt-2 h-28 rounded-md object-cover" alt="">
-                        @elseif ($lama)
-                            <img src="{{ \App\Support\FotoPrivat::url($lama) }}" class="mt-2 h-28 rounded-md object-cover" alt="">
-                        @endif
-                        @error($model) <p class="text-sm text-danger mt-1">{{ $message }}</p> @enderror
+                        <label class="block text-sm mb-1.5">{{ $label }} <span class="text-muted">{{ $lama ? '· sudah ada, ambil ulang bila perlu' : '' }}</span></label>
+                        <x-input-foto wire:model="{{ $model }}" :nilai="$this->{$model}" :kamera="$kamera" :lama="$lama"
+                                      :label="$model === 'fotoKtp' ? 'Foto KTP' : 'Foto wajah penyewa'" />
                     </div>
                 @endforeach
             </div>
@@ -109,16 +107,26 @@
             @if ($this->unitTersedia->isEmpty())
                 <p class="text-sm text-danger">Tidak ada Playbox tersedia. Tambahkan di Admin → Sewa Playbox → Playbox.</p>
             @endif
-            <div class="grid gap-2 sm:grid-cols-2">
-                @foreach ($this->unitTersedia as $u)
-                    <button type="button" wire:key="u-{{ $u->id }}" wire:click="pilihUnit('{{ $u->id }}')"
-                            @class(['rounded-md border p-3 text-left', 'border-accent' => $playboxId === $u->id, 'border-line' => $playboxId !== $u->id])>
-                        <div class="font-semibold">{{ $u->kode }} <span class="font-normal text-muted">· {{ $u->nama }}</span></div>
-                        <div class="text-xs text-muted mt-1">
-                            {{ collect($u->tarif())->map(fn ($h, $s) => 'Rp'.number_format($h, 0, ',', '.').'/'.$s)->implode(' · ') }}
-                        </div>
-                    </button>
-                @endforeach
+            {{-- Daftar ringkas + cari (unit banyak tetap pendek) --}}
+            <div x-data="{ q: '' }">
+                @if ($this->unitTersedia->count() > 6)
+                    <input type="search" x-model="q" class="input mb-2" placeholder="Cari kode / nama unit ({{ $this->unitTersedia->count() }} tersedia)">
+                @endif
+                <div class="rounded-md border border-line divide-y divide-line max-h-80 overflow-y-auto">
+                    @foreach ($this->unitTersedia as $u)
+                        <button type="button" wire:key="u-{{ $u->id }}" wire:click="pilihUnit('{{ $u->id }}')"
+                                x-show="! q || @js(mb_strtolower($u->kode.' '.$u->nama)).includes(q.toLowerCase())"
+                                @class(['w-full flex items-center gap-3 px-3 py-2 text-left', 'bg-surface-2' => $playboxId === $u->id])>
+                            <span @class(['h-4 w-4 shrink-0 rounded-full border-2', 'border-accent bg-accent' => $playboxId === $u->id, 'border-line' => $playboxId !== $u->id])></span>
+                            <span class="flex-1 min-w-0">
+                                <span class="font-semibold">{{ $u->kode }}</span> <span class="text-muted">· {{ $u->nama }}</span>
+                                <span class="block text-xs text-muted truncate">
+                                    {{ collect($u->tarif())->map(fn ($h, $s) => 'Rp'.number_format($h, 0, ',', '.').'/'.$s)->implode(' · ') }}
+                                </span>
+                            </span>
+                        </button>
+                    @endforeach
+                </div>
             </div>
             @error('playboxId') <p class="text-sm text-danger">{{ $message }}</p> @enderror
 
@@ -176,7 +184,7 @@
                             <span class="block text-sm">Barang lain (STNK, HP, …)</span>
                             @if ($jaminan['barang'])
                                 <input type="text" wire:model="barangKet" class="input" placeholder="Mis. STNK motor DK 1234 AB">
-                                <input type="file" accept="image/*" capture="environment" wire:model="fotoBarang" class="block w-full text-sm">
+                                <x-input-foto wire:model="fotoBarang" :nilai="$fotoBarang" kamera="environment" label="Foto barang jaminan" />
                             @endif
                         </span>
                     </label>
@@ -203,9 +211,7 @@
 
             <div>
                 <label class="block text-sm mb-1.5">Foto kondisi unit (boleh beberapa)</label>
-                <input type="file" accept="image/*" capture="environment" multiple wire:model="fotoKondisi" class="block w-full text-sm">
-                <div wire:loading wire:target="fotoKondisi" class="label mt-1">Mengunggah…</div>
-                @if (count($fotoKondisi))<p class="text-xs text-muted mt-1">{{ count($fotoKondisi) }} foto</p>@endif
+                <x-input-foto wire:model="fotoKondisi" :nilai="$fotoKondisi" kamera="environment" multiple label="Foto kondisi unit" />
             </div>
 
         {{-- ======================= 4. SYARAT & TANDA TANGAN ======================= --}}

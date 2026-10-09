@@ -69,9 +69,11 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
   "Masuk HH:MM"), lalu panel PIN + input foto kamera + pratinjau, tombol Absen masuk (primary) / pulang (tint oranye).
   Admin: Jam shift, Jadwal mingguan (tabel select per hari), Absensi (foto bundar masuk/pulang).
 - Tambahan di luar desain — Sewa Playbox (menu kasir setelah POS, ikon `playbox` kuning): tab Berjalan/Riwayat,
-  chip status unit, kartu sewa (`surface`, badge jatuh tempo / telat merah) dengan tombol Bayar, Kembali, Perpanjang
-  (inline), Surat, WA, Maps, Batal. Sewa baru: langkah bernomor 1–4 (penyewa → unit & durasi → jaminan & kondisi →
-  syarat & tanda tangan canvas), input foto kamera + pratinjau. Pengembalian: tabel checklist keluar vs kembali,
+  chip ringkasan + status unit, kartu sewa (`surface`, badge jatuh tempo / telat merah) dengan tombol Bayar, Kembali,
+  Perpanjang (inline), Surat, WA, Maps, Batal; sakelar ikon `kotak`/`daftar` → tabel (pola Daftar Transaksi, garis
+  status kiri di kolom unit). Sewa baru: langkah bernomor 1–4 (penyewa → unit & durasi [daftar ringkas + cari] →
+  jaminan & kondisi → syarat & tanda tangan canvas). Foto: komponen `x-input-foto` (tombol garis putus, ikon
+  `kamera`, status unggah, pratinjau) menggantikan input file bawaan browser. Pengembalian: tabel checklist keluar vs kembali,
   biaya otomatis, ringkasan deposit. Surat sewa: HTML polos siap cetak seperti slip gaji.
 - Tambahan di luar desain — Rekap gaji (admin): tabel rincian komponen di section Filament, checkbox usulan potongan,
   repeater penyesuaian, aksi header Slip / Setujui / Bayar / Batalkan; slip gaji HTML polos siap cetak (A5/A4).

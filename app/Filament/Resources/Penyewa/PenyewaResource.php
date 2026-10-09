@@ -59,8 +59,11 @@ class PenyewaResource extends Resource
                 ->columns(2)
                 ->schema([
                     TextInput::make('nama')->required()->maxLength(100),
-                    TextInput::make('telepon')->label('Nomor HP / WA')->required()->maxLength(30),
-                    TextInput::make('nik')->label('NIK (KTP)')->maxLength(20)->helperText('Disimpan terenkripsi.'),
+                    TextInput::make('telepon')->label('Nomor HP / WA')->tel()->required()->regex('/^\+?\d{9,15}$/')
+                        ->extraInputAttributes(['inputmode' => 'numeric'])->validationMessages(['regex' => 'Nomor HP 9–15 angka.']),
+                    TextInput::make('nik')->label('NIK (KTP)')->length(16)->regex('/^\d{16}$/')
+                        ->extraInputAttributes(['inputmode' => 'numeric', 'maxlength' => 16])
+                        ->validationMessages(['regex' => 'NIK harus 16 angka.', 'size' => 'NIK harus 16 angka.'])->helperText('16 angka · disimpan terenkripsi.'),
                     Select::make('jenis_tempat')->label('Tinggal di')->options(Penyewa::JENIS_TEMPAT)->required(),
                     Textarea::make('alamat')->rows(2)->columnSpanFull(),
                     TextInput::make('koordinat')

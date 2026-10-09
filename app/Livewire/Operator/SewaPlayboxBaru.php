@@ -101,6 +101,20 @@ class SewaPlayboxBaru extends Component
             ? PlayboxService::jatuhTempo(now(), $this->satuan, max(1, $this->jumlah))->translatedFormat('D, d M Y H:i') : null;
     }
 
+    /** HP & NIK hanya angka (NIK maks. 16 digit) */
+    public function updatedPenyewa($nilai, string $kunci): void
+    {
+        if (in_array($kunci, ['telepon', 'nik'], true)) {
+            $angka = preg_replace('/\D/', '', (string) $nilai);
+            $this->penyewa[$kunci] = $kunci === 'nik' ? substr($angka, 0, 16) : substr($angka, 0, 15);
+        }
+    }
+
+    public function updatedCariHp(): void
+    {
+        $this->cariHp = substr(preg_replace('/\D/', '', $this->cariHp), 0, 15);
+    }
+
     /** Cari penyewa lama dari nomor HP → data terisi otomatis */
     public function cari(): void
     {
@@ -151,13 +165,16 @@ class SewaPlayboxBaru extends Component
         if ($this->langkah === 1) {
             $this->validate([
                 'penyewa.nama' => 'required|string|min:2|max:100',
-                'penyewa.telepon' => 'required|string|min:9|max:30',
+                'penyewa.telepon' => 'required|digits_between:9,15',
+                'penyewa.nik' => 'nullable|digits:16',
                 'penyewa.alamat' => 'required|string|max:500',
                 'fotoPenyewa' => $this->penyewaLama?->foto ? 'nullable|file|max:10240' : 'required|file|max:10240',
                 'fotoKtp' => $this->penyewaLama?->foto_ktp ? 'nullable|file|max:10240' : 'required|file|max:10240',
             ], [
                 'fotoPenyewa.required' => 'Foto penyewa wajib.', 'fotoKtp.required' => 'Foto KTP wajib.',
                 'penyewa.alamat.required' => 'Alamat rumah / kost wajib.',
+                'penyewa.telepon.digits_between' => 'Nomor HP 9–15 angka.',
+                'penyewa.nik.digits' => 'NIK harus 16 angka.',
             ]);
 
             if (filled($this->penyewa['koordinat']) && ! $this->urlMaps()) {

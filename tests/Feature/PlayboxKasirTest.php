@@ -114,6 +114,27 @@ class PlayboxKasirTest extends TestCase
             ->call('lanjut')->assertHasNoErrors()->assertSet('langkah', 2);
     }
 
+    public function test_hp_dan_nik_hanya_angka_nik_16_digit(): void
+    {
+        Livewire::test(SewaPlayboxBaru::class)
+            ->set('penyewa.telepon', '0812-3456 78ab90')->assertSet('penyewa.telepon', '081234567890')
+            ->set('penyewa.nik', '5171 0000 0000 0001 99')->assertSet('penyewa.nik', '5171000000000001')
+            ->set('cariHp', '+62 812')->assertSet('cariHp', '62812')
+            ->set('penyewa.nik', '51710')->call('lanjut')->assertHasErrors(['penyewa.nik' => 'digits']);
+    }
+
+    public function test_tampilan_daftar_dan_kotak(): void
+    {
+        $s = $this->sewaLewatForm();
+
+        Livewire::test(PlayboxSewa::class)->assertSet('tampilan', 'kotak')->assertSee('Sewa belum dibayar')
+            ->set('tampilan', 'daftar')->assertSee('<table', false)->assertSee($s->nomor)->assertSee('belum bayar')
+            ->call('bukaPerpanjang', $s->id)->assertSee('wire:click="perpanjang"', false);
+
+        // Pilihan tampilan diingat
+        Livewire::test(PlayboxSewa::class)->assertSet('tampilan', 'daftar');
+    }
+
     public function test_daftar_perpanjang_batal_dan_buka_pembayaran(): void
     {
         $s = $this->sewaLewatForm();
@@ -164,6 +185,7 @@ class PlayboxKasirTest extends TestCase
         $this->get(route('berkas.privat', 'tenants/'.$this->cabang->tenant_id.'/../../.env'))->assertNotFound();
         $this->get('/admin/playbox')->assertOk();
         $this->get('/admin/penyewa')->assertOk();
+        $this->get('/admin/penyewa/'.$s->penyewa_id.'/edit')->assertOk();
     }
 
     public function test_pengingat_wa_sekali_sebelum_jatuh_tempo(): void

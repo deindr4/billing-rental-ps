@@ -10,25 +10,99 @@
         </div>
     </div>
 
-    {{-- Unit --}}
+    {{-- Unit: ringkasan jumlah + chip per unit (geser bila banyak) --}}
+    @php $hitung = $this->unit->countBy('status'); @endphp
     <div class="flex gap-1.5 overflow-x-auto pb-1 mb-3">
+        <span class="chip shrink-0 font-medium">
+            <span class="text-st-kosong">{{ $hitung['tersedia'] ?? 0 }} tersedia</span> ·
+            <span class="text-st-hampir">{{ $hitung['disewa'] ?? 0 }} disewa</span>
+            @if ($hitung['servis'] ?? 0) · <span class="text-st-servis">{{ $hitung['servis'] }} servis</span>@endif
+        </span>
         @foreach ($this->unit as $u)
             <span @class(['chip shrink-0', 'text-st-kosong' => $u->status === 'tersedia', 'text-st-hampir' => $u->status === 'disewa', 'text-st-servis' => $u->status === 'servis'])>
-                <span class="dot"></span> {{ $u->kode }} · {{ \App\Models\Playbox::STATUS[$u->status] ?? $u->status }}
+                <span class="dot"></span> {{ $u->kode }}
             </span>
         @endforeach
     </div>
 
-    <div class="flex gap-1.5 mb-4">
+    <div class="flex items-center gap-1.5 mb-4">
         @foreach (['berjalan' => 'Sedang disewa', 'riwayat' => 'Riwayat'] as $k => $l)
             <button type="button" wire:click="$set('tab', '{{ $k }}')"
                     @class(['btn h-8 px-3 text-xs font-mono uppercase tracking-wider', 'btn-primary' => $tab === $k, 'text-muted' => $tab !== $k])>{{ $l }}</button>
         @endforeach
+        {{-- Tampilan kotak / daftar --}}
+        <div class="ml-auto flex rounded-md border border-line overflow-hidden">
+            @foreach (['kotak' => 'Tampilan kotak', 'daftar' => 'Tampilan daftar'] as $k => $l)
+                <button type="button" wire:click="$set('tampilan', '{{ $k }}')" title="{{ $l }}" aria-label="{{ $l }}"
+                        @class(['h-8 w-9 grid place-items-center', 'bg-accent text-[var(--accent-contrast)]' => $tampilan === $k, 'text-muted hover:text-fg' => $tampilan !== $k])>
+                    <x-ikon :name="$k" size="16" />
+                </button>
+            @endforeach
+        </div>
     </div>
 
     @if ($this->sewa->isEmpty())
         <div class="kartu p-10 text-center text-muted">{{ $tab === 'berjalan' ? 'Tidak ada Playbox yang sedang disewa.' : 'Belum ada riwayat.' }}</div>
+    @elseif ($tampilan === 'daftar')
+        {{-- ======================= DAFTAR ======================= --}}
+        <div class="surface overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead class="text-left text-xs text-muted border-b border-line">
+                    <tr>
+                        <th class="px-3 py-2 font-medium">Unit</th>
+                        <th class="px-3 py-2 font-medium">Penyewa</th>
+                        <th class="px-3 py-2 font-medium hidden lg:table-cell">Tempat</th>
+                        <th class="px-3 py-2 font-medium hidden md:table-cell">Durasi</th>
+                        <th class="px-3 py-2 font-medium">Jatuh tempo</th>
+                        <th class="px-3 py-2 font-medium text-right hidden md:table-cell">Deposit</th>
+                        <th class="px-3 py-2 font-medium text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-line">
+                    @foreach ($this->sewa as $s)
+                        @php
+                            $telat = $s->telat();
+                            $belumBayar = $s->transaksi && $s->transaksi->status === 'belum_bayar';
+                            $warna = $s->status !== 'berjalan' ? 'var(--border)' : ($telat ? 'var(--danger)' : ($s->jatuh_tempo->lt(now()->addHours(3)) ? 'var(--status-hampir-habis)' : 'var(--status-main)'));
+                        @endphp
+                        <tr wire:key="d-{{ $s->id }}" class="align-middle">
+                            <td class="px-3 py-2 whitespace-nowrap" style="box-shadow: inset 3px 0 0 {{ $warna }}">
+                                <div class="font-semibold">{{ $s->playbox?->kode }}</div>
+                                <div class="text-xs text-muted num">{{ $s->nomor }}</div>
+                            </td>
+                            <td class="px-3 py-2">
+                                <div class="font-medium truncate max-w-44">{{ $s->penyewa?->nama }}@if ($s->penyewa?->daftar_hitam) <span class="text-danger">⚠</span>@endif</div>
+                                <div class="text-xs text-muted num">{{ $s->penyewa?->telepon }}</div>
+                            </td>
+                            <td class="px-3 py-2 hidden lg:table-cell text-muted">
+                                <div class="truncate max-w-52">{{ \App\Models\Penyewa::JENIS_TEMPAT[$s->penyewa?->jenis_tempat] ?? '' }} · {{ $s->alamat }}</div>
+                            </td>
+                            <td class="px-3 py-2 hidden md:table-cell whitespace-nowrap">{{ $s->labelDurasi() }}{{ $s->perpanjangan ? ' +'.count($s->perpanjangan).'×' : '' }}</td>
+                            <td class="px-3 py-2 whitespace-nowrap">
+                                <div @class(['num', 'text-danger font-semibold' => $telat])>{{ $s->jatuh_tempo->format('d/m H:i') }}</div>
+                                <div class="text-xs" style="color: {{ $warna }}">
+                                    {{ $s->status === 'berjalan' ? ($telat ? 'TELAT ' : '').$s->jatuh_tempo->diffForHumans(short: true) : strtoupper($s->status) }}
+                                    @if ($belumBayar)<span class="text-danger">· belum bayar</span>@endif
+                                </div>
+                            </td>
+                            <td class="px-3 py-2 text-right hidden md:table-cell whitespace-nowrap">@if ($s->deposit)<x-rupiah :nilai="$s->deposit" />@else<span class="text-muted">–</span>@endif</td>
+                            <td class="px-3 py-2">
+                                <div class="flex justify-end gap-1.5 whitespace-nowrap">
+                                    @include('livewire.operator.partials.aksi-sewa-playbox', ['ringkas' => true])
+                                </div>
+                            </td>
+                        </tr>
+                        @if ($perpanjangId === $s->id)
+                            <tr wire:key="dp-{{ $s->id }}"><td colspan="7" class="px-3 py-3 bg-surface-2">
+                                @include('livewire.operator.partials.perpanjang-playbox')
+                            </td></tr>
+                        @endif
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     @else
+        {{-- ======================= KOTAK ======================= --}}
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             @foreach ($this->sewa as $s)
                 @php
@@ -57,42 +131,12 @@
                         @if ($belumBayar)<div class="text-danger text-xs">Sewa belum dibayar</div>@endif
                     </dl>
                     <div class="px-3 py-2.5 border-t border-line flex flex-wrap gap-1.5">
-                        @if ($belumBayar)
-                            <button type="button" wire:click="bayar('{{ $s->transaksi_id }}')" class="btn btn-primary h-9 px-3 text-sm">Bayar</button>
-                        @endif
-                        @if ($s->status === 'berjalan')
-                            <a href="{{ route('playbox.kembali', ['id' => $s->id]) }}" wire:navigate class="btn btn-tint tint-hijau h-9 px-3 text-sm">Kembali</a>
-                            <button type="button" wire:click="bukaPerpanjang('{{ $s->id }}')" class="btn btn-tint tint-kuning h-9 px-3 text-sm">Perpanjang</button>
-                        @endif
-                        <a href="{{ route('playbox.surat', ['id' => $s->id]) }}" target="_blank" class="btn btn-ikon h-9 w-9" title="Surat sewa"><x-ikon name="transaksi" size="16" /></a>
-                        @if ($s->penyewa?->telepon)
-                            <a href="{{ \App\Livewire\Operator\PlayboxSewa::linkWa($s) }}" target="_blank" rel="noopener" class="btn btn-ikon h-9 w-9 text-ik-hijau" title="WhatsApp penyewa"><x-ikon name="pengumuman" size="16" /></a>
-                        @endif
-                        @if ($s->urlMaps())
-                            <a href="{{ $s->urlMaps() }}" target="_blank" rel="noopener" class="btn btn-ikon h-9 w-9 text-ik-biru" title="Lokasi di Google Maps"><x-ikon name="cabang" size="16" /></a>
-                        @endif
-                        @if ($s->status === 'berjalan')
-                            <x-confirm-button action="batal" :params="[$s->id]" title="Batalkan sewa {{ $s->nomor }}?"
-                                              text="Tagihan dibatalkan (uang dikembalikan bila sudah dibayar), deposit dikembalikan, unit tersedia lagi."
-                                              confirm-text="Ya, batalkan" danger reason class="btn-tint tint-merah h-9 px-3 text-sm ml-auto">Batal</x-confirm-button>
-                        @endif
+                        @include('livewire.operator.partials.aksi-sewa-playbox')
                     </div>
 
                     @if ($perpanjangId === $s->id)
-                        <div class="px-3 py-3 border-t border-line space-y-2">
-                            <div class="flex flex-wrap gap-1.5">
-                                @foreach ($s->playbox?->tarif() ?? [] as $sat => $h)
-                                    <button type="button" wire:click="$set('satuan', '{{ $sat }}')" @class(['btn h-8 px-2.5 text-xs', 'btn-primary' => $satuan === $sat])>
-                                        {{ \App\Models\Playbox::SATUAN[$sat] }} · <x-rupiah :nilai="$h" />
-                                    </button>
-                                @endforeach
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <input type="number" min="1" wire:model.live="jumlah" class="input num w-20 h-9">
-                                <span class="text-sm text-muted flex-1">{{ \App\Models\Playbox::SATUAN[$satuan] ?? '' }} · <x-rupiah :nilai="($s->playbox?->harga($satuan) ?? 0) * max(1, $jumlah)" /></span>
-                                <button type="button" wire:click="$set('perpanjangId', null)" class="btn h-9 px-3 text-sm">Batal</button>
-                                <button type="button" wire:click="perpanjang" class="btn btn-primary h-9 px-3 text-sm">Perpanjang</button>
-                            </div>
+                        <div class="px-3 py-3 border-t border-line">
+                            @include('livewire.operator.partials.perpanjang-playbox')
                         </div>
                     @endif
                 </div>

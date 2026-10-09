@@ -7,7 +7,7 @@ Inventarisnya terpisah dari unit rental, pembayarannya **di muka**, dan ada jami
 
 | Tempat | Isi |
 |---|---|
-| Kasir → **Sewa Playbox** (`/playbox`) | Daftar sewa berjalan & riwayat, tombol Sewa baru, Bayar, Kembali, Perpanjang, Surat, WA, Maps, Batal |
+| Kasir → **Sewa Playbox** (`/playbox`) | Daftar sewa berjalan & riwayat (tampilan **kotak** atau **daftar/tabel**, diingat per login), tombol Sewa baru, Bayar, Kembali, Perpanjang, Surat, WA, Maps, Batal |
 | Kasir → Sewa Playbox → **Sewa baru** (`/playbox/sewa`) | Formulir 4 langkah (lihat di bawah) |
 | Admin → Sewa Playbox → **Playbox** | Unit (kode, nama, nomor seri), daftar kelengkapan + harga ganti, tarif jam/hari/minggu/bulan, denda telat, saran deposit, status |
 | Admin → Sewa Playbox → **Penyewa** | Data penyewa, foto & KTP, lokasi, riwayat sewa, **daftar hitam** |
@@ -17,7 +17,8 @@ Izin kasir: `playbox.kelola` (bawaan Kasir & Supervisor). Admin Playbox/Penyewa 
 
 ## Sewa baru (4 langkah)
 
-1. **Penyewa** — cari dari nomor HP (penyewa lama langsung terisi). Nama, HP (08… disimpan 628…), NIK (terenkripsi),
+1. **Penyewa** — cari dari nomor HP (penyewa lama langsung terisi). Nama, HP (angka saja; 08… disimpan 628…),
+   NIK (16 angka, terenkripsi),
    alamat, rumah/kost, **koordinat**: tempel link Google Maps (termasuk `maps.app.goo.gl`) atau `lat, lng`. Tombol
    "Lokasi saya" hanya muncul di HTTPS. Foto penyewa & foto KTP wajib untuk penyewa baru (kamera tablet), otomatis
    dikompres ke WebP.

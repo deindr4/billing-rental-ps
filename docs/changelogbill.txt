@@ -22,6 +22,10 @@ Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> 
 - Foto penyewa/KTP/kondisi/tanda tangan disimpan privat (bukan folder publik). Laporan: baris Sewa Playbox.
 - Database: tabel baru playbox, penyewa, sewa_playbox -> Update database + Pasang ulang trigger sinkron.
   Panduan: docs/playbox.md.
+- Daftar sewa bisa dilihat sebagai kotak atau DAFTAR/tabel (tombol di kanan tab, diingat per login) agar ringkas
+  saat unit banyak; ringkasan jumlah tersedia/disewa/servis. Pilih unit di sewa baru berupa daftar ringkas + cari.
+- Nomor HP & NIK hanya angka (keyboard angka di tablet); NIK wajib 16 digit (kasir & admin Penyewa).
+- Tombol ambil foto yang jelas (ikon kamera, status unggah, pratinjau) menggantikan "Choose file".
 
 
 2026-10-09 (installer VPS satu perintah)

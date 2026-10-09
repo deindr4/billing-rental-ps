@@ -58,8 +58,7 @@
 
             <div>
                 <label class="block text-sm mb-1.5">Foto kondisi saat kembali</label>
-                <input type="file" accept="image/*" capture="environment" multiple wire:model="fotoKondisi" class="block w-full text-sm">
-                <div wire:loading wire:target="fotoKondisi" class="label mt-1">Mengunggah…</div>
+                <x-input-foto wire:model="fotoKondisi" :nilai="$fotoKondisi" kamera="environment" multiple label="Foto kondisi unit" />
             </div>
 
             <div class="grid gap-3 sm:grid-cols-2">

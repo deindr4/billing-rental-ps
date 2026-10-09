@@ -11,6 +11,7 @@ use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -26,6 +27,10 @@ class PlayboxSewa extends Component
     public string $tab = 'berjalan';
 
     public string $cari = '';
+
+    /** kotak | daftar — diingat per sesi login (unit banyak lebih ringkas sebagai daftar) */
+    #[Session]
+    public string $tampilan = 'kotak';
 
     // Perpanjang
     public ?string $perpanjangId = null;
