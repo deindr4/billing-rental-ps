@@ -5,6 +5,15 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (tampilan daftar Rental PS / PC)
+-----------------------------------------------------------------------------
+- Rental PS & Rental PC: tombol tampilan Kotak / Daftar di kanan tab status (diingat per login). Daftar = satu baris
+  per unit (kode berwarna, status, pemain & paket, timer, tagihan, tombol Mulai/Kelola/Bayar/Tandai siap) dan tombol
+  remote TV/PC yang membuka baris remote di bawahnya. Daftar dibagi 15 unit per halaman (filter & cari kembali ke
+  halaman 1). Tampilan kotak tidak berubah.
+- Sewa Playbox tampilan daftar juga dibagi 15 sewa per halaman.
+
+
 2026-10-09 (sewa Playbox bawa pulang)
 -----------------------------------------------------------------------------
 - Menu kasir baru "Sewa Playbox" (izin playbox.kelola: Owner, Supervisor, Kasir): sewa PlayStation dibawa pulang

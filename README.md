@@ -111,6 +111,7 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud.
 <summary><b>🕹️ Rental & sesi</b></summary>
 
 - Matriks unit realtime: ready, terisi, menunggu bayar, maintenance — sisa waktu, tagihan & status TV per kartu.
+  Bisa ditampilkan sebagai **kotak** atau **daftar** (satu baris per unit, per halaman, remote dibuka per baris).
 - Mode **paket / durasi** (hitung mundur) dan **open billing** (blok menit, minimal tagih, toleransi, pembulatan).
 - **Waktu pilih game** tidak ditagih, tambah waktu (bayar / gratis dengan PIN), **bonus waktu** kompensasi, pause & resume.
 - **Pindah unit** tanpa kehilangan tagihan, **batal tambah waktu** & **batal sesi** (salah pencet / tidak jadi main).

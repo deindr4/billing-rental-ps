@@ -84,6 +84,27 @@ class RentalPcTest extends TestCase
         $this->get('/pc')->assertOk()->assertSee('PC1')->assertSee('PC Gaming')->assertDontSee('TV1');
     }
 
+    public function test_tampilan_daftar_per_halaman_dengan_sesi_dan_remote(): void
+    {
+        foreach (range(1, 18) as $n) {
+            $this->unitPc(sprintf('PC%02d', $n));
+        }
+        $this->pasangkanPc(Unit::where('kode', 'PC01')->first());
+        app(BillingService::class)->mulai(Unit::where('kode', 'PC02')->first(), $this->owner, ['mode' => 'open']);
+
+        // Kotak: semua unit tampil
+        Livewire::test(RentalPc::class)->assertSet('tampilan', 'kotak')->assertSee('PC18');
+
+        Livewire::test(RentalPc::class)->set('tampilan', 'daftar')
+            ->assertSee('PC01')->assertSee('PC15')->assertDontSee('PC16')
+            ->assertSee('1–15 dari 18 unit')->assertSee('Kelola')->assertSee('Remote PC', false)
+            ->call('nextPage')->assertSee('PC16')->assertSee('PC18')->assertDontSee('PC03')
+            ->set('cari', 'PC17')->assertSee('PC17')->assertDontSee('PC18');
+
+        // Pilihan tampilan diingat
+        Livewire::test(RentalPc::class)->assertSet('tampilan', 'daftar');
+    }
+
     public function test_pairing_agen_pc_dan_status_berisi_pengaturan_kiosk(): void
     {
         $pc = $this->unitPc();

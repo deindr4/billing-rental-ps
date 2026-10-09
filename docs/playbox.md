@@ -7,7 +7,7 @@ Inventarisnya terpisah dari unit rental, pembayarannya **di muka**, dan ada jami
 
 | Tempat | Isi |
 |---|---|
-| Kasir → **Sewa Playbox** (`/playbox`) | Daftar sewa berjalan & riwayat (tampilan **kotak** atau **daftar/tabel**, diingat per login), tombol Sewa baru, Bayar, Kembali, Perpanjang, Surat, WA, Maps, Batal |
+| Kasir → **Sewa Playbox** (`/playbox`) | Daftar sewa berjalan & riwayat (tampilan **kotak** atau **daftar/tabel** 15 per halaman, diingat per login), tombol Sewa baru, Bayar, Kembali, Perpanjang, Surat, WA, Maps, Batal |
 | Kasir → Sewa Playbox → **Sewa baru** (`/playbox/sewa`) | Formulir 4 langkah (lihat di bawah) |
 | Admin → Sewa Playbox → **Playbox** | Unit (kode, nama, nomor seri), daftar kelengkapan + harga ganti, tarif jam/hari/minggu/bulan, denda telat, saran deposit, status |
 | Admin → Sewa Playbox → **Penyewa** | Data penyewa, foto & KTP, lokasi, riwayat sewa, **daftar hitam** |

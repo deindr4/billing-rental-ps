@@ -19,16 +19,19 @@ use App\Support\RunningTextTv;
 use App\Support\Tenancy;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.operator')]
 #[Title('Rental')]
 class Rental extends Component
 {
-    use WithAlert;
+    use WithAlert, WithPagination;
 
     #[Url(as: 'status', except: 'semua')]
     public string $filterStatus = 'semua';
@@ -38,6 +41,20 @@ class Rental extends Component
 
     /** ps | pc — menu "Rental PS" & "Rental PC" (RentalPc) memakai halaman ini */
     public string $jenis = TipeKonsol::JENIS_PS;
+
+    /** kotak | daftar — diingat per login; daftar dipecah per halaman agar tidak memanjang */
+    #[Session(key: 'rental-tampilan')]
+    public string $tampilan = 'kotak';
+
+    public const PER_HALAMAN = 15;
+
+    /** Filter / cari / tampilan berubah → kembali ke halaman 1 */
+    public function updated(string $properti): void
+    {
+        if (in_array($properti, ['filterStatus', 'cari', 'tampilan'], true)) {
+            $this->resetPage();
+        }
+    }
 
     /** Dipanggil saat sesi berubah (mulai, tambah waktu, selesai, bayar, dll.) */
     #[On('sesi-berubah')]
@@ -234,7 +251,14 @@ class Rental extends Component
                 $kata = mb_strtolower($this->cari);
 
                 return $c->filter(fn (Unit $u) => str_contains(mb_strtolower($u->nama.' '.$u->kode), $kata));
-            });
+            })
+            ->values();
+
+        // Daftar: per halaman (kotak tetap semua unit, seperti matriks di layar kasir)
+        if ($this->tampilan === 'daftar') {
+            $halaman = min($this->getPage(), max(1, (int) ceil($units->count() / self::PER_HALAMAN)));
+            $units = new LengthAwarePaginator($units->forPage($halaman, self::PER_HALAMAN)->values(), $units->count(), self::PER_HALAMAN, $halaman);
+        }
 
         return view('livewire.operator.rental', [
             'jenis' => $this->jenis,

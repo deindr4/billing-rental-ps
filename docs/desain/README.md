@@ -40,6 +40,11 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
 - Angka di desain adalah data contoh.
 - Tambahan di luar desain — timer melayang TV (APK 0.6.5): baris info teknis kecil & redup di bawah angka
   (`v0.6.5 · ●L 12ms · ●C 85ms`, titik hijau/kuning/merah), bisa dimatikan di Admin → Pengaturan Operasional.
+- Tambahan di luar desain — Rental PS / PC tampilan DAFTAR (sakelar ikon `kotak`/`daftar` di kanan tab status, diingat
+  per login): `x-baris-unit` satu baris per unit (garis kiri warna unit, chip kode, titik status TV/PC, label status,
+  pemain & paket, timer ringkas, tagihan, tombol aksi ringkas); tombol remote membuka baris `x-remote-unit` (komponen
+  yang sama dengan kartu). 15 unit per halaman (`partials/paginasi`: x–y dari N, nomor halaman). Kotak tetap semua unit.
+  Sewa Playbox tampilan daftar juga per 15.
 - Tambahan di luar desain — kartu unit kasir: remote daya dua tombol terpisah, ikon matahari (`bangun`, hijau)
   = Bangunkan TV dan ikon daya (oranye) = Matikan; TV offline/standby menampilkan "TV offline / standby" + Bangunkan.
 - Tambahan di luar desain — dialog Pembayaran: bagian lipat "Bayar sekaligus dengan tagihan lain" (daftar centang

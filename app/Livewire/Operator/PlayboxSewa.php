@@ -7,6 +7,7 @@ use App\Livewire\Concerns\WithAlert;
 use App\Models\Playbox;
 use App\Models\SewaPlaybox;
 use App\Services\Playbox\PlayboxService;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Layout;
@@ -15,13 +16,14 @@ use Livewire\Attributes\Session;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 /** Sewa Playbox bawa pulang: sewa berjalan (jatuh tempo, telat, belum bayar), unit, perpanjang, batal */
 #[Layout('layouts.operator')]
 #[Title('Sewa Playbox')]
 class PlayboxSewa extends Component
 {
-    use WithAlert;
+    use WithAlert, WithPagination;
 
     #[Url(as: 'tab', except: 'berjalan')]
     public string $tab = 'berjalan';
@@ -31,6 +33,8 @@ class PlayboxSewa extends Component
     /** kotak | daftar — diingat per sesi login (unit banyak lebih ringkas sebagai daftar) */
     #[Session]
     public string $tampilan = 'kotak';
+
+    public const PER_HALAMAN = 15;
 
     // Perpanjang
     public ?string $perpanjangId = null;
@@ -51,7 +55,7 @@ class PlayboxSewa extends Component
     #[On('pembayaran-berhasil')]
     public function segarkan(): void
     {
-        unset($this->sewa, $this->unit);
+        unset($this->sewa, $this->halamanSewa, $this->unit);
     }
 
     #[Computed]
@@ -68,6 +72,23 @@ class PlayboxSewa extends Component
         }
 
         return $q->get();
+    }
+
+    /** Tampilan daftar: per halaman agar tidak memanjang */
+    #[Computed]
+    public function halamanSewa(): LengthAwarePaginator
+    {
+        $semua = $this->sewa;
+        $halaman = min($this->getPage(), max(1, (int) ceil($semua->count() / self::PER_HALAMAN)));
+
+        return new LengthAwarePaginator($semua->forPage($halaman, self::PER_HALAMAN)->values(), $semua->count(), self::PER_HALAMAN, $halaman);
+    }
+
+    public function updated(string $properti): void
+    {
+        if (in_array($properti, ['tab', 'cari', 'tampilan'], true)) {
+            $this->resetPage();
+        }
     }
 
     #[Computed]

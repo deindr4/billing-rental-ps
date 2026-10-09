@@ -42,7 +42,8 @@
             'servis' => 'var(--status-servis)',
         ];
     @endphp
-    <div class="flex gap-1.5 overflow-x-auto pb-1 mb-4">
+    <div class="flex items-center gap-1.5 mb-4">
+    <div class="flex gap-1.5 overflow-x-auto pb-1 min-w-0">
         @foreach ($tab as $kunci => $teks)
             <button type="button" wire:click="$set('filterStatus', '{{ $kunci }}')"
                     @class([
@@ -57,8 +58,18 @@
             </button>
         @endforeach
     </div>
+        {{-- Tampilan kotak / daftar (diingat per login) --}}
+        <div class="ml-auto shrink-0 flex rounded-md border border-line overflow-hidden mb-1">
+            @foreach (['kotak' => 'Tampilan kotak', 'daftar' => 'Tampilan daftar'] as $k => $l)
+                <button type="button" wire:click="$set('tampilan', '{{ $k }}')" title="{{ $l }}" aria-label="{{ $l }}"
+                        @class(['h-8 w-9 grid place-items-center', 'bg-accent text-[var(--accent-contrast)]' => $tampilan === $k, 'text-muted hover:text-fg' => $tampilan !== $k])>
+                    <x-ikon :name="$k" size="16" />
+                </button>
+            @endforeach
+        </div>
+    </div>
 
-    {{-- Grid unit --}}
+    {{-- Unit: kotak (semua) atau daftar (per halaman) --}}
     @if ($units->isEmpty())
         <div class="kartu p-10 text-center text-muted">
             @if ($jenis === 'pc' && $ringkasan['semua'] === 0)
@@ -67,6 +78,25 @@
                 Tidak ada unit yang cocok.
             @endif
         </div>
+    @elseif ($tampilan === 'daftar')
+        <div class="surface overflow-hidden">
+            @foreach ($units as $unit)
+                @php $sesi = $sesiPerUnit->get($unit->id); @endphp
+                <x-baris-unit
+                    wire:key="baris-{{ $unit->id }}-{{ $unit->status }}-{{ $sesi?->versi_tagihan ?? 0 }}-{{ $unit->warnaKartu() }}"
+                    :unit="$unit"
+                    :sesi="$sesi"
+                    :aksesori="$sesi ? $aksesoriPerSesi->get($sesi->id) : null"
+                    :tv="$tvPerUnit->get($unit->id)"
+                    :bisa-remote="$bisaRemote"
+                    :tarif="$tarif[$unit->id] ?? null"
+                    :peringatan-menit="$peringatanMenit"
+                    :server-now="$serverNow">
+                    @include('livewire.operator.partials.aksi-unit', ['ringkas' => true])
+                </x-baris-unit>
+            @endforeach
+        </div>
+        @include('livewire.operator.partials.paginasi', ['p' => $units, 'satuan' => 'unit'])
     @else
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
             @foreach ($units as $unit)
@@ -82,68 +112,7 @@
                     :tarif="$tarif[$unit->id] ?? null"
                     :peringatan-menit="$peringatanMenit"
                     :server-now="$serverNow">
-
-                    @switch($unit->status)
-                        @case('kosong')
-                            <button type="button"
-                                    wire:click="$dispatch('buka-mulai-sesi', { unitId: '{{ $unit->id }}' })"
-                                    class="btn btn-primary w-full">
-                                <x-ikon name="play" size="16" /> Mulai Rental
-                            </button>
-                            @break
-
-                        @case('main')
-                        @case('pause')
-                            @if ($sesi?->sedangPilihGame())
-                                <button type="button" wire:click="mulaiSekarang('{{ $sesi->id }}')"
-                                        class="btn btn-tint tint-hijau w-full mb-2 text-sm">
-                                    <x-ikon name="play" size="14" /> Pelanggan siap · mulai waktu sekarang
-                                </button>
-                            @endif
-                            <div class="flex gap-2">
-                                @if ($sesi?->mode === 'paket')
-                                    <button type="button" title="Tambah waktu"
-                                            wire:click="$dispatch('buka-kelola-sesi', { unitId: '{{ $unit->id }}', panel: 'tambah' })"
-                                            class="btn btn-ikon text-ik-kuning">
-                                        <x-ikon name="jam" size="18" />
-                                    </button>
-                                @endif
-                                <a href="{{ route('pos', ['unit' => $unit->id]) }}" wire:navigate title="Tambah F&B"
-                                   class="btn btn-ikon text-ik-oranye">
-                                    <x-ikon name="fnb" size="18" />
-                                </a>
-                                <button type="button"
-                                        wire:click="$dispatch('buka-kelola-sesi', { unitId: '{{ $unit->id }}' })"
-                                        class="btn btn-tint tint-biru flex-1">
-                                    <x-ikon name="kelola" size="16" /> Kelola Sesi
-                                </button>
-                            </div>
-                            @break
-
-                        @case('menunggu_bayar')
-                            @if ($sesi)
-                                <button type="button"
-                                        wire:click="$dispatch('buka-pembayaran', { transaksiId: '{{ $sesi->transaksi_id }}' })"
-                                        class="btn btn-primary w-full">
-                                    <x-ikon name="bayar" size="16" /> Bayar
-                                </button>
-                            @endif
-                            @break
-
-                        @case('servis')
-                            <x-confirm-button action="tandaiSiap"
-                                              :params="[$unit->id]"
-                                              title="Unit sudah selesai diperbaiki?"
-                                              text="Status akan kembali Ready dan unit bisa dipakai lagi."
-                                              confirm-text="Ya, siap dipakai"
-                                              class="w-full">
-                                Tandai Siap Dipakai
-                            </x-confirm-button>
-                            @break
-
-                        @default
-                            <div class="h-9"></div>
-                    @endswitch
+                    @include('livewire.operator.partials.aksi-unit')
                 </x-kartu-unit>
             @endforeach
         </div>

@@ -59,7 +59,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-line">
-                    @foreach ($this->sewa as $s)
+                    @foreach ($this->halamanSewa as $s)
                         @php
                             $telat = $s->telat();
                             $belumBayar = $s->transaksi && $s->transaksi->status === 'belum_bayar';
@@ -101,6 +101,7 @@
                 </tbody>
             </table>
         </div>
+        @include('livewire.operator.partials.paginasi', ['p' => $this->halamanSewa, 'satuan' => 'sewa'])
     @else
         {{-- ======================= KOTAK ======================= --}}
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
