@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\Cabang;
 use App\Models\Pengaturan;
 use App\Services\Billing\PengeluaranService;
+use App\Services\Billing\ShiftService;
 use App\Services\Publik\BookingService;
 use App\Services\Publik\QrisService;
 use App\Services\Struk\StrukService;
@@ -51,6 +52,7 @@ class PengaturanOperasional extends Page implements HasSchemas
     /** kunci pengaturan => [field, default] */
     private const KUNCI = [
         'pengeluaran.plafon_shift' => ['batas_pengeluaran', PengeluaranService::PLAFON_DEFAULT],
+        'kas.modal_tetap' => ['modal_tetap', ShiftService::MODAL_TETAP_DEFAULT],
         'open_billing.blok_menit' => ['blok_menit', 15],
         'open_billing.toleransi_menit' => ['toleransi_menit', 5],
         'open_billing.minimal_menit' => ['minimal_menit', 60],
@@ -162,6 +164,10 @@ class PengaturanOperasional extends Page implements HasSchemas
                         self::uang(TextInput::make('batas_pengeluaran'))
                             ->label('Batas pengeluaran kas laci per shift')
                             ->helperText('Pengeluaran dari laci melebihi batas ini butuh PIN supervisor/owner. Isi 0 untuk tanpa batas.')
+                            ->required(),
+                        self::uang(TextInput::make('modal_tetap'))
+                            ->label('Modal tetap di laci')
+                            ->helperText('Uang kembalian yang ditinggal di laci saat serah terima / tutup kas. Kelebihannya disetor ke owner/brankas.')
                             ->required(),
                     ]),
 

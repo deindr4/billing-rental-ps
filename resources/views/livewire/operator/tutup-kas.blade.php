@@ -8,8 +8,16 @@
         <h1 class="text-xl font-semibold">Tutup Kas</h1>
         <p class="text-sm text-muted">
             <span class="num">{{ $this->shift->nomor }}</span> · dibuka {{ $this->shift->dibuka_pada->format('d/m H:i') }}
+            · {{ $this->shift->user?->name }}
         </p>
     </div>
+
+    {{-- Ganti kasir di tengah hari: serah terima, bukan tutup kas --}}
+    <a href="{{ route('shift.serah') }}" wire:navigate
+       class="flex items-center justify-between gap-3 rounded-md border border-line px-3 py-2.5 mb-4 text-sm hover:border-accent">
+        <span><span class="font-medium">Ganti kasir?</span> <span class="text-muted">Pakai Serah Terima agar laci langsung dipegang kasir berikutnya.</span></span>
+        <x-ikon name="chevron" size="16" class="-rotate-90 text-muted shrink-0" />
+    </a>
 
     {{-- Peringatan --}}
     @if ($r['sesi_aktif'] > 0 || $r['menunggu_bayar'] > 0)
@@ -23,51 +31,7 @@
         </div>
     @endif
 
-    {{-- Ringkasan kas laci --}}
-    <div class="surface mb-4">
-        <div class="px-4 py-2.5 border-b border-line font-medium">Kas laci (tunai)</div>
-        <dl class="px-4 py-3 text-sm space-y-1.5">
-            <div class="flex justify-between"><dt class="text-muted">Kas awal</dt><dd><x-rupiah :nilai="$r['kas_awal']" /></dd></div>
-            <div class="flex justify-between"><dt class="text-muted">Penjualan tunai</dt><dd><x-rupiah :nilai="$r['penjualan_tunai']" /></dd></div>
-            @if ($r['topup_tunai'] !== 0)
-                <div class="flex justify-between"><dt class="text-muted">Top up member (tunai)</dt><dd><x-rupiah :nilai="$r['topup_tunai']" /></dd></div>
-            @endif
-            @if ($r['pembatalan'] !== 0)
-                <div class="flex justify-between"><dt class="text-muted">Pembatalan</dt><dd class="text-danger"><x-rupiah :nilai="$r['pembatalan']" /></dd></div>
-            @endif
-            @if ($r['modal'] !== 0)
-                <div class="flex justify-between"><dt class="text-muted">Modal masuk</dt><dd><x-rupiah :nilai="$r['modal']" /></dd></div>
-            @endif
-            @if ($r['prive'] !== 0)
-                <div class="flex justify-between"><dt class="text-muted">Prive owner</dt><dd class="text-danger"><x-rupiah :nilai="$r['prive']" /></dd></div>
-            @endif
-            @if ($r['pengeluaran'] !== 0)
-                <div class="flex justify-between"><dt class="text-muted">Pengeluaran</dt><dd class="text-danger"><x-rupiah :nilai="$r['pengeluaran']" /></dd></div>
-            @endif
-            <div class="flex justify-between pt-1.5 border-t border-line font-semibold">
-                <dt>Kas seharusnya</dt><dd><x-rupiah :nilai="$r['seharusnya']" /></dd>
-            </div>
-        </dl>
-    </div>
-
-    {{-- Non tunai --}}
-    <div class="surface mb-4">
-        <div class="px-4 py-2.5 border-b border-line font-medium">Non-tunai</div>
-        <dl class="px-4 py-3 text-sm space-y-1.5">
-            <div class="flex justify-between"><dt class="text-muted">QRIS</dt><dd><x-rupiah :nilai="$r['qris']" /></dd></div>
-            <div class="flex justify-between"><dt class="text-muted">Transfer</dt><dd><x-rupiah :nilai="$r['transfer']" /></dd></div>
-            @if ($r['qris_gateway'] > 0)
-                <div class="flex justify-between"><dt class="text-muted">QRIS online (bayar mandiri TV)</dt><dd><x-rupiah :nilai="$r['qris_gateway']" /></dd></div>
-            @endif
-            @if ($r['saldo'] > 0)
-                <div class="flex justify-between"><dt class="text-muted">Saldo member</dt><dd><x-rupiah :nilai="$r['saldo']" /></dd></div>
-            @endif
-            <div class="flex justify-between pt-1.5 border-t border-line text-muted">
-                <dt>Transaksi dibayar · dibatalkan</dt>
-                <dd class="num">{{ $r['jumlah_transaksi'] }} · {{ $r['jumlah_batal'] }}</dd>
-            </div>
-        </dl>
-    </div>
+    @include('livewire.operator.partials.ringkasan-kas', ['r' => $r])
 
     {{-- Input kas fisik --}}
     <div class="surface p-4 space-y-4">
@@ -89,6 +53,17 @@
                 <x-rupiah :nilai="abs($selisih)" class="text-xl font-semibold" />
             </div>
         @endif
+
+        <div>
+            <label for="ditinggal" class="block text-sm mb-1.5">Ditinggal di laci untuk besok <span class="text-muted">(modal kembalian)</span></label>
+            <x-input-uang id="ditinggal" wire:model.live="ditinggal" />
+            @if ($kasFisik !== null)
+                <p class="text-sm mt-1.5 flex justify-between">
+                    <span class="text-muted">Disetor ke owner / brankas</span>
+                    <x-rupiah :nilai="(int) $kasFisik - $this->ditinggalEfektif()" class="font-semibold" />
+                </p>
+            @endif
+        </div>
 
         @if ($selisih !== null && $selisih !== 0)
             <div>

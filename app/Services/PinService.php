@@ -64,6 +64,29 @@ final class PinService
         throw new BillingException('PIN salah.');
     }
 
+    /** PIN milik user tertentu (mis. kasir penerima serah terima / absen). Batas percobaan sama dengan setujui(). */
+    public function cocokkan(User $user, ?string $pin, string $untuk): void
+    {
+        $kunci = 'pin:'.$user->tenant_id.'|'.request()->ip();
+
+        if (RateLimiter::tooManyAttempts($kunci, self::MAKS_PERCOBAAN)) {
+            throw new BillingException('Terlalu banyak PIN salah. Coba lagi dalam '.RateLimiter::availableIn($kunci).' detik.');
+        }
+
+        if (! $user->pin) {
+            throw new BillingException("{$user->name} belum punya PIN. Atur di Admin → Pengguna.");
+        }
+
+        if (! preg_match('/^\d{4,6}$/', trim((string) $pin)) || ! Hash::check(trim((string) $pin), $user->pin)) {
+            RateLimiter::hit($kunci, self::BLOKIR_DETIK);
+            Audit::catat('pin_gagal', "PIN {$user->name} salah ({$untuk})", null, ['untuk' => $untuk], tenantId: $user->tenant_id);
+
+            throw new BillingException("PIN {$user->name} salah.");
+        }
+
+        RateLimiter::clear($kunci);
+    }
+
     /** Pastikan PIN belum dipakai pengguna lain di tenant yang sama. */
     public function tersedia(string $pin, string $tenantId, ?string $kecualiUserId = null): bool
     {

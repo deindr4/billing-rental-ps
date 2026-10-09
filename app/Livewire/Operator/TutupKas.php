@@ -5,12 +5,7 @@ namespace App\Livewire\Operator;
 use App\Exceptions\BillingException;
 use App\Jobs\BuatLaporanTutupKas;
 use App\Livewire\Concerns\WithAlert;
-use App\Models\KasMutasi;
-use App\Models\Pembayaran;
-use App\Models\Sesi;
 use App\Models\Shift;
-use App\Models\Transaksi;
-use App\Models\Unit;
 use App\Services\Billing\ShiftService;
 use App\Support\Tenancy;
 use Livewire\Attributes\Computed;
@@ -18,6 +13,10 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
+/**
+ * Tutup kas akhir hari (tanpa kasir penerus). Ganti kasir di tengah hari pakai Serah Terima.
+ * Uang yang ditinggal untuk besok dicatat; sisanya = setoran ke owner / brankas.
+ */
 #[Layout('layouts.operator')]
 #[Title('Tutup Kas')]
 class TutupKas extends Component
@@ -26,6 +25,9 @@ class TutupKas extends Component
 
     public ?int $kasFisik = null;
 
+    /** Modal kembalian yang ditinggal di laci untuk shift besok (null = modal tetap cabang) */
+    public ?int $ditinggal = null;
+
     public string $catatan = '';
 
     public function mount()
@@ -33,6 +35,8 @@ class TutupKas extends Component
         if (! $this->shift) {
             return $this->redirectRoute('shift.buka', navigate: true);
         }
+
+        $this->ditinggal = ShiftService::modalTetap(app(Tenancy::class)->cabangId());
     }
 
     #[Computed]
@@ -44,47 +48,7 @@ class TutupKas extends Component
     #[Computed]
     public function ringkasan(): array
     {
-        $shift = $this->shift;
-
-        $mutasi = KasMutasi::query()
-            ->where('shift_id', $shift->id)
-            ->selectRaw('jenis, SUM(jumlah) as total')
-            ->groupBy('jenis')
-            ->pluck('total', 'jenis');
-
-        $perMetode = Pembayaran::query()
-            ->where('shift_id', $shift->id)
-            ->where('status', 'sukses')
-            ->selectRaw('metode, SUM(jumlah) as total, COUNT(*) as jumlah')
-            ->groupBy('metode')
-            ->get()
-            ->keyBy('metode');
-
-        return [
-            'kas_awal' => (int) ($mutasi['kas_awal'] ?? 0),
-            'penjualan_tunai' => (int) ($mutasi['penjualan'] ?? 0),
-            'pembatalan' => (int) ($mutasi['pembatalan'] ?? 0),
-            'topup_tunai' => (int) ($mutasi['topup'] ?? 0),
-            'modal' => (int) ($mutasi['modal'] ?? 0),
-            'prive' => (int) ($mutasi['prive'] ?? 0),
-            'pengeluaran' => (int) ($mutasi['pengeluaran'] ?? 0),
-            'seharusnya' => (int) $mutasi->sum(),
-            'qris' => (int) ($perMetode['qris']->total ?? 0),
-            'transfer' => (int) ($perMetode['transfer']->total ?? 0),
-            'saldo' => (int) ($perMetode['saldo']->total ?? 0),
-            'qris_gateway' => (int) ($perMetode['qris_gateway']->total ?? 0),
-            'jumlah_transaksi' => Pembayaran::query()
-                ->where('shift_id', $shift->id)
-                ->where('status', 'sukses')
-                ->distinct()
-                ->count('transaksi_id'),
-            'jumlah_batal' => Transaksi::query()
-                ->where('shift_id', $shift->id)
-                ->where('status', Transaksi::STATUS_DIBATALKAN)
-                ->count(),
-            'sesi_aktif' => Sesi::query()->aktif()->count(),
-            'menunggu_bayar' => Unit::query()->where('status', Unit::STATUS_MENUNGGU_BAYAR)->count(),
-        ];
+        return app(ShiftService::class)->ringkasan($this->shift);
     }
 
     public function selisih(): ?int
@@ -92,11 +56,18 @@ class TutupKas extends Component
         return $this->kasFisik === null ? null : $this->kasFisik - $this->ringkasan['seharusnya'];
     }
 
+    /** Uang ditinggal tidak bisa melebihi kas fisik */
+    public function ditinggalEfektif(): int
+    {
+        return max(0, min((int) $this->ditinggal, (int) $this->kasFisik));
+    }
+
     /** Dipanggil dari tombol konfirmasi */
     public function tutup(array $konfirmasi = [])
     {
         $this->validate([
             'kasFisik' => 'required|integer|min:0',
+            'ditinggal' => 'nullable|integer|min:0',
             'catatan' => 'nullable|string|max:500',
         ], [
             'kasFisik.required' => 'Masukkan jumlah uang di laci (kas fisik).',
@@ -115,7 +86,9 @@ class TutupKas extends Component
                 $this->shift,
                 auth()->user(),
                 (int) $this->kasFisik,
-                trim($this->catatan) ?: null
+                trim($this->catatan) ?: null,
+                null,
+                $this->ditinggalEfektif(),
             );
         } catch (BillingException $e) {
             $this->alert('Tidak bisa tutup kas', $e->getMessage(), 'error');
@@ -129,14 +102,15 @@ class TutupKas extends Component
         $this->flashAlert(
             'Shift ditutup',
             sprintf(
-                'Kas fisik Rp %s · Selisih Rp %s',
+                'Kas fisik Rp %s · Selisih Rp %s · Disetor Rp %s',
                 number_format($shift->kas_fisik, 0, ',', '.'),
-                number_format($shift->selisih, 0, ',', '.')
+                number_format($shift->selisih, 0, ',', '.'),
+                number_format((int) $shift->setoran, 0, ',', '.')
             ),
             'success'
         );
 
-        return $this->redirectRoute('shift.buka', navigate: true);
+        return $this->redirectRoute('shift.laporan', ['id' => $shift->id], navigate: true);
     }
 
     public function render()

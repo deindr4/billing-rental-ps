@@ -78,7 +78,10 @@ class BatalWaktuSesiTest extends TestCase
         $kasir->assignRole('Kasir');
         $kasir->cabang()->attach($this->cabang->id);
         $this->tenancy();
-        app(ShiftService::class)->buka($kasir, $this->cabang, 0);
+        // Satu laci per cabang: shift owner ditutup, kasir memegang laci
+        $shift = app(ShiftService::class);
+        $shift->tutup($shift->terbukaDiCabang($this->cabang->id), $this->owner, 0, 'uji');
+        $shift->buka($kasir, $this->cabang, 0);
 
         return $kasir;
     }

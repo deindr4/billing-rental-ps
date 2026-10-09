@@ -113,7 +113,10 @@ class BonusWaktuTest extends TestCase
         $kasir = User::create(['tenant_id' => $this->owner->tenant_id, 'name' => 'Kasir', 'username' => 'kasirb', 'email' => 'kasirb@billing.test', 'password' => 'password']);
         $kasir->assignRole('Kasir');
         $kasir->cabang()->attach($this->cabang->id);
-        app(ShiftService::class)->buka($kasir, $this->cabang, 0); // shift berlaku per orang
+        // Satu laci per cabang: shift owner ditutup, kasir memegang laci (owner tetap bisa membantu)
+        $shift = app(ShiftService::class);
+        $shift->tutup($shift->terbukaDiCabang($this->cabang->id), $this->owner, 0, 'uji');
+        $shift->buka($kasir, $this->cabang, 0);
 
         $panel = Livewire::actingAs($kasir)->test(KelolaSesi::class)
             ->call('bukaUntuk', $unit->id)->call('kePanel', 'bonus')

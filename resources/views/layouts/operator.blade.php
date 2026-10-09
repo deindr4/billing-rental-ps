@@ -105,7 +105,7 @@
                     <span class="min-w-0 flex-1" x-show="! ciut">
                         <span class="block text-sm font-medium truncate">{{ $user?->name }}</span>
                         <span class="block label truncate">
-                            {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i') : 'Shift belum dibuka' }}
+                            {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i').($shiftAktif->user_id !== $user->id ? ' · laci '.$shiftAktif->user?->name : '') : 'Shift belum dibuka' }}
                         </span>
                     </span>
                     <x-ikon name="chevron" size="16" class="text-muted shrink-0" x-show="! ciut" />
@@ -114,6 +114,9 @@
                 <div x-show="menuUser" x-transition.opacity.duration.150ms x-cloak
                      class="surface absolute bottom-full left-0 mb-2 w-56 p-1 shadow-xl z-40">
                     @if ($shiftAktif)
+                        <a href="{{ route('shift.serah') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
+                            <x-ikon name="member" size="16" class="text-ik-teal" /> Serah Terima (ganti kasir)
+                        </a>
                         <a href="{{ route('shift.tutup') }}" wire:navigate class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-surface-2 text-sm">
                             <x-ikon name="kas" size="16" class="text-ik-kuning" /> Tutup Kas
                         </a>
@@ -149,7 +152,7 @@
                 <div class="lg:hidden min-w-0">
                     <div class="font-semibold leading-tight truncate">{{ $cabangAktif?->nama ?? config('app.name') }}</div>
                     <div class="label truncate">
-                        {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i').' · '.$user->name : 'Shift belum dibuka' }}
+                        {{ $shiftAktif ? 'Shift '.$shiftAktif->dibuka_pada->format('H:i').' · laci '.($shiftAktif->user?->name ?? $user->name) : 'Shift belum dibuka' }}
                     </div>
                 </div>
 
@@ -270,6 +273,9 @@
                     </a>
                 @endif
                 @if ($shiftAktif)
+                    <a href="{{ route('shift.serah') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
+                        <x-ikon name="member" size="18" class="text-ik-teal" /> Serah Terima (ganti kasir)
+                    </a>
                     <a href="{{ route('shift.tutup') }}" wire:navigate @click="lainnya = false" class="flex items-center gap-3 px-3 py-3 text-sm">
                         <x-ikon name="kas" size="18" class="text-ik-kuning" /> Tutup Kas
                     </a>

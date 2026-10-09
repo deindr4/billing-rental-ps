@@ -22,6 +22,8 @@ class Shift extends Model
     protected $fillable = [
         'tenant_id', 'cabang_id', 'user_id', 'nomor', 'status', 'dibuka_pada', 'ditutup_pada',
         'kas_awal', 'kas_seharusnya', 'kas_fisik', 'selisih', 'rincian_pecahan', 'catatan_tutup', 'ditutup_oleh',
+        // Serah terima (satu laci per cabang)
+        'kas_ditinggal', 'setoran', 'diserahkan_ke', 'shift_sebelum_id', 'shift_berikut_id', 'selisih_terima', 'serah_terima',
     ];
 
     protected function casts(): array
@@ -34,6 +36,10 @@ class Shift extends Model
             'kas_fisik' => 'integer',
             'selisih' => 'integer',
             'rincian_pecahan' => 'array',
+            'kas_ditinggal' => 'integer',
+            'setoran' => 'integer',
+            'selisih_terima' => 'integer',
+            'serah_terima' => 'array',
             'synced_at' => 'datetime',
         ];
     }

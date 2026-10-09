@@ -22,17 +22,24 @@ class BukaShift extends Component
 
     public ?int $kasAkhirSebelumnya = null;
 
+    /** Laci sedang dipegang kasir lain (satu laci per cabang) → tidak bisa buka, perlu serah terima */
+    public ?Shift $dipegang = null;
+
     public function mount(ShiftService $shift, Tenancy $tenancy)
     {
         if ($shift->aktif(auth()->user(), $tenancy->cabangId())) {
             return $this->redirectRoute('rental', navigate: true);
         }
 
-        // Saran kas awal: kas fisik dari shift terakhir yang ditutup di cabang ini
-        $this->kasAkhirSebelumnya = Shift::query()
+        $this->dipegang = $shift->terbukaDiCabang($tenancy->cabangId());
+
+        // Saran kas awal: uang yang ditinggal di laci saat shift terakhir ditutup (data lama: kas fisik)
+        $terakhir = Shift::query()
             ->where('status', Shift::STATUS_TUTUP)
-            ->latest('ditutup_pada')
-            ->value('kas_fisik');
+            ->orderByDesc('ditutup_pada')
+            ->orderByDesc('dibuka_pada') // serah terima & tutup bisa di detik yang sama
+            ->first(['kas_fisik', 'kas_ditinggal']);
+        $this->kasAkhirSebelumnya = $terakhir ? (int) ($terakhir->kas_ditinggal ?? $terakhir->kas_fisik) : null;
     }
 
     public function pakaiKasSebelumnya(): void

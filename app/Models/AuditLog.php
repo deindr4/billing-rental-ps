@@ -39,6 +39,8 @@ class AuditLog extends Model
         'koreksi_member' => 'Koreksi member',
         'batal_pengeluaran' => 'Batal pengeluaran',
         'selisih_kas' => 'Selisih kas',
+        'serah_terima_shift' => 'Serah terima shift',
+        'selisih_serah_terima' => 'Selisih serah terima',
         'modal' => 'Suntikan modal',
         'prive' => 'Prive owner',
         'backup' => 'Backup',

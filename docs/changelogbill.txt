@@ -5,6 +5,19 @@ Setelah memasang update: Admin -> Pengaturan -> Pemeliharaan sistem ->
 Backup dulu -> Update database -> Pasang ulang trigger sinkron -> Optimalkan -> Restart antrean & realtime.
 
 
+2026-10-09 (satu laci per cabang + serah terima shift)
+-----------------------------------------------------------------------------
+- Satu cabang = satu laci = satu shift terbuka. Kasir lain tidak bisa membuka shift kedua; menerima laci lewat
+  serah terima. Owner & Supervisor (izin baru "shift.bantu") tetap bisa bertransaksi di laci kasir yang bertugas.
+- Serah Terima (menu akun -> "Serah Terima (ganti kasir)"): hitung laci, uang ditinggal = modal tetap (Admin ->
+  Pengaturan Operasional -> Modal tetap di laci, bawaan Rp200.000), sisanya setoran; penerima konfirmasi dengan PIN
+  & boleh menghitung ulang (beda = "Selisih serah terima", anomali). Shift penerima langsung dibuka.
+- Laporan shift (setelah serah terima / tutup kas, bisa dicetak): kas, setoran, yang ditinggal, selisih, penerima,
+  sesi masih main & tagihan belum dibayar yang diteruskan; tombol "Keluar & ganti kasir".
+- Tutup kas: isian "ditinggal di laci untuk besok" + setoran; Buka Shift menyarankan kas awal = yang ditinggal.
+- Database: kolom baru di shifts -> Update database + Pasang ulang trigger sinkron. Panduan: docs/karyawan.md.
+
+
 2026-10-08 (sewa aksesori + warna kartu unit)
 -----------------------------------------------------------------------------
 - Sewa aksesori di lokasi (stik tambahan, headset, setir): Admin -> Rental -> "Aksesori sewa" (per cabang):

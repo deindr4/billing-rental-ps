@@ -17,9 +17,11 @@ use App\Livewire\Operator\Member;
 use App\Livewire\Operator\PembayaranOnlineKasir;
 use App\Livewire\Operator\Pengeluaran;
 use App\Livewire\Operator\Pos;
+use App\Livewire\Operator\LaporanShift;
 use App\Livewire\Operator\Rental;
 use App\Livewire\Operator\RentalPc;
 use App\Livewire\Operator\Stok;
+use App\Livewire\Operator\SerahTerima;
 use App\Livewire\Operator\TutupKas;
 use App\Livewire\Publik\Billboard;
 use App\Livewire\Publik\BookingPortal;
@@ -84,6 +86,8 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/shift/buka', BukaShift::class)->middleware('can:shift.kelola')->name('shift.buka');
         Route::get('/shift/tutup', TutupKas::class)->middleware('can:shift.kelola')->name('shift.tutup');
+        Route::get('/shift/serah-terima', SerahTerima::class)->middleware('can:shift.kelola')->name('shift.serah');
+        Route::get('/shift/{id}/laporan', LaporanShift::class)->whereUuid('id')->name('shift.laporan');
         Route::get('/transaksi', DaftarTransaksi::class)->middleware('can:transaksi.lihat')->name('transaksi');
         Route::get('/stok', Stok::class)->middleware('can:stok.lihat')->name('stok');
         Route::get('/laporan', Laporan::class)->middleware('can:laporan.lihat')->name('laporan');

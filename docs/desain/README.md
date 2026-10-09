@@ -62,6 +62,9 @@ Token warna sudah dipasang di [`resources/css/shared/tokens.css`](../../resource
   disewa" dengan tombol Kembalikan (teal) / Batal (merah); kartu unit: baris "Aksesori" di bawah Paket.
 - Tambahan di luar desain — warna penanda unit: `border-left: 4px` + chip kode (latar 16% warna unit) di kartu unit;
   garis atas tetap warna status. Palet 12 warna (`Unit::PALET`), bisa diganti per unit di admin.
+- Tambahan di luar desain — Serah Terima & Laporan Shift: pola halaman Tutup Kas (`max-w-lg`, `surface`, ringkasan
+  kas bersama `partials/ringkasan-kas`), langkah bernomor 1–3, daftar "Diteruskan ke kasir berikutnya"; Buka Shift
+  menampilkan kartu "Laci sedang dipegang" bila kasir lain bertugas. Menu akun: "Serah Terima (ganti kasir)".
 - Tambahan di luar desain — Stok → Riwayat (Owner): kolom "Harga pokok" + tombol kecil `btn-tint tint-kuning`
   "Koreksi" yang membuka baris isian harga + alasan di bawah baris mutasi.
 - Fitur di desain yang belum ada di roadmap aplikasi saat ini: relay/smart plug & monitor daya, target omzet shift, aksesori sewa (stik, headset), antrean lounge.
