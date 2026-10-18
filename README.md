@@ -258,6 +258,9 @@ terpasang sebagai layanan Windows. Firewall hanya dibuka untuk jaringan lokal.
 
 ## Memasang
 
+📘 **Panduan lengkap: [Pasang di Windows](docs/pasang-windows.md)** — persiapan, wizard, tablet kasir, TV & izinnya,
+pindah PC, akses internet, update, uninstall & masalah umum.
+
 ### PC rental (Windows 10 / 11, 64-bit)
 
 1. Unduh **`BillingPS-Setup-<versi>.exe`** dari [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest).
@@ -271,6 +274,7 @@ Panduan bergambar A–Z (unit, paket, F&B, kasir, TV, transaksi pertama) tersedi
 
 Di TV buka `http://IP-PC/apk` (atau unduh **`tv-agent-<versi>.apk`** dari [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest))
 → pasang **TV Agent** → isi alamat server → masukkan kode pairing di Admin → Perangkat TV & PC.
+Izin tambahan & mode kiosk: [Pasang di Windows → Hubungkan TV](docs/pasang-windows.md#5-hubungkan-tv).
 
 ---
 
