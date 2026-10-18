@@ -50,8 +50,20 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud (Delta Clo
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/gambar/kasir-kelola-sesi.webp" alt="Kelola sesi"><br><sub><b>Kelola sesi</b> — tambah waktu, F&B, pause, pindah unit, bonus waktu, struk</sub></td>
-    <td width="50%"><img src="docs/gambar/kasir-pos.webp" alt="POS F&B"><br><sub><b>POS F&B</b> — gabung ke tagihan unit, batalkan salah order (−1 / semua)</sub></td>
+    <td width="50%"><img src="docs/gambar/kasir-dashboard.webp" alt="Dashboard kasir"><br><sub><b>Dashboard</b> — pendapatan & laba hari ini, alamat server, status cloud & sinkron, TV / PC online, unit siap</sub></td>
+    <td width="50%"><img src="docs/gambar/kasir-kelola-sesi.webp" alt="Kelola sesi"><br><sub><b>Kelola sesi</b> — tambah / kurangi waktu, F&B, pause, pindah unit, bonus waktu, struk</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-kurangi-waktu.webp" alt="Kurangi waktu"><br><sub><b>Kurangi waktu</b> — dipesan 2 jam ternyata 1 jam: harga dihitung proporsional, kembalian tunai dari laci</sub></td>
+    <td><img src="docs/gambar/kasir-pindah-unit.webp" alt="Pindah unit"><br><sub><b>Pindah unit + konversi tarif</b> — PS5 ↔ PS4, sisa waktu tetap, tagihan disesuaikan otomatis</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-unit-dibersihkan.webp" alt="Unit dibersihkan"><br><sub><b>Sedang dibersihkan</b> — setelah selesai & lunas unit dibersihkan dulu (manual / otomatis N menit) sebelum siap lagi</sub></td>
+    <td><img src="docs/gambar/kasir-pos.webp" alt="POS F&B"><br><sub><b>POS F&B</b> — bundling otomatis (beli 3 = Rp2.500), gabung ke tagihan unit, batalkan salah order</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-stok-masuk.webp" alt="Stok masuk"><br><sub><b>Stok masuk dari supplier</b> — nota pembelian, harga pokok baru, belanja tunai dari hasil bulan lalu</sub></td>
+    <td><img src="docs/gambar/kasir-tes-stik.webp" alt="Tes stik"><br><sub><b>Tes Stik</b> — tombol, analog drift, L2/R2, getar, gyro & speaker DualSense langsung di browser</sub></td>
   </tr>
   <tr>
     <td><img src="docs/gambar/kasir-rental-daftar.webp" alt="Tampilan daftar"><br><sub><b>Tampilan daftar</b> — satu baris per unit (timer, tagihan, aksi, remote), 15 unit per halaman; bisa ganti ke kotak</sub></td>
@@ -102,8 +114,12 @@ port yang dipakai, dan **backup database** walau billing mati.
     <td width="50%"><img src="docs/gambar/tv-tagihan.webp" alt="Tagihan di TV"><br><sub><b>Waktu habis</b> — rincian tagihan, QR isi ulang waktu dari HP, tombol panggil kasir</sub></td>
   </tr>
   <tr>
+    <td><img src="docs/gambar/tv-dibersihkan.webp" alt="Sedang dibersihkan"><br><sub><b>Sedang dibersihkan</b> — TV tetap terkunci sampai kasir menandai unit siap</sub></td>
     <td><img src="docs/gambar/tv-pemberitahuan.webp" alt="Pemberitahuan"><br><sub><b>Pemberitahuan</b> dari kasir di tengah layar + running text promo</sub></td>
+  </tr>
+  <tr>
     <td><img src="docs/gambar/tv-transisi-logo.webp" alt="Transisi logo"><br><sub><b>Transisi logo</b> saat mulai & selesai main</sub></td>
+    <td></td>
   </tr>
 </table>
 
@@ -121,6 +137,18 @@ port yang dipakai, dan **backup database** walau billing mati.
   </tr>
   <tr>
     <td><img src="docs/gambar/admin-perangkat.webp" alt="Perangkat TV & PC"><br><sub><b>Perangkat TV & PC</b> — statistik tipe TV, versi Android & APK, status online, push update</sub></td>
+    <td><img src="docs/gambar/admin-neraca.webp" alt="Neraca"><br><sub><b>Neraca</b> — aset, kewajiban & ekuitas per tanggal dengan pembanding</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/admin-laporan-pembelian.webp" alt="Laporan pembelian"><br><sub><b>Pembelian</b> — per supplier & produk, dana belanja dari hasil bulan lalu</sub></td>
+    <td><img src="docs/gambar/admin-selisih-harga.webp" alt="Selisih harga pokok"><br><sub><b>Selisih harga pokok</b> — bulan ini vs bulan lalu, supplier termurah per produk</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/admin-laba-penjualan.webp" alt="Laba penjualan"><br><sub><b>Laba penjualan F&B</b> — per produk & kategori, tanda produk rugi / margin tipis</sub></td>
+    <td><img src="docs/gambar/admin-bundling.webp" alt="Bundling"><br><sub><b>Bundling</b> — "beli N = Rp X" per produk, dengan masa berlaku</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/admin-supplier.webp" alt="Supplier"><br><sub><b>Supplier</b> — kontak, catatan & riwayat pembelian</sub></td>
     <td></td>
   </tr>
   <tr>
@@ -138,7 +166,9 @@ port yang dipakai, dan **backup database** walau billing mati.
 
 - Matriks unit realtime: ready, terisi, menunggu bayar, maintenance — sisa waktu, tagihan & status TV per kartu (kotak / daftar).
 - Mode **paket / durasi** (hitung mundur) dan **open billing** (blok menit, minimal tagih, toleransi, pembulatan).
-- **Waktu pilih game** tidak ditagih, tambah waktu, **bonus waktu**, pause & resume, **pindah unit**, batal tambah waktu & batal sesi.
+- **Waktu pilih game** tidak ditagih, tambah waktu, **kurangi waktu** (harga proporsional), **bonus waktu**, pause & resume, batal tambah waktu & batal sesi.
+- **Pindah unit dengan konversi tarif** (PS5 ↔ PS4): sisa waktu tetap, tagihan disesuaikan.
+- Status **Sedang dibersihkan** setelah sesi selesai & lunas (aktif per cabang, manual atau otomatis).
 - Satu TV beberapa konsol (nama per **HDMI**), tarif per tipe konsol, kategori unit (VIP / reguler), paket & aturan harga.
 - **Rental PC** di menu terpisah, member & laporan tetap satu.
 </details>
@@ -156,8 +186,9 @@ port yang dipakai, dan **backup database** walau billing mati.
 <details>
 <summary><b>🍜 POS, stok, keuangan & karyawan</b></summary>
 
-- POS F&B: jual langsung atau **gabung ke tagihan unit**, scan barcode, batal salah order.
-- Stok per cabang dengan HPP rata-rata, stok masuk, **opname**, mutasi.
+- POS F&B: jual langsung atau **gabung ke tagihan unit**, scan barcode, batal salah order, **bundling** (beli N = Rp X).
+- Stok per cabang dengan HPP rata-rata, stok masuk dari **supplier** + nota, **opname**, mutasi.
+- **Laporan pembelian, selisih harga pokok, laba penjualan F&B & neraca** (Owner & Admin).
 - **Shift kas** satu laci per cabang + **serah terima**, selisih kas tercatat, pengeluaran dengan PIN.
 - **Karyawan**: jadwal, **absen PIN + selfie**, **rekap gaji** & bonus, slip gaji.
 - **Sewa Playbox** (PS bawa pulang): penyewa + lokasi Maps, foto & KTP privat, tarif jam/hari/minggu/bulan, jaminan, checklist, surat sewa, denda, pengingat WA.
@@ -253,8 +284,9 @@ file `.exe`. Installer otomatis backup database sebelum update — data & pengat
 
 ## Delta Cloud
 
-Server cloud dikelola pengembang dan **disewakan lewat langganan**: sinkron & cadangan cloud (TV & kasir tetap jalan
-saat PC rental mati), billboard & booking online, akses owner dari mana saja.
+**Satu server cloud khusus untuk setiap rental** (beserta cabangnya), disiapkan & dikelola pengembang lewat langganan:
+sinkron & cadangan cloud (TV & kasir tetap jalan saat PC rental mati), billboard & booking online, akses owner dari mana saja,
+dan backup otomatis ke Google Drive.
 Pesan langsung dari aplikasi: **Admin → Pengaturan → Langganan Delta Cloud** — bayar QRIS, sinkron cloud terpasang otomatis.
 
 ---
