@@ -201,11 +201,19 @@ port yang dipakai, dan **backup database** walau billing mati.
 </details>
 
 <details>
-<summary><b>📊 Analisa pintar (tanpa AI, offline)</b></summary>
+<summary><b>📊 Analisa pintar (aturan offline + AI Gemini opsional)</b></summary>
 
 - **Audit kecurangan kasir**: skor risiko 0–100 dari pembatalan, kas kurang, bonus waktu, bypass TV, batal F&B, diskon, PIN salah.
 - **Keuangan**: vs periode lalu, titik impas harian, proyeksi akhir bulan, margin, ROI aset.
 - **Operasional & stok**: utilisasi per unit, jam sepi, paket terlaris, barang hilang saat opname, stok mati.
+- **AI Google Gemini (opsional, API key gratis milik sendiri)**:
+  - **Log Analisa AI** membaca error sistem (bagian, lokasi, penyebab, saran);
+  - **Ringkasan AI** memberi saran usaha per cabang;
+  - kuota & jatah harian terlihat, berhenti otomatis saat limit lalu lanjut sendiri;
+  - jadwal harian / mingguan / bulanan;
+  - hasil dikirim ke Telegram & WhatsApp;
+  - bisa diajak **berbalas pesan** untuk meluruskan hasil yang keliru;
+  - data disensor dan nama kasir disamarkan.
 </details>
 
 <details>
