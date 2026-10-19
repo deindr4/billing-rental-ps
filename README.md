@@ -125,7 +125,7 @@ port yang dipakai, dan **backup database** walau billing mati.
 
 <p align="center">
   <img src="docs/gambar/tv-timer.webp" alt="Timer melayang" width="75%"><br>
-  <sub><b>Timer melayang di atas game</b> — warna, ukuran & kepekatan diatur admin; otomatis merah & berkedip + bunyi saat hampir habis</sub>
+  <sub><b>Timer melayang di atas game</b> — warna, ukuran & kepekatan diatur admin; otomatis merah & berkedip + bunyi saat hampir habis. Bisa <b>selalu tampil</b> atau <b>sesuai kondisi</b>: muncul sesaat saat mulai & saat sisa 30 menit, lalu tampil terus sejak sisa 5 menit</sub>
 </p>
 
 ### Admin & halaman publik
