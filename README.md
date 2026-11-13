@@ -51,7 +51,15 @@ Jalan di PC rental (offline-first) dan bisa disinkron ke server cloud (Delta Clo
 <table>
   <tr>
     <td width="50%"><img src="docs/gambar/kasir-dashboard.webp" alt="Dashboard kasir"><br><sub><b>Dashboard</b> — pendapatan & laba hari ini, alamat server, status cloud & sinkron, TV / PC online, unit siap</sub></td>
-    <td width="50%"><img src="docs/gambar/kasir-kelola-sesi.webp" alt="Kelola sesi"><br><sub><b>Kelola sesi</b> — tambah / kurangi waktu, F&B, pause, pindah unit, bonus waktu, struk</sub></td>
+    <td width="50%"><img src="docs/gambar/kasir-kelola-sesi.webp" alt="Kelola sesi"><br><sub><b>Kelola sesi</b> — tambah / kurangi waktu, simpan sisa waktu, F&B, aksesori, pause, pindah unit, bonus waktu, catatan TV, struk</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-simpan-waktu.webp" alt="Simpan sisa waktu"><br><sub><b>Simpan sisa waktu</b> — berhenti lebih awal, sisa menit disimpan ke member & dipakai lain hari (Rp0); batas dari admin, PIN di atas batas</sub></td>
+    <td><img src="docs/gambar/kasir-diskon.webp" alt="Diskon kasir"><br><sub><b>Diskon & voucher saat bayar</b> — persen / rupiah dengan alasan, PIN supervisor di atas batas; kode voucher / promo</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/kasir-antrean.webp" alt="Antrean tunggu"><br><sub><b>Antrean tunggu</b> — TV penuh? pelanggan antre (dari kasir / HP), TV kosong langsung ditahan 5 menit + WhatsApp otomatis</sub></td>
+    <td></td>
   </tr>
   <tr>
     <td><img src="docs/gambar/kasir-kurangi-waktu.webp" alt="Kurangi waktu"><br><sub><b>Kurangi waktu</b> — dipesan 2 jam ternyata 1 jam: harga dihitung proporsional, kembalian tunai dari laci</sub></td>
@@ -119,7 +127,7 @@ port yang dipakai, dan **backup database** walau billing mati.
   </tr>
   <tr>
     <td><img src="docs/gambar/tv-transisi-logo.webp" alt="Transisi logo"><br><sub><b>Transisi logo</b> saat mulai & selesai main</sub></td>
-    <td></td>
+    <td><img src="docs/gambar/tv-slide-iklan.webp" alt="Slide show iklan"><br><sub><b>Slide show iklan</b> di layar kunci — promo bergantian, masa tayang per iklan; <b>mode iklan</b> saat TV menganggur (APK 1.0.6)</sub></td>
   </tr>
 </table>
 
@@ -149,7 +157,15 @@ port yang dipakai, dan **backup database** walau billing mati.
   </tr>
   <tr>
     <td><img src="docs/gambar/admin-supplier.webp" alt="Supplier"><br><sub><b>Supplier</b> — kontak, catatan & riwayat pembelian</sub></td>
-    <td></td>
+    <td><img src="docs/gambar/admin-laporan-bulanan.webp" alt="Laporan bulanan"><br><sub><b>Laporan Bulanan Lengkap</b> — laba rugi vs bulan lalu, poin penting, grafik harian, unit & jam ramai; PDF & CSV</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/admin-voucher.webp" alt="Voucher & promo"><br><sub><b>Voucher & promo</b> — potongan persen / rupiah / gratis main, kuota, jam berlaku, batas per member</sub></td>
+    <td><img src="docs/gambar/admin-kasbon.webp" alt="Kasbon"><br><sub><b>Kasbon karyawan</b> — dicicil otomatis per gajian; potongan terlambat per menit / bertingkat</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/gambar/admin-slide-show.webp" alt="Slide show TV"><br><sub><b>Slide show layar kunci</b> — sampai 10 gambar, urutan, durasi, efek, tanggal mulai & kedaluwarsa per iklan</sub></td>
+    <td><img src="docs/gambar/admin-kesehatan-db.webp" alt="Kesehatan database"><br><sub><b>Kesehatan database</b> — ukuran per tabel, masa simpan log, tombol optimasi; data transaksi tidak pernah dihapus</sub></td>
   </tr>
   <tr>
     <td><img src="docs/gambar/publik-billboard.webp" alt="Billboard"><br><sub><b>Billboard</b> — PlayStation & PC terpisah, tampilan Grid / List, slider iklan, turnamen di atas</sub></td>
@@ -167,10 +183,14 @@ port yang dipakai, dan **backup database** walau billing mati.
 - Matriks unit realtime: ready, terisi, menunggu bayar, maintenance — sisa waktu, tagihan & status TV per kartu (kotak / daftar).
 - Mode **paket / durasi** (hitung mundur) dan **open billing** (blok menit, minimal tagih, toleransi, pembulatan).
 - **Waktu pilih game** tidak ditagih, tambah waktu, **kurangi waktu** (harga proporsional), **bonus waktu**, pause & resume, batal tambah waktu & batal sesi.
+- **Simpan sisa waktu** ke member: berhenti lebih awal → sisa menit dipakai lain hari atau ditambahkan di tengah sesi (Rp0).
+  Batas dari admin (maks sekali simpan, saldo per member, masa berlaku), PIN supervisor di atas batas.
+- **Antrean tunggu** saat TV penuh: daftar dari kasir atau HP pelanggan, TV yang kosong ditahan 5 menit + **WhatsApp otomatis**.
 - **Pindah unit dengan konversi tarif** (PS5 ↔ PS4): sisa waktu tetap, tagihan disesuaikan.
 - Status **Sedang dibersihkan** setelah sesi selesai & lunas (aktif per cabang, manual atau otomatis).
+- **Catatan per TV** (mis. "sudah bayar Rp20.000 di awal"), pembulatan harga durasi, hapus turnamen batal.
 - Satu TV beberapa konsol (nama per **HDMI**), tarif per tipe konsol, kategori unit (VIP / reguler), paket & aturan harga.
-- **Rental PC** di menu terpisah, member & laporan tetap satu.
+- **Rental PC** di menu terpisah (katalog game & pindai game per PC), member & laporan tetap satu.
 </details>
 
 <details>
@@ -179,7 +199,10 @@ port yang dipakai, dan **backup database** walau billing mati.
 - TV **terkunci** di luar sesi; saat main pindah otomatis ke HDMI PS, saat habis kembali terkunci.
 - Timer dihitung **di TV** (aman saat offline), peringatan sisa waktu: angka merah, berkedip, bunyi.
 - Remote dari kasir: volume, matikan / bangunkan layar, restart, pindah HDMI, pemberitahuan, running text.
-- **Bypass** berdurasi dengan PIN, **kode darurat** offline, akses staf.
+- **Slide show iklan** di layar kunci: sampai 10 gambar promo, durasi & efek diatur admin, **masa tayang per iklan**
+  (mulai & kedaluwarsa, otomatis hilang dari TV), **mode iklan** saat TV menganggur. Gambar disimpan di TV, hemat memori.
+- Timer melayang selalu tampil atau sesuai kondisi, posisi per cabang / per unit.
+- **Bypass** berdurasi dengan PIN, **kode darurat** offline, akses staf (PIN tetap bisa saat server tidak terjangkau).
 - **Failover** lokal ↔ cloud, mode kiosk, update APK dari server (push ke semua TV, rollback).
 </details>
 
@@ -190,7 +213,12 @@ port yang dipakai, dan **backup database** walau billing mati.
 - Stok per cabang dengan HPP rata-rata, stok masuk dari **supplier** + nota, **opname**, mutasi.
 - **Laporan pembelian, selisih harga pokok, laba penjualan F&B & neraca** (Owner & Admin).
 - **Shift kas** satu laci per cabang + **serah terima**, selisih kas tercatat, pengeluaran dengan PIN.
-- **Karyawan**: jadwal, **absen PIN + selfie**, **rekap gaji** & bonus, slip gaji.
+- **Diskon kasir saat bayar** (persen / rupiah, alasan wajib, PIN supervisor di atas batas) & **voucher / kode promo**
+  (potongan persen, rupiah, atau gratis main; kuota, jam berlaku, batas per member).
+- **Koreksi rincian bayar** (split tunai / QRIS / transfer) & koreksi metode bayar oleh owner, tercatat di log.
+- **Karyawan**: jadwal, **absen PIN + selfie**, **rekap gaji** & bonus, slip gaji, **kasbon** dicicil per gajian,
+  **potongan terlambat** (per menit / bertingkat, toleransi).
+- **Laporan Bulanan Lengkap** (PDF): laba rugi vs bulan lalu, arus kas, neraca, poin penting, grafik, unit & jam ramai.
 - **Sewa Playbox** (PS bawa pulang): penyewa + lokasi Maps, foto & KTP privat, tarif jam/hari/minggu/bulan, jaminan, checklist, surat sewa, denda, pengingat WA.
 - Pembayaran tunai, QRIS, transfer, saldo member, campuran; **bayar sekaligus** beberapa tagihan; struk Bluetooth & WhatsApp.
 - **Dashboard utama**, **ringkasan harian ke owner** (Telegram / WhatsApp), **Laporan Detail** & ekspor CSV.
@@ -221,7 +249,7 @@ port yang dipakai, dan **backup database** walau billing mati.
 
 - Member: saldo top-up, **poin**, **stamp**, **tier** dengan diskon otomatis.
 - **Booking online** dari HP, antrean lounge, **turnamen** (gugur, gugur ganda, liga, fase grup) dengan bagan publik.
-- **Billboard** publik: status stasiun, turnamen, slider iklan.
+- **Billboard** publik: status stasiun, turnamen, slider iklan, **poster QR A4** siap cetak (logo rental di tengah QR).
 - **Lonceng notifikasi** (Playbox telat, pembatalan, booking, selisih kas, stok, keamanan, sistem); yang penting juga ke Telegram / WA.
 </details>
 
@@ -232,6 +260,10 @@ port yang dipakai, dan **backup database** walau billing mati.
 - Multi-cabang; role **Owner, Supervisor, Kasir, Teknisi** + PIN persetujuan; log audit & anomali; sudah melalui pentest.
 - Backup harian otomatis + pulihkan; **otomatis ke Google Drive** pemilik — [panduan](docs/backup-google-drive.md).
 - **Cloudflare Tunnel** dari admin, laporan ke **Telegram** & **WhatsApp**, **cek update** otomatis.
+- **Kesehatan & optimasi database**: ukuran per tabel, masa simpan log bisa diatur, tombol optimasi (log lama dirapikan
+  otomatis tiap malam; data transaksi tidak pernah dihapus).
+- **Monitor** Windows: status & restart layanan, IP perangkat, atur **IP statis**, backup darurat.
+- Komponen installer selalu versi aman (mis. Apache 2.4.71 untuk CVE-2026-119618, PHP 8.4.27, Node.js 24.22.1).
 </details>
 
 ---
