@@ -284,7 +284,7 @@ port yang dipakai, dan **backup database** walau billing mati.
 
 **Pilih installer** di [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest):
 - `BillingPS-Setup-<versi>.exe`: PC dengan RAM **8 GB atau lebih**.
-- `BillingPS-Setup-<versi>-LowRam.exe`: PC / laptop **RAM 4 GB**. Cache database & PHP diperkecil supaya Windows
+- `BillingPS-Setup-LowRam-<versi>.exe`: PC / laptop **RAM 4 GB**. Cache database & PHP diperkecil supaya Windows
   tidak kehabisan RAM (gejala: panel admin sangat lambat, error 503). Jangan dipakai bersamaan dengan program berat
   (game, browser banyak tab).
 

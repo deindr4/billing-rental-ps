@@ -34,7 +34,7 @@ Sebelum memasang:
 ±5–10 menit.
 
 1. Unduh dari [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest):
-   **`BillingPS-Setup-<versi>.exe`** untuk PC RAM 8 GB ke atas, atau **`BillingPS-Setup-<versi>-LowRam.exe`** untuk
+   **`BillingPS-Setup-<versi>.exe`** untuk PC RAM 8 GB ke atas, atau **`BillingPS-Setup-LowRam-<versi>.exe`** untuk
    PC / laptop RAM 4 GB (cache database & PHP diperkecil; PC dipakai khusus billing).
 2. Klik dua kali → **Yes** saat Windows meminta izin Administrator.
    Bila muncul *Windows protected your PC*: **More info → Run anyway**.
