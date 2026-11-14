@@ -275,12 +275,18 @@ port yang dipakai, dan **backup database** walau billing mati.
 | | Minimal | Disarankan |
 |---|---|---|
 | Sistem operasi | Windows 10 64-bit | Windows 10 / 11 64-bit, update terbaru |
-| Prosesor | 2 core 64-bit | 4 core atau lebih |
-| RAM | 4 GB | 8 GB |
-| Penyimpanan | 3 GB kosong + ruang backup harian | **SSD**, 10 GB kosong |
+| Prosesor | 4 core 64-bit (Intel Core i3 gen 8 / AMD Ryzen 3 ke atas) | Core i5 / Ryzen 5, 6 core atau lebih |
+| RAM | **8 GB** (EXE biasa) · 4 GB hanya dengan **EXE LowRam** | 16 GB |
+| Penyimpanan | **SSD**, 20 GB kosong | SSD NVMe, 50 GB kosong (backup harian) |
 | Jaringan | LAN satu jaringan dengan TV & tablet kasir | Kabel LAN + **IP tetap** (reservasi DHCP di router) |
-| Akses | Akun **administrator** Windows untuk memasang | PC menyala selama jam buka |
+| Akses | Akun **administrator** Windows untuk memasang | PC / laptop **khusus billing**, menyala selama jam buka, *sleep* & *hibernate* dimatikan |
 | Internet | Tidak wajib untuk kasir & TV | Untuk cloud, pembayaran online, WhatsApp, cek update |
+
+**Pilih installer** di [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest):
+- `BillingPS-Setup-<versi>.exe`: PC dengan RAM **8 GB atau lebih**.
+- `BillingPS-Setup-<versi>-LowRam.exe`: PC / laptop **RAM 4 GB**. Cache database & PHP diperkecil supaya Windows
+  tidak kehabisan RAM (gejala: panel admin sangat lambat, error 503). Jangan dipakai bersamaan dengan program berat
+  (game, browser banyak tab).
 
 Semua komponen **sudah termasuk** di installer (web server, database, layanan WhatsApp, Cloudflare Tunnel) dan
 terpasang sebagai layanan Windows. Firewall hanya dibuka untuk jaringan lokal.

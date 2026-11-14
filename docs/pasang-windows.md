@@ -15,9 +15,9 @@ PHP, MySQL, XAMPP atau Node.js sendiri.
 | | Minimal | Disarankan |
 |---|---|---|
 | Sistem operasi | Windows 10 64-bit | Windows 10 / 11 64-bit, update terbaru |
-| Prosesor | 2 core 64-bit | 4 core atau lebih |
-| RAM | 4 GB | 8 GB |
-| Penyimpanan | 3 GB kosong + ruang backup | **SSD**, 10 GB kosong |
+| Prosesor | 4 core 64-bit (Core i3 gen 8 / Ryzen 3 ke atas) | Core i5 / Ryzen 5, 6 core atau lebih |
+| RAM | **8 GB** (EXE biasa) · 4 GB hanya dengan **EXE LowRam** | 16 GB |
+| Penyimpanan | **SSD**, 20 GB kosong | SSD NVMe, 50 GB kosong (backup harian) |
 | Jaringan | LAN satu jaringan dengan TV & tablet kasir | Kabel LAN + **IP tetap** |
 
 Sebelum memasang:
@@ -33,8 +33,9 @@ Sebelum memasang:
 
 ±5–10 menit.
 
-1. Unduh **`BillingPS-Setup-<versi>.exe`** dari
-   [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest).
+1. Unduh dari [Releases](https://github.com/deindr4/billing-rental-ps/releases/latest):
+   **`BillingPS-Setup-<versi>.exe`** untuk PC RAM 8 GB ke atas, atau **`BillingPS-Setup-<versi>-LowRam.exe`** untuk
+   PC / laptop RAM 4 GB (cache database & PHP diperkecil; PC dipakai khusus billing).
 2. Klik dua kali → **Yes** saat Windows meminta izin Administrator.
    Bila muncul *Windows protected your PC*: **More info → Run anyway**.
 3. Isi wizard:
